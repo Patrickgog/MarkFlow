@@ -1,0 +1,26 @@
+{
+  "name": "markflow-office",
+  "display_name": "MarkFlow Office",
+  "description": "Suite de documentos con IA: saneamiento de Markdown, conversiÃ³n a DOCX/HTML/PDF, documentos tÃ©cnicos y bÃºsqueda local (offline-first).",
+  "version": "1.22.2",
+  "transport": {
+    "stdio": {
+      "command": "python",
+      "args": [
+        "-m",
+        "interfaces.mcp"
+      ],
+      "cwd": "."
+    }
+  },
+  "tools": [
+    "version",
+    "listar_documentos",
+    "leer_documento",
+    "sanear_texto",
+    "exportar_docx",
+    "buscar"
+  ],
+  "license": "Apache-2.0",
+  "attribution": "NÃºcleo DOCX byte-preserving adaptado de genspark-ai/genoffice (Apache-2.0); patrÃ³n de distribuciÃ³n de agente inspirado en morluto/rea (MIT)."
+}

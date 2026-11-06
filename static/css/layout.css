@@ -1,0 +1,285 @@
+/* =========================================================================
+   MarkFlow AI — layout.css (AppShell y arquitectura de contenedores)
+   Cabecera fija con glassmorphism, hairline degradado, contenedor
+   centrado, pestañas píldora con degradado índigo→violeta y retícula
+   "Centro de Comando" para la pestaña Salida.
+   ========================================================================= */
+
+/* --- CABECERA FIJA ÚNICA (Glassmorphism + hairline) ---------------------- */
+.cabecera {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.7rem 1.75rem;
+  background: var(--bg-appshell);
+  backdrop-filter: blur(18px) saturate(1.4);
+  -webkit-backdrop-filter: blur(18px) saturate(1.4);
+  border-bottom: 1px solid var(--border-subtle);
+  transition: background-color var(--transition-normal), border-color var(--transition-normal);
+}
+
+/* Hairline degradado de marca bajo la cabecera */
+.cabecera::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 1px;
+  background: var(--gradient-hairline);
+  opacity: 0.85;
+  pointer-events: none;
+}
+
+.marca {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+/* Marco redondeado con degradado suave para presencia del logo */
+.marca-logo-contenedor {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  background: var(--gradient-ai-soft);
+  border: 1px solid var(--border-subtle);
+  border-radius: 10px;
+  transition: transform var(--transition-fast), border-color var(--transition-fast);
+}
+
+.marca-logo-contenedor:hover {
+  transform: translateY(-1px);
+  border-color: rgba(99, 102, 241, 0.35);
+}
+
+.marca img {
+  height: 36px;
+  width: auto;
+  display: block;
+  filter: drop-shadow(0 2px 10px rgba(99, 102, 241, 0.35));
+}
+
+.marca-texto {
+  font-size: 1.18rem;
+  font-weight: 700;
+  letter-spacing: -0.018em;
+  color: var(--text-main);
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.marca-texto .marca-ai {
+  background: var(--gradient-ai);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  font-weight: 800;
+}
+
+/* --- CONTENEDOR PRINCIPAL ------------------------------------------------- */
+main {
+  flex: 1;
+  max-width: 1320px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 1.6rem 1.6rem 3.5rem;
+}
+
+/* --- PESTAÑAS (Tabs variante píldora) ------------------------------------- */
+.pestanas {
+  display: inline-flex;
+  background: var(--bg-card);
+  padding: 5px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 1.6rem;
+  gap: 4px;
+  position: sticky;
+  top: 66px;
+  z-index: 900;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.pestaña {
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-md);
+  padding: 0.55rem 1.2rem;
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0.005em;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: color var(--transition-fast), background-color var(--transition-fast),
+              box-shadow var(--transition-fast);
+  user-select: none;
+  position: relative;
+}
+
+.pestaña:hover:not(.activa) {
+  color: var(--text-main);
+  background: var(--bg-hover);
+}
+
+.pestaña.activa {
+  background: var(--gradient-primary);
+  color: #ffffff !important;
+  font-weight: 600;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 6px 18px rgba(99, 102, 241, 0.35);
+}
+
+/* --- PANELES DE CONTENIDO ------------------------------------------------- */
+.panel-tab {
+  display: none;
+  width: 100%;
+}
+
+.panel-tab.activo {
+  display: block;
+  animation: mfFadeIn 0.28s var(--easing) both;
+}
+
+@keyframes mfFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* --- PESTAÑA SALIDA: PILA VERTICAL DE SLIDERS HORIZONTALES ----------------- */
+/* 1) Control de calidad: tarjeta informativa horizontal (sin slider) */
+.tarjeta-qa {
+  margin-bottom: 1.25rem;
+}
+
+.tarjeta-qa .qa-cuadricula {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+/* Barra de acciones del visor "Markdown saneado" (dentro del slider) */
+.barra-acciones-vista {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 0.7rem;
+}
+
+/* Cuerpo del slider "Markdown saneado": visor a ancho completo */
+.acordeon-cuerpo .vista-codigo {
+  width: 100%;
+  min-height: 340px;
+  max-height: 560px;
+  font-size: 0.84rem;
+  font-family: var(--font-mono);
+}
+
+/* Cuerpo del slider "Generación de Salidas": horizontal, formatos en fila */
+.cuerpo-generacion .formatos-card-grid {
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+}
+
+.cuerpo-generacion .fila-acciones {
+  margin-top: 0.4rem;
+}
+
+.cuerpo-generacion .fila-acciones .btn {
+  flex: 1;
+}
+
+/* --- PIE DE PÁGINA -------------------------------------------------------- */
+.pie {
+  text-align: center;
+  padding: 1.4rem 1rem 1.6rem;
+  font-size: 0.86rem;
+  color: var(--text-muted);
+  position: relative;
+  background: var(--bg-appshell);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+/* Hairline degradado sobre el pie */
+.pie::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--gradient-hairline);
+  opacity: 0.55;
+}
+
+.pie strong {
+  color: var(--text-main);
+}
+
+.pie .chip-version {
+  margin-left: 0.55rem;
+}
+
+/* --- RESPONSIVIDAD --------------------------------------------------------- */
+@media (max-width: 1080px) {
+  .tarjeta-qa .qa-cuadricula {
+    grid-template-columns: 1fr;
+  }
+
+  .cuerpo-generacion .fila-acciones {
+    flex-direction: column;
+  }
+
+  .cuerpo-generacion .fila-acciones .btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 860px) {
+  .acordeon-cuerpo .vista-codigo {
+    min-height: 280px;
+  }
+}
+
+@media (max-width: 768px) {
+  .cabecera {
+    padding: 0.6rem 1rem;
+  }
+
+  .marca img {
+    height: 30px;
+  }
+
+  main {
+    padding: 1rem 0.8rem 2.5rem;
+  }
+
+  .pestanas {
+    display: flex;
+    width: 100%;
+    overflow-x: auto;
+    top: 58px;
+  }
+
+  .pestaña {
+    flex: 1;
+    justify-content: center;
+    padding: 0.5rem 0.7rem;
+    font-size: 0.8rem;
+    white-space: nowrap;
+  }
+}

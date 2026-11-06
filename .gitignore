@@ -1,0 +1,73 @@
+# Entornos y dependencias
+.venv/
+venv/
+node_modules/
+__pycache__/
+*.pyc
+
+# Archivos y llaves de Interpro
+.interpro_api_key
+temp.key
+
+# Respaldos e historiales de IA / Antigravity
+respaldos/
+Resumenes/
+scratch/
+.aider.*
+.genkit/
+.agent/
+
+# Archivos pesados de bases de datos de trabajo y Excel locales
+*.ipux
+*.ipex
+*.xlsx
+
+# Archivos temporales, de volcado y de log
+*.log
+*.tmp
+*.bak
+*.txt
+*.json
+# Mantener explícitamente el README.md, LICENSE, vercel.json y server.json del MCP
+!README.md
+!LICENSE
+!vercel.json
+!interfaces/mcp/server.json
+
+# Respaldos, resumenes de IA e historiales de desarrollo (no publicar)
+respaldos/
+Resumenes/
+resumenes/
+historial-resumenes/
+salidas/
+mermaid/
+💾 Respaldos/
+📝 Resumenes/
+scratch/
+.aider.*
+.genkit/
+.agent/
+
+# Caches y entornos
+.venv/
+venv/
+node_modules/
+__pycache__/
+*.pyc
+
+# Scripts auxiliares y temporales de desarrollo (limpieza)
+check_*.py
+test_*.py
+debug_*.py
+reproduce_*.py
+scratch_*.py
+inspect_*.py
+dump_*.py
+find_*.py
+list_*.py
+reparar_*.py
+create_*.py
+get_*.py
+read_*.py
+_ins*.py
+b.py

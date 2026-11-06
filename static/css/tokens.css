@@ -1,0 +1,241 @@
+/* =========================================================================
+   MarkFlow AI — tokens.css (Índigo → Violeta, degradados visibles)
+   ÚNICA fuente de verdad de colores, radios y sombras.
+   ========================================================================= */
+
+/* --- MODO OSCURO (PREDETERMINADO) ---------------------------------------- */
+:root,
+html[data-tema="oscuro"] {
+  color-scheme: dark;
+
+  /* Escala oscura */
+  --mantine-dark-0: #c9c9c9;
+  --mantine-dark-1: #b8b8b8;
+  --mantine-dark-2: #828282;
+  --mantine-dark-3: #696969;
+  --mantine-dark-4: #424242;
+  --mantine-dark-5: #373a40;
+  --mantine-dark-6: #2c2e33;
+  --mantine-dark-7: #25262b;
+  --mantine-dark-8: #1a1b1e;
+  --mantine-dark-9: #141517;
+
+  /* Capas de fondo */
+  --bg-canvas: #101114;
+  --bg-appshell: rgba(16, 17, 20, 0.72);
+  --bg-card: #1b1c24;
+  --bg-card-elevated: #23242e;
+  --bg-subtle: #181920;
+  --bg-input: #121319;
+  --bg-hover: rgba(255, 255, 255, 0.05);
+
+  /* Texto */
+  --text-main: #f3f4f8;
+  --text-body: #d6d8e0;
+  --text-muted: #a3a8b8;
+  --text-dimmed: #6f7487;
+
+  /* Bordes */
+  --border-subtle: rgba(255, 255, 255, 0.07);
+  --border-default: #34364a;
+  --border-focus: #6366f1;
+
+  /* Acentos: índigo y violeta */
+  --accent-indigo: #6366f1;
+  --accent-indigo-hover: #818cf8;
+  --accent-cyan: #a78bfa;
+  --accent-blue: #6366f1;
+  --accent-violet: #8b5cf6;
+  --accent-teal: #a78bfa;
+
+  /* Degradados de marca: índigo → violeta */
+  --gradient-ai: linear-gradient(120deg, #6366f1 0%, #8b5cf6 100%);
+  --gradient-ai-soft: linear-gradient(120deg, rgba(99, 102, 241, 0.18), rgba(139, 92, 246, 0.18));
+  --gradient-primary: linear-gradient(135deg, #6366f1 0%, #7c3aed 100%);
+  --gradient-primary-hover: linear-gradient(135deg, #818cf8 0%, #a78bfa 100%);
+  --gradient-hairline: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.6), rgba(139, 92, 246, 0.6), transparent);
+
+  /* Fondo con degradado visible (índigo y violeta en las esquinas) */
+  --degradado-canvas:
+    radial-gradient(1200px 620px at 85% -10%, rgba(99, 102, 241, 0.30), transparent 60%),
+    radial-gradient(1000px 560px at -10% 110%, rgba(139, 92, 246, 0.24), transparent 55%),
+    radial-gradient(800px 480px at 50% 40%, rgba(99, 102, 241, 0.08), transparent 70%),
+    linear-gradient(180deg, #15161c 0%, #101114 100%);
+
+  /* Estados semánticos */
+  --color-success: #38d9a9;
+  --color-success-bg: rgba(32, 201, 151, 0.12);
+  --color-warning: #fcc419;
+  --color-warning-bg: rgba(252, 196, 25, 0.12);
+  --color-danger: #ff6b6b;
+  --color-danger-bg: rgba(250, 82, 82, 0.12);
+  --color-info: #8b5cf6;
+  --color-info-bg: rgba(139, 92, 246, 0.12);
+
+  /* Radios */
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 14px;
+  --radius-xl: 18px;
+  --radius-full: 9999px;
+
+  /* Sombras y glows */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4), 0 1px 3px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 14px rgba(0, 0, 0, 0.35), 0 2px 6px rgba(0, 0, 0, 0.25);
+  --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.5), 0 8px 16px rgba(0, 0, 0, 0.3);
+  --glow-primary: 0 0 0 1px rgba(99, 102, 241, 0.35), 0 8px 24px rgba(99, 102, 241, 0.28);
+  --glow-cyan: 0 0 0 1px rgba(139, 92, 246, 0.35), 0 8px 24px rgba(139, 92, 246, 0.25);
+  --ring-focus: 0 0 0 3px rgba(99, 102, 241, 0.3);
+
+  /* Transiciones */
+  --transition-fast: 150ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  --transition-normal: 250ms cubic-bezier(0.2, 0.8, 0.2, 1);
+
+  /* Tipografía */
+  --font-family: "IBM Plex Sans", "Segoe UI", system-ui, -apple-system, Roboto, sans-serif;
+  --font-mono: "IBM Plex Mono", "Cascadia Code", Consolas, ui-monospace, monospace;
+
+  /* ALIAS DE COMPATIBILIDAD (nombres heredados) */
+  --fondo: var(--bg-canvas);
+  --superficie: var(--bg-card);
+  --card: var(--bg-card);
+  --bg: var(--bg-canvas);
+  --bg-secondary: var(--bg-subtle);
+  --texto: var(--text-main);
+  --text: var(--text-main);
+  --text-primary: var(--text-main);
+  --texto-sec: var(--text-muted);
+  --border: var(--border-default);
+  --border-color: var(--border-default);
+  --accent: var(--accent-indigo);
+  --accent-color: var(--accent-indigo);
+  --acento-2: var(--accent-violet);
+  --degradado: var(--gradient-ai);
+  --degradado-suave: var(--gradient-ai-soft);
+  --radio: var(--radius-lg);
+  --radio-chico: var(--radius-md);
+  --radio-chip: var(--radius-full);
+  --radio-tarjeta: var(--radius-xl);
+  --sombra: var(--shadow-md);
+  --sombra-lg: var(--shadow-lg);
+  --sombra-flotante: var(--shadow-lg);
+  --sombra-flecha: 0 4px 14px rgba(99, 102, 241, 0.35);
+  --vidrio-blur: blur(14px);
+  --duracion: 180ms;
+  --easing: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --transicion-rapida: var(--transition-fast);
+  --hover: var(--bg-hover);
+  --exito: var(--color-success);
+  --peligro: var(--color-danger);
+}
+
+/* --- MODO CLARO ----------------------------------------------------------- */
+html[data-tema="claro"] {
+  color-scheme: light;
+
+  /* Escala clara */
+  --mantine-gray-0: #f8f9fa;
+  --mantine-gray-1: #f1f3f5;
+  --mantine-gray-2: #e9ecef;
+  --mantine-gray-3: #dee2e6;
+  --mantine-gray-4: #ced4da;
+  --mantine-gray-5: #adb5bd;
+  --mantine-gray-6: #868e96;
+  --mantine-gray-7: #495057;
+  --mantine-gray-8: #343a40;
+  --mantine-gray-9: #212529;
+
+  /* Capas de fondo */
+  --bg-canvas: #eef0fa;
+  --bg-appshell: rgba(255, 255, 255, 0.72);
+  --bg-card: #ffffff;
+  --bg-card-elevated: #ffffff;
+  --bg-subtle: #f5f6fc;
+  --bg-input: #ffffff;
+  --bg-hover: rgba(79, 70, 229, 0.06);
+
+  /* Texto */
+  --text-main: #1c1d2b;
+  --text-body: #363849;
+  --text-muted: #5b6075;
+  --text-dimmed: #8a8fa3;
+
+  /* Bordes */
+  --border-subtle: rgba(30, 27, 75, 0.07);
+  --border-default: #d9dcea;
+  --border-focus: #4f46e5;
+
+  /* Acentos */
+  --accent-indigo: #4f46e5;
+  --accent-indigo-hover: #4338ca;
+  --accent-cyan: #7c3aed;
+  --accent-blue: #4f46e5;
+  --accent-violet: #7c3aed;
+  --accent-teal: #7c3aed;
+
+  /* Degradados: índigo → violeta */
+  --gradient-ai: linear-gradient(120deg, #4f46e5 0%, #7c3aed 100%);
+  --gradient-ai-soft: linear-gradient(120deg, rgba(79, 70, 229, 0.10), rgba(124, 58, 237, 0.10));
+  --gradient-primary: linear-gradient(135deg, #4f46e5 0%, #6d28d9 100%);
+  --gradient-primary-hover: linear-gradient(135deg, #4338ca 0%, #7c3aed 100%);
+  --gradient-hairline: linear-gradient(90deg, transparent, rgba(79, 70, 229, 0.45), rgba(124, 58, 237, 0.45), transparent);
+
+  /* Fondo con degradado visible en claro */
+  --degradado-canvas-claro:
+    radial-gradient(1200px 620px at 85% -10%, rgba(99, 102, 241, 0.24), transparent 60%),
+    radial-gradient(1000px 560px at -10% 110%, rgba(139, 92, 246, 0.20), transparent 55%),
+    radial-gradient(800px 480px at 50% 40%, rgba(99, 102, 241, 0.06), transparent 70%),
+    linear-gradient(180deg, #f5f6ff 0%, #eef0fa 100%);
+
+  /* Estados */
+  --color-success: #0ca678;
+  --color-success-bg: rgba(18, 184, 134, 0.1);
+  --color-warning: #e8590c;
+  --color-warning-bg: rgba(245, 159, 0, 0.12);
+  --color-danger: #e03131;
+  --color-danger-bg: rgba(224, 49, 49, 0.1);
+  --color-info: #6d28d9;
+  --color-info-bg: rgba(109, 40, 217, 0.1);
+
+  /* Sombras suaves */
+  --shadow-sm: 0 1px 2px rgba(30, 27, 75, 0.06), 0 1px 3px rgba(30, 27, 75, 0.08);
+  --shadow-md: 0 4px 14px rgba(30, 27, 75, 0.08), 0 2px 6px rgba(30, 27, 75, 0.05);
+  --shadow-lg: 0 16px 40px rgba(30, 27, 75, 0.14), 0 8px 16px rgba(30, 27, 75, 0.06);
+  --glow-primary: 0 0 0 1px rgba(79, 70, 229, 0.25), 0 8px 24px rgba(79, 70, 229, 0.18);
+  --glow-cyan: 0 0 0 1px rgba(124, 58, 237, 0.25), 0 8px 24px rgba(124, 58, 237, 0.16);
+  --ring-focus: 0 0 0 3px rgba(79, 70, 229, 0.2);
+
+  /* Alias heredados */
+  --fondo: var(--bg-canvas);
+  --superficie: var(--bg-card);
+  --card: var(--bg-card);
+  --bg: var(--bg-canvas);
+  --bg-secondary: var(--bg-subtle);
+  --texto: var(--text-main);
+  --text: var(--text-main);
+  --text-primary: var(--text-main);
+  --texto-sec: var(--text-muted);
+  --border: var(--border-default);
+  --border-color: var(--border-default);
+  --accent: var(--accent-indigo);
+  --accent-color: var(--accent-indigo);
+  --acento-2: var(--accent-violet);
+  --degradado: var(--gradient-ai);
+  --degradado-suave: var(--gradient-ai-soft);
+  --radio: var(--radius-lg);
+  --radio-chico: var(--radius-md);
+  --radio-chip: var(--radius-full);
+  --radio-tarjeta: var(--radius-xl);
+  --sombra: var(--shadow-md);
+  --sombra-lg: var(--shadow-lg);
+  --sombra-flotante: var(--shadow-lg);
+  --sombra-flecha: 0 4px 14px rgba(79, 70, 229, 0.28);
+  --vidrio-blur: blur(14px);
+  --duracion: 180ms;
+  --easing: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --transicion-rapida: var(--transition-fast);
+  --hover: var(--bg-hover);
+  --exito: var(--color-success);
+  --peligro: var(--color-danger);
+}

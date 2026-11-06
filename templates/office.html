@@ -1,0 +1,1556 @@
+<!doctype html>
+<html lang="es" data-tema="oscuro">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ nombre }} — Suite de documentos con IA</title>
+  <link rel="icon" href="/static/img/favicon.svg?v={{ version }}" type="image/svg+xml">
+  <link rel="preload" href="/static/fonts/PlusJakartaSans-Variable.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="/static/css/tokens.css?v={{ version }}">
+  <link rel="stylesheet" href="/static/css/base.css?v={{ version }}">
+  <link rel="stylesheet" href="/static/css/components.css?v={{ version }}">
+  <link rel="stylesheet" href="/static/css/office.css?v={{ version }}">
+  <link rel="stylesheet" href="/static/vendor/prosemirror/pm_editor.css">
+  <link rel="stylesheet" href="/assets/katex/katex.min.css">
+  <script defer src="/assets/katex/katex.min.js"></script>
+  <script defer src="/assets/katex/contrib/auto-render.min.js"></script>
+  <script defer src="/assets/mermaid/mermaid.min.js"></script>
+  <script>
+    /* Tema persistente antes del primer render (sin parpadeo) */
+    try {
+      var tema = localStorage.getItem("mfo-tema");
+      if (tema === "claro" || tema === "oscuro") {
+        document.documentElement.setAttribute("data-tema", tema);
+      }
+    } catch (e) {}
+  </script>
+</head>
+<body>
+
+<div class="office">
+
+  <!-- ══════════════ RIEL LATERAL DE APPS (estilo GenOffice) ══════════════ -->
+  <aside class="riel" aria-label="Aplicaciones de la suite">
+    <div class="riel-logo" title="MarkFlow Office — Suite de documentos con IA">
+      <span class="riel-logo-tile">M<i>▾</i></span>
+    </div>
+
+    <nav class="riel-apps" role="tablist" aria-label="Apps">
+      <button class="riel-btn activo" data-app="documentos" title="Documentos" aria-label="Documentos">
+        <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        <span class="riel-tooltip">Documentos</span>
+      </button>
+
+      <button class="riel-btn" data-app="docs" title="Docs (Markdown)" aria-label="Docs">
+        <svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+        <span class="riel-tooltip">Docs</span>
+      </button>
+
+      <button class="riel-btn" data-app="word" title="Word (.docx)" aria-label="Word">
+        <span class="riel-icono-texto riel-w">W</span>
+        <span class="riel-tooltip">Word · exportar .docx</span>
+      </button>
+
+      <button class="riel-btn" data-app="pdf" title="PDF — visor local" aria-label="PDF">
+        <span class="riel-icono-texto riel-p">P</span>
+        <span class="riel-tooltip">PDF · visor local</span>
+      </button>
+
+      <button class="riel-btn" data-app="html" title="HTML — visor dedicado" aria-label="HTML">
+        <span class="riel-icono-texto riel-h">🌐</span>
+        <span class="riel-tooltip">HTML · visor dedicado</span>
+      </button>
+
+      <button class="riel-btn" data-app="tablas" title="Tablas — estilo Excel" aria-label="Tablas">
+        <span class="riel-icono-texto riel-t">📊</span>
+        <span class="riel-tooltip">Tablas · estilo Excel</span>
+      </button>
+
+      <button class="riel-btn" data-app="entregables" title="Entregables de la sesión" aria-label="Entregables">
+        <span class="riel-icono-texto riel-e">📦</span>
+        <span class="riel-tooltip">Entregables · descargas</span>
+      </button>
+
+      <button class="riel-btn" data-app="plantillas" title="Plantillas (Placeholders dinámicos)" aria-label="Plantillas">
+        <span class="riel-icono-texto riel-pl">🧩</span>
+        <span class="riel-tooltip">Plantillas · placeholders</span>
+      </button>
+
+      <button class="riel-btn" data-app="markflow" title="MarkFlow (motor clásico completo)" aria-label="MarkFlow">
+        <span class="riel-icono-texto">M▾</span>
+        <span class="riel-tooltip">MarkFlow · conversión completa</span>
+      </button>
+
+      <button class="riel-btn" data-app="manual" title="Manual de Usuario y Documentación" aria-label="Manual de Usuario">
+        <span class="riel-icono-texto">📖</span>
+        <span class="riel-tooltip">Manual de Usuario</span>
+      </button>
+    </nav>
+
+    <div class="riel-pie">
+      <button class="riel-btn" data-app="config" title="Configuración" aria-label="Configuración">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        <span class="riel-tooltip">Configuración</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- ══════════════ COLUMNA PRINCIPAL ══════════════ -->
+  <div class="marco">
+
+    <header class="barra-top">
+      <div class="marca">
+        <strong>MarkFlow</strong> <span class="marca-suite">Office</span>
+      </div>
+      <input id="titulo-documento" class="titulo-doc" type="text" value="sin documento"
+             placeholder="Nombre del documento" aria-label="Nombre del documento">
+      <div class="barra-acciones">
+        <button id="btn-panel-ia" class="btn btn-fantasma chico" title="Panel de IA (Preguntar)">
+          ✨ <span>IA</span>
+        </button>
+        <button id="btn-tema" class="btn btn-fantasma chico" title="Cambiar tema claro/oscuro">
+          <span id="btn-tema-icono">☀️</span>
+        </button>
+        <span class="chip" title="Versión SSOT">v{{ version }}</span>
+      </div>
+    </header>
+
+    <main class="lienzo">
+
+      <!-- ── App: Documentos ── -->
+      <section id="panel-documentos" class="app-panel activo">
+        <div class="panel-cabecera">
+          <h2>📄 Documentos</h2>
+          <div class="panel-acciones">
+            <input id="buscador-fts" type="search" class="entrada-busqueda" placeholder="🔍 Buscar en todos los documentos…">
+            <button id="btn-nuevo-doc" class="btn btn-primario chico">＋ Nuevo</button>
+            <button id="btn-importar-docx" class="btn chico" title="Abrir un .docx existente y convertirlo a Markdown">⬆ .docx</button>
+            <input id="input-docx-importar" type="file" accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document" hidden>
+            <button id="btn-importar-md" class="btn chico" title="Importar un archivo Markdown (.md)">⬆ .md</button>
+            <input id="input-md-importar" type="file" accept=".md,.markdown,.txt,text/markdown,text/plain" hidden>
+          </div>
+        </div>
+        <div id="resultados-busqueda" class="resultados-busqueda" hidden></div>
+
+        <!-- ── Barra contextual de Fusión de documentos (Fase 1) ── -->
+        <div id="barra-fusion-docs" class="barra-fusion-docs" style="display: none;">
+          <div class="barra-fusion-info">
+            <span class="icono-fusion">🔗</span>
+            <span id="contador-seleccion-fusion" class="texto-seleccion-fusion">0 seleccionados</span>
+          </div>
+          <div class="barra-fusion-acciones">
+            <label class="check-capitulos-label" title="Si está activa, cada documento comienza en una hoja nueva y sus títulos se numeran 1., 2., 3...">
+              <input type="checkbox" id="chk-fusion-capitulos" checked>
+              <span>Cada documento es un capítulo distinto</span>
+            </label>
+            <button id="btn-abrir-modal-fusion" class="btn btn-primario chico" title="Configurar orden y fusionar documentos">
+              🔗 Fusionar seleccionados
+            </button>
+            <button id="btn-cancelar-seleccion-fusion" class="btn btn-fantasma chico" title="Limpiar selección">
+              ✕ Cancelar
+            </button>
+          </div>
+        </div>
+
+        <div id="lista-documentos" class="cuadricula-documentos" aria-live="polite"></div>
+      </section>
+
+      <!-- ── App: Docs (editor visual ProseMirror + vista en vivo) ── -->
+      <section id="panel-docs" class="app-panel">
+        <div class="panel-cabecera">
+          <div style="display: flex; align-items: center; gap: 0.75rem; flex: 1; min-width: 0;">
+            <h2 style="margin: 0; white-space: nowrap;">📝 Docs</h2>
+            <input id="docs-titulo-input" class="entrada-busqueda" type="text" value="sin documento"
+                   placeholder="Título del documento…" style="max-width: 380px; font-weight: 600;" aria-label="Título del documento en Docs">
+          </div>
+          <div class="panel-acciones">
+            <span id="docs-estado" class="badge neutral">sin cambios</span>
+            <button id="btn-guardar-doc" class="btn chico" title="Guardar cambios (Ctrl+S)">💾 Guardar</button>
+            <button id="btn-guardar-como-doc" class="btn chico" title="Guardar una copia o cambiar el nombre">💾 Guardar como…</button>
+            <button id="btn-volver-documentos" class="btn btn-fantasma chico">← Documentos</button>
+          </div>
+        </div>
+
+        <div id="barra-docs" class="barra-docs" role="toolbar" aria-label="Herramientas del editor">
+          <div class="bd-grupo">
+            <button type="button" data-bd="strong" class="bd-btn" title="Negrita (Ctrl+B)"><strong>B</strong></button>
+            <button type="button" data-bd="em" class="bd-btn bd-it" title="Cursiva (Ctrl+I)"><em>I</em></button>
+            <button type="button" data-bd="s" class="bd-btn bd-tachado" title="Tachado"><s>S</s></button>
+            <button type="button" data-bd="code" class="bd-btn bd-mono" title="Código (Ctrl+`)" aria-label="Código">&lt;&gt;</button>
+          </div>
+          <div class="bd-grupo">
+            <button type="button" data-bd="p" class="bd-btn" title="Párrafo (Shift+Ctrl+0)">¶</button>
+            <button type="button" data-bd="h1" class="bd-btn" title="Título 1 (Shift+Ctrl+1)">H1</button>
+            <button type="button" data-bd="h2" class="bd-btn" title="Título 2 (Shift+Ctrl+2)">H2</button>
+            <button type="button" data-bd="h3" class="bd-btn" title="Título 3 (Shift+Ctrl+3)">H3</button>
+          </div>
+          <div class="bd-grupo">
+            <button type="button" data-bd="bullet" class="bd-btn" title="Viñetas (Shift+Ctrl+8)">•≡</button>
+            <button type="button" data-bd="ordered" class="bd-btn" title="Lista numerada (Shift+Ctrl+9)">1.</button>
+            <button type="button" data-bd="quote" class="bd-btn" title="Cita (Ctrl+&gt;)">❝</button>
+            <button type="button" data-bd="nota" class="bd-btn bd-nota" title="Embeber Nota / Aclaración (> [!NOTE])">📝 Nota</button>
+            <button type="button" id="btn-docs-quitar-todas-notas" class="bd-btn bd-quitar-notas" title="Eliminar todas las marcas de nota (>) del documento">🚫 Quitar Notas</button>
+            <button type="button" data-bd="codeblock" class="bd-btn bd-mono" title="Bloque de código (``` o Shift+Ctrl+\)">{ }</button>
+          </div>
+          <div class="bd-grupo">
+            <button type="button" data-bd="link" class="bd-btn" title="Enlace (Ctrl+K)">🔗</button>
+            <button type="button" id="btn-docs-insertar-img" class="bd-btn" title="Insertar Imagen referenciada ![nombre][img-N] con Base64 al pie">🖼️ Imagen</button>
+            <input type="file" id="input-docs-img-file" accept="image/png,image/jpeg,image/gif" hidden>
+            <button type="button" data-bd="hr" class="bd-btn" title="Separador (---)">—</button>
+          </div>
+          <div class="bd-grupo">
+            <button type="button" data-bd="tabla" class="bd-btn" title="Insertar tabla (p. ej. 4x3)">⊞</button>
+            <button type="button" data-bd="fila+" class="bd-btn" title="Fila debajo (Tab en la última celda también crea una)">⇧+</button>
+            <button type="button" data-bd="fila-" class="bd-btn" title="Eliminar fila">⇧−</button>
+            <button type="button" data-bd="col+" class="bd-btn" title="Columna a la derecha">↔+</button>
+            <button type="button" data-bd="col-" class="bd-btn" title="Eliminar columna">↔−</button>
+            <button type="button" data-bd="tabla-del" class="bd-btn" title="Eliminar tabla">🗑</button>
+          </div>
+          <div class="bd-grupo">
+            <button type="button" data-bd="undo" class="bd-btn" title="Deshacer (Ctrl+Z)">↩</button>
+            <button type="button" data-bd="redo" class="bd-btn" title="Rehacer (Ctrl+Y)">↪</button>
+          </div>
+          <div class="bd-grupo">
+            <button type="button" data-bd="cc-ins" class="bd-btn bd-cc-ins" title="Marcar como inserción (control de cambios; sin selección pide el texto)">＋<ins>i</ins></button>
+            <button type="button" data-bd="cc-del" class="bd-btn bd-cc-del" title="Marcar como borrado (control de cambios; requiere selección)"><del>t</del></button>
+            <button type="button" data-bd="cc-aceptar" class="bd-btn" title="Aceptar cambios marcados (si no hay selección, todo el documento)">✔</button>
+            <button type="button" data-bd="cc-rechazar" class="bd-btn" title="Rechazar cambios marcados (si no hay selección, todo el documento)">✘</button>
+          </div>
+          <span id="docs-stats" class="bd-stats">0 palabras · 0 caracteres</span>
+          <span class="bd-resorte"></span>
+          <button id="btn-validar-formulas" class="btn chico" title="Valida la sintaxis de todas las fórmulas matemáticas del documento">∑ Validar fórmulas</button>
+          <button id="btn-sanear-pegado" class="btn chico" title="Aplica el pipeline de saneamiento del motor (fórmulas, listas pisadas, imágenes Base64…)">🧹 Sanear</button>
+          <button id="btn-modo-fuente" class="btn chico" title="Editar el Markdown fuente (&lt;/&gt;)">&lt;/&gt; Fuente</button>
+        </div>
+
+        <div id="split-docs" class="split-docs">
+          <div id="editor-docs" class="editor-docs" aria-label="Editor visual">
+            <div class="editor-cargando">Cargando editor visual…</div>
+          </div>
+          <textarea id="editor-markdown" class="editor-md" spellcheck="false"
+                    placeholder="# Escribe tu Markdown aquí…&#10;&#10;Pega contenido de Word, ChatGPT o cualquier fuente: el motor lo sanea automáticamente."></textarea>
+          <iframe id="visor-docs" class="visor-docs" title="Previsualización del documento"></iframe>
+        </div>
+      </section>
+
+      <!-- ── App: Word (.docx) con Visor Paginado y Barra Lateral Derecha ── -->
+      <section id="panel-word" class="app-panel app-con-sidebar-derecha">
+        <div class="panel-cabecera">
+          <h2><span class="tile-word">W</span> Word (.docx) — Previsualización y Exportación</h2>
+          <div class="panel-acciones">
+            <span class="badge neutral">documento activo de Docs</span>
+            <button id="btn-refrescar-vista-word" class="btn chico" title="Refrescar visualización desde el documento Docs">↻ Refrescar desde Docs</button>
+            <button id="btn-exportar-word" class="btn btn-primario chico" title="Compilar y descargar .docx">📄 Exportar .docx</button>
+            <a id="btn-descarga-directa-word" class="btn btn-exito chico" href="#" download="" style="display:none; text-decoration:none;">⬇ Descargar .docx</a>
+          </div>
+        </div>
+
+        <div class="contenedor-area-con-sidebar">
+          <!-- Área principal: Visor maquetado de páginas A4 continuas -->
+          <div class="area-principal-visor">
+            <div class="hoja-word-marco">
+              <div class="hoja-word-barra-superior">
+                <span class="hoja-word-etiqueta">📄 Vista Previa de Maquetación Word (Página A4 / 2.54 cm)</span>
+                <div style="display:flex; align-items:center; gap:0.5rem;">
+                  <span id="word-stats-resumen" class="chip chip-sm">0 palabras</span>
+                  <span id="word-hoja-paginacion" class="chip chip-sm">Página 1</span>
+                </div>
+              </div>
+              <div class="hoja-word-papel-scroll">
+                <div id="hoja-word-contenedor-paginas" class="hoja-word-contenedor-paginas">
+                  <article id="hoja-word-papel" class="hoja-word-pagina">
+                    <div class="hoja-word-cargando">Cargando maquetación de Word…</div>
+                  </article>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Botón flotante para abrir/cerrar la barra lateral en el borde derecho -->
+          <button id="btn-toggle-sidebar-word" class="btn-toggle-sidebar-flotante" title="Mostrar/ocultar opciones de Word">
+            <span class="icono-toggle">⚙️</span>
+            <span class="texto-toggle">Opciones</span>
+          </button>
+
+          <!-- Barra lateral deslizable (340 px) conectada al registro único -->
+          <aside id="sidebar-word-opciones" class="barra-lateral-derecha">
+            <div class="sidebar-cabecera">
+              <h4><span>📘</span> Opciones de Word (.docx)</h4>
+              <button id="btn-cerrar-sidebar-word" class="btn-cerrar-sidebar" title="Ocultar barra lateral">✕</button>
+            </div>
+
+            <div class="sidebar-cuerpo">
+              <details class="sidebar-seccion" data-seccion-id="word-hoja-membrete" open>
+                <summary>📄 Hoja de Membrete Word</summary>
+                <div class="sidebar-seccion-contenido">
+                  <div class="campo-sidebar">
+                    <label for="word-opt-hoja-membrete">Plantilla de Hoja (.docx):</label>
+                    <select id="word-opt-hoja-membrete" class="select-lateral">
+                      <option value="">Sin plantilla (predeterminada)</option>
+                    </select>
+                  </div>
+                  <div style="display: flex; gap: 0.5rem; margin-top: 0.2rem; margin-bottom: 0.5rem;">
+                    <button type="button" id="btn-refrescar-plantillas-word" class="btn btn-fantasma chico" style="width: 100%;" title="Actualizar lista de hojas de membrete desde disco">🔄 Actualizar hojas</button>
+                  </div>
+
+                  <!-- Contenedor dinámico de Zona de Escritura (visible al seleccionar una plantilla) -->
+                  <div id="contenedor-zona-membrete" style="display: none; padding: 0.6rem; background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); margin-top: 0.5rem;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.4rem;">
+                      <label style="font-size: 0.78rem; font-weight: 600; margin: 0;">📐 Zona de Escritura (cm):</label>
+                      <span id="badge-origen-zona" class="chip chico" style="font-size: 0.68rem; padding: 0.15rem 0.4rem;" title="Origen de los márgenes configurados">Analizada</span>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.4rem; font-size: 0.75rem; margin-bottom: 0.5rem;">
+                      <div>
+                        <label for="word-membrete-top" style="display: block; margin-bottom: 0.15rem; color: var(--text-muted, #94a3b8);">⬆ Sup. (cm):</label>
+                        <input type="number" id="word-membrete-top" class="select-lateral" step="0.1" min="0.5" max="15.0" value="2.5" style="padding: 0.3rem 0.4rem; height: auto;">
+                      </div>
+                      <div>
+                        <label for="word-membrete-bottom" style="display: block; margin-bottom: 0.15rem; color: var(--text-muted, #94a3b8);">⬇ Inf. (cm):</label>
+                        <input type="number" id="word-membrete-bottom" class="select-lateral" step="0.1" min="0.5" max="15.0" value="2.0" style="padding: 0.3rem 0.4rem; height: auto;">
+                      </div>
+                      <div>
+                        <label for="word-membrete-left" style="display: block; margin-bottom: 0.15rem; color: var(--text-muted, #94a3b8);">⬅ Izq. (cm):</label>
+                        <input type="number" id="word-membrete-left" class="select-lateral" step="0.1" min="0.5" max="10.0" value="2.5" style="padding: 0.3rem 0.4rem; height: auto;">
+                      </div>
+                      <div>
+                        <label for="word-membrete-right" style="display: block; margin-bottom: 0.15rem; color: var(--text-muted, #94a3b8);">➡️ Der. (cm):</label>
+                        <input type="number" id="word-membrete-right" class="select-lateral" step="0.1" min="0.5" max="10.0" value="2.5" style="padding: 0.3rem 0.4rem; height: auto;">
+                      </div>
+                    </div>
+
+                    <!-- Avisos geométricos del análisis si hubiese (ej. imagen en cuerpo) -->
+                    <div id="aviso-membrete-geometria" style="display: none; font-size: 0.72rem; padding: 0.35rem 0.5rem; border-radius: var(--radius-sm); background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); color: var(--text-main); margin-bottom: 0.5rem;">
+                      ℹ️ <span id="texto-aviso-membrete"></span>
+                    </div>
+
+                    <button type="button" id="btn-guardar-zona-membrete" class="btn btn-primario chico" style="width: 100%;" title="Guardar estos márgenes en el archivo .zona.json de la plantilla">
+                      💾 Guardar zona de esta hoja
+                    </button>
+                    <p id="estado-zona-membrete" style="font-size: 0.72rem; margin: 0.3rem 0 0 0; text-align: center; color: var(--text-muted, #94a3b8); min-height: 1rem;"></p>
+                  </div>
+                </div>
+              </details>
+
+              <details class="sidebar-seccion" data-seccion-id="word-plantilla">
+                <summary>🎨 Plantilla y Paleta</summary>
+                <div class="sidebar-seccion-contenido">
+                  <div class="campo-sidebar">
+                    <label for="word-opt-tema">Plantilla Formal Word:</label>
+                    <select id="word-opt-tema" class="select-lateral"></select>
+                  </div>
+
+                  <!-- Aviso para temas nativos inmutables -->
+                  <div id="aviso-tema-word-lateral" class="aviso-advertencia" style="display: none; font-size: 0.78rem; padding: 0.45rem 0.6rem; border-radius: var(--radius-sm); background: rgba(234, 179, 8, 0.12); border: 1px solid rgba(234, 179, 8, 0.35); margin-bottom: 0.5rem; color: var(--text-main);">
+                    🔒 <span><b>Tema Nativo Inmutable:</b> Este tema de Word posee estilos tipográficos y tablas fijas. Para aplicar colores personalizados a títulos y tablas, selecciona <b>🎨 Tema Personalizado</b>.</span>
+                  </div>
+
+                  <!-- Color de Títulos / Encabezados -->
+                  <div id="contenedor-titulos-word" style="margin-bottom: 0.5rem;">
+                    <div class="campo-sidebar">
+                      <label for="word-sel-modo-color-titulos">Color de Títulos / Encabezados:</label>
+                      <select id="word-sel-modo-color-titulos" class="select-lateral">
+                        <option value="negro" selected>Negro Absoluto / Formal (#000000)</option>
+                        <option value="paleta">Usar Color de Paleta</option>
+                        <option value="personalizado">🎨 Color Personalizado (3 Colores)</option>
+                      </select>
+                    </div>
+
+                    <div class="campo-sidebar" id="contenedor-paleta-titulos-select" style="display: none;">
+                      <label for="word-opt-paleta-titulos">Paleta de Títulos:</label>
+                      <select id="word-opt-paleta-titulos" class="select-lateral"></select>
+                    </div>
+
+                    <!-- Pickers interactivos de color para títulos (Selector visual sin texto hex manual) -->
+                    <div id="contenedor-pickers-titulos-custom" style="display: none; padding: 0.6rem; background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); margin-bottom: 0.5rem;">
+                      <label style="font-size: 0.78rem; font-weight: 600; display: block; margin-bottom: 0.4rem;">🎨 Colores para Títulos y Acentos:</label>
+                      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; font-size: 0.75rem;">
+                        <div class="selector-color-visual">
+                          <span class="selector-color-etiqueta">H1 (Primario):</span>
+                          <div class="pastilla-color-visual" id="pastilla-tit-h1" title="Clic para elegir color visualmente">
+                            <span class="muestra-color-circulo" id="muestra-tit-h1" style="background-color: #1E3A8A;"></span>
+                            <span class="muestra-color-codigo" id="codigo-tit-h1">#1E3A8A</span>
+                            <input type="color" id="word-picker-tit-h1" class="input-color-nativo" value="#1E3A8A" aria-label="Elegir color H1">
+                          </div>
+                        </div>
+                        <div class="selector-color-visual">
+                          <span class="selector-color-etiqueta">H2 / H3 (Secundario):</span>
+                          <div class="pastilla-color-visual" id="pastilla-tit-h2" title="Clic para elegir color visualmente">
+                            <span class="muestra-color-circulo" id="muestra-tit-h2" style="background-color: #3B82F6;"></span>
+                            <span class="muestra-color-codigo" id="codigo-tit-h2">#3B82F6</span>
+                            <input type="color" id="word-picker-tit-h2" class="input-color-nativo" value="#3B82F6" aria-label="Elegir color H2 y H3">
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Cuadros y Tablas -->
+                  <div id="contenedor-cuadros-word" style="margin-bottom: 0.5rem;">
+                    <div class="campo-sidebar">
+                      <label class="chk-lateral">
+                        <input id="word-opt-paleta-suave-tablas" type="checkbox" checked>
+                        <span>Activar paleta suave para cuadros/tablas</span>
+                      </label>
+                    </div>
+
+                    <div class="campo-sidebar" id="contenedor-select-paleta-tablas">
+                      <label for="word-opt-paleta-tablas">Paleta de Tablas / Cuadros:</label>
+                      <select id="word-opt-paleta-tablas" class="select-lateral"></select>
+                    </div>
+
+                    <!-- Pickers interactivos de color para cuadros/tablas (Selector visual sin texto hex manual) -->
+                    <div id="contenedor-pickers-tablas-custom" style="display: none; padding: 0.6rem; background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); margin-bottom: 0.5rem;">
+                      <label style="font-size: 0.78rem; font-weight: 600; display: block; margin-bottom: 0.4rem;">📊 Paleta Exclusiva para Cuadros y Tablas:</label>
+                      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; font-size: 0.75rem;">
+                        <div class="selector-color-visual">
+                          <span class="selector-color-etiqueta">Cabecera:</span>
+                          <div class="pastilla-color-visual" id="pastilla-tabla-cabecera" title="Clic para elegir color de cabecera">
+                            <span class="muestra-color-circulo" id="muestra-tabla-cabecera" style="background-color: #1E3A8A;"></span>
+                            <span class="muestra-color-codigo" id="codigo-tabla-cabecera">#1E3A8A</span>
+                            <input type="color" id="word-picker-tabla-cabecera" class="input-color-nativo" value="#1E3A8A" aria-label="Color cabecera">
+                          </div>
+                        </div>
+                        <div class="selector-color-visual">
+                          <span class="selector-color-etiqueta">Filas Alternas:</span>
+                          <div class="pastilla-color-visual" id="pastilla-tabla-filas" title="Clic para elegir color de filas alternas">
+                            <span class="muestra-color-circulo" id="muestra-tabla-filas" style="background-color: #F0F4F8;"></span>
+                            <span class="muestra-color-codigo" id="codigo-tabla-filas">#F0F4F8</span>
+                            <input type="color" id="word-picker-tabla-filas" class="input-color-nativo" value="#F0F4F8" aria-label="Color filas alternas">
+                          </div>
+                        </div>
+                      </div>
+                      <div style="margin-top: 0.5rem;">
+                        <div class="selector-color-visual">
+                          <span class="selector-color-etiqueta">Bordes de Tabla:</span>
+                          <div class="pastilla-color-visual" id="pastilla-tabla-borde" title="Clic para elegir color de bordes">
+                            <span class="muestra-color-circulo" id="muestra-tabla-borde" style="background-color: #CBD5E1;"></span>
+                            <span class="muestra-color-codigo" id="codigo-tabla-borde">#CBD5E1</span>
+                            <input type="color" id="word-picker-tabla-borde" class="input-color-nativo" value="#CBD5E1" aria-label="Color de bordes">
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <button type="button" class="btn btn-fantasma chico btn-abrir-modal-paletas" style="width: 100%; margin-bottom: 0.5rem;" title="Gestionar y guardar paletas personalizadas (2 a 6 colores)">🎨 Paletas Personalizadas</button>
+
+                  <div class="campo-sidebar">
+                    <label class="chk-lateral">
+                      <input id="word-plantilla" type="checkbox" checked>
+                      <span>Usar plantilla base formal (byte-preserving)</span>
+                    </label>
+                  </div>
+                </div>
+              </details>
+
+              <details class="sidebar-seccion" data-seccion-id="word-tipografia">
+                <summary>🔤 Tipografía e Interlineado</summary>
+                <div class="sidebar-seccion-contenido">
+                  <div class="campo-sidebar">
+                    <label for="word-opt-fuente">Fuente del documento:</label>
+                    <select id="word-opt-fuente" class="select-lateral"></select>
+                  </div>
+                  <div class="campo-sidebar fila-doble">
+                    <div>
+                      <label for="word-opt-tamanio">Tamaño base:</label>
+                      <select id="word-opt-tamanio" class="select-lateral"></select>
+                    </div>
+                    <div>
+                      <label for="word-opt-interlineado">Interlineado:</label>
+                      <select id="word-opt-interlineado" class="select-lateral"></select>
+                    </div>
+                  </div>
+                  <div class="campo-sidebar">
+                    <label for="word-opt-alineacion">Alineación del texto:</label>
+                    <select id="word-opt-alineacion" class="select-lateral"></select>
+                  </div>
+                  <div class="campo-sidebar fila-doble">
+                    <div>
+                      <label for="word-opt-fuente-tabla">Fuente en tablas:</label>
+                      <select id="word-opt-fuente-tabla" class="select-lateral"></select>
+                    </div>
+                    <div>
+                      <label for="word-opt-tamanio-tabla">Alto texto tablas:</label>
+                      <select id="word-opt-tamanio-tabla" class="select-lateral"></select>
+                    </div>
+                  </div>
+                </div>
+              </details>
+
+              <details class="sidebar-seccion" data-seccion-id="word-estructura">
+                <summary>📐 Estructura y APA 7ma</summary>
+                <div class="sidebar-seccion-contenido">
+                  <div class="campo-sidebar fila-doble">
+                    <div>
+                      <label for="word-opt-pie">Pie de página:</label>
+                      <input type="text" id="word-opt-pie" class="select-lateral" placeholder="Ej: Memoria Técnica">
+                    </div>
+                    <div>
+                      <label for="word-opt-alineacion-pie">Alineación pie:</label>
+                      <select id="word-opt-alineacion-pie" class="select-lateral"></select>
+                    </div>
+                  </div>
+                  <div class="campo-sidebar">
+                    <label class="chk-lateral"><input type="checkbox" id="word-opt-apa7"> <span>Normas APA 7ma Edición</span></label>
+                    <label class="chk-lateral"><input type="checkbox" id="word-opt-num-eq"> <span>Numerar ecuaciones</span></label>
+                    <label class="chk-lateral"><input type="checkbox" id="word-opt-toc"> <span>Crear Índice (TOC)</span></label>
+                  </div>
+                  <div class="campo-sidebar" id="contenedor-posicion-indice-word">
+                    <label for="word-opt-posicion-indice">Ubicación del Índice:</label>
+                    <select id="word-opt-posicion-indice" class="select-lateral"></select>
+                  </div>
+                  <div class="campo-sidebar">
+                    <label class="chk-lateral"><input type="checkbox" id="word-opt-num-pag" checked> <span>Numerar páginas en pie</span></label>
+                  </div>
+                </div>
+              </details>
+
+              <details class="sidebar-seccion" data-seccion-id="word-roundtrip">
+                <summary>♻️ Round-Trip .docx</summary>
+                <div class="sidebar-seccion-contenido">
+                  <p class="word-intro" style="font-size:0.8rem; margin:0 0 0.5rem 0;">Extrae el cuerpo a Markdown y reguarda conservando estilos nativos.</p>
+                  <div style="display:flex; gap:0.4rem; flex-wrap:wrap;">
+                    <input id="input-rt-docx" type="file" accept=".docx" hidden>
+                    <button id="btn-rt-extraer" class="btn chico">📥 Cargar .docx</button>
+                    <button id="btn-rt-descargar-md" class="btn chico" style="display:none;" title="Descargar como archivo Markdown (.md)">⬇ Extraer a .md</button>
+                    <button id="btn-rt-cargar-docs" class="btn chico btn-fantasma" style="display:none;" title="Cargar el Markdown extraído en el editor Docs">📝 Cargar en Docs</button>
+                    <button id="btn-rt-reguardar" class="btn btn-primario chico" disabled>♻ Reguardar .docx</button>
+                  </div>
+                  <textarea id="rt-texto" class="editor-md chico" style="min-height:90px; display:none; margin-top:0.4rem;" placeholder="Markdown extraído…"></textarea>
+                  <p id="rt-estado" class="nota-estado" style="font-size:0.78rem; margin-top:0.3rem;"></p>
+                </div>
+              </details>
+            </div>
+
+            <div class="sidebar-pie-acciones">
+              <button id="btn-exportar-word-sidebar" class="btn btn-primario btn-ancho">📄 Exportar .docx</button>
+              <button id="btn-reset-word-sidebar" class="btn btn-fantasma btn-ancho chico">↺ Restablecer valores</button>
+              <p id="word-estado" class="nota-estado" style="font-size:0.8rem; margin:0.3rem 0 0 0; text-align:center;">Listo para exportar.</p>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <!-- ── App: PDF Editorial con Visor y Barra Lateral Derecha ── -->
+      <section id="panel-pdf" class="app-panel app-con-sidebar-derecha">
+        <div class="panel-cabecera">
+          <h2><span class="tile-pdf">P</span> PDF Editorial — Previsualización y Exportación</h2>
+          <div class="panel-acciones">
+            <span class="badge neutral">documento activo de Docs</span>
+            <button id="btn-refrescar-pdf" class="btn chico" title="Recompilar PDF desde el documento activo de Docs">↻ Refrescar desde Docs</button>
+            <button id="btn-exportar-pdf" class="btn btn-primario chico" title="Compilar y descargar PDF">📕 Exportar PDF</button>
+          </div>
+        </div>
+
+        <div class="contenedor-area-con-sidebar">
+          <div class="area-principal-visor">
+            <section class="visor-pdf vidrio">
+              <div class="barra-visor">
+                <button id="pdf-prev" class="btn chico" title="Página anterior" disabled>←</button>
+                <span id="pdf-pag" class="pdf-indicador">– / –</span>
+                <button id="pdf-next" class="btn chico" title="Página siguiente" disabled>→</button>
+                <span class="barra-resorte"></span>
+                <button id="pdf-zoom-out" class="btn chico" title="Reducir zoom (Ctrl + −)">−</button>
+                <select id="pdf-zoom" class="pdf-zoom-selector" title="Nivel de zoom (Ctrl + rueda sobre la hoja)" aria-label="Nivel de zoom del PDF">
+                  <option value="pagina">Ajustar página</option>
+                  <option value="ancho">Ajustar ancho</option>
+                  <option value="0.25">25 %</option>
+                  <option value="0.5">50 %</option>
+                  <option value="0.75">75 %</option>
+                  <option value="1">100 %</option>
+                  <option value="1.25">125 %</option>
+                  <option value="1.5">150 %</option>
+                  <option value="2">200 %</option>
+                  <option value="3">300 %</option>
+                  <option value="4">400 %</option>
+                </select>
+                <button id="pdf-zoom-in" class="btn chico" title="Ampliar zoom (Ctrl + +)">＋</button>
+                <span class="barra-resorte"></span>
+                <button id="btn-recargar-pdfs" class="btn chico" title="Recargar lista de entregables PDF">↻</button>
+                <a id="pdf-abrir" class="btn chico" href="#" target="_blank" rel="noopener" hidden>↗ Abrir</a>
+                <a id="pdf-descargar" class="btn chico btn-primario" href="#" download="" hidden>⬇ Descargar PDF</a>
+              </div>
+              <div id="lista-pdfs" class="lista-entregables-pdf" style="display:none;" hidden></div>
+              <div class="visor-pdf-cuerpo-flex">
+                <!-- Barra lateral izquierda de miniaturas de páginas -->
+                <aside id="pdf-panel-miniaturas" class="pdf-panel-miniaturas" aria-label="Miniaturas de páginas PDF">
+                  <div class="pdf-miniaturas-cabecera">
+                    <span>📑 Páginas (<span id="pdf-total-minis">0</span>)</span>
+                  </div>
+                  <div id="pdf-lista-miniaturas" class="pdf-lista-miniaturas" aria-live="polite">
+                    <p style="font-size:0.75rem; color:var(--text-muted); text-align:center; padding:1rem 0.5rem; margin:0;">Sin páginas</p>
+                  </div>
+                </aside>
+
+                <div id="lienzo-pdf" class="lienzo-pdf" tabindex="0" aria-label="Hoja del PDF. Ctrl + rueda o Ctrl + más/menos para zoom; Ctrl + 0 ajusta la página.">
+                  <canvas id="canvas-pdf" hidden></canvas>
+                  <div id="pdf-vacio" class="pdf-vacio">
+                    <div class="ph-icono">📕</div>
+                    <p id="pdf-vacio-texto">Generando vista previa en vivo del PDF…</p>
+                  </div>
+                </div>
+              </div>
+              <p id="pdf-estado" class="nota-estado">Previsualización vectorial de alta fidelidad basada en Chromium Headless y CSS Paged Media.</p>
+            </section>
+          </div>
+
+          <button id="btn-toggle-sidebar-pdf" class="btn-toggle-sidebar-flotante" title="Mostrar/ocultar opciones de PDF">
+            <span class="icono-toggle">⚙️</span>
+            <span class="texto-toggle">Opciones</span>
+          </button>
+
+          <aside id="sidebar-pdf-opciones" class="barra-lateral-derecha">
+            <div class="sidebar-cabecera">
+              <h4><span>📕</span> Opciones de PDF Editorial</h4>
+              <button id="btn-cerrar-sidebar-pdf" class="btn-cerrar-sidebar" title="Ocultar barra lateral">✕</button>
+            </div>
+
+            <div class="sidebar-cuerpo">
+              <details class="sidebar-seccion" data-seccion-id="pdf-hoja-membrete" open>
+                <summary>📄 Hoja de Membrete PDF</summary>
+                <div class="sidebar-seccion-contenido">
+                  <div class="campo-sidebar">
+                    <label for="pdf-opt-hoja-membrete">Plantilla de Hoja (.docx):</label>
+                    <select id="pdf-opt-hoja-membrete" class="select-lateral">
+                      <option value="">Sin plantilla (predeterminada)</option>
+                    </select>
+                  </div>
+                  <div style="display: flex; gap: 0.5rem; margin-top: 0.2rem; margin-bottom: 0.5rem;">
+                    <button type="button" id="btn-refrescar-plantillas-pdf" class="btn btn-fantasma chico" style="width: 100%;" title="Actualizar lista de hojas de membrete desde disco">🔄 Actualizar hojas</button>
+                  </div>
+
+                  <!-- Contenedor dinámico de Zona de Escritura PDF -->
+                  <div id="contenedor-zona-membrete-pdf" style="display: none; padding: 0.6rem; background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); margin-top: 0.5rem;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.4rem;">
+                      <label style="font-size: 0.78rem; font-weight: 600; margin: 0;">📐 Zona de Escritura (cm):</label>
+                      <span id="badge-origen-zona-pdf" class="chip chico" style="font-size: 0.68rem; padding: 0.15rem 0.4rem;">Analizada</span>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.4rem; font-size: 0.75rem; margin-bottom: 0.5rem;">
+                      <div>
+                        <label for="pdf-membrete-top" style="display: block; margin-bottom: 0.15rem; color: var(--text-muted, #94a3b8);">⬆ Sup. (cm):</label>
+                        <input type="number" id="pdf-membrete-top" class="select-lateral" step="0.1" min="0.5" max="15.0" value="2.5" style="padding: 0.3rem 0.4rem; height: auto;">
+                      </div>
+                      <div>
+                        <label for="pdf-membrete-bottom" style="display: block; margin-bottom: 0.15rem; color: var(--text-muted, #94a3b8);">⬇ Inf. (cm):</label>
+                        <input type="number" id="pdf-membrete-bottom" class="select-lateral" step="0.1" min="0.5" max="15.0" value="2.0" style="padding: 0.3rem 0.4rem; height: auto;">
+                      </div>
+                      <div>
+                        <label for="pdf-membrete-left" style="display: block; margin-bottom: 0.15rem; color: var(--text-muted, #94a3b8);">⬅ Izq. (cm):</label>
+                        <input type="number" id="pdf-membrete-left" class="select-lateral" step="0.1" min="0.5" max="10.0" value="2.5" style="padding: 0.3rem 0.4rem; height: auto;">
+                      </div>
+                      <div>
+                        <label for="pdf-membrete-right" style="display: block; margin-bottom: 0.15rem; color: var(--text-muted, #94a3b8);">➡️ Der. (cm):</label>
+                        <input type="number" id="pdf-membrete-right" class="select-lateral" step="0.1" min="0.5" max="10.0" value="2.5" style="padding: 0.3rem 0.4rem; height: auto;">
+                      </div>
+                    </div>
+
+                    <div style="font-size: 0.72rem; color: #10b981; margin-top: 0.2rem; display: flex; align-items: center; gap: 0.3rem;">
+                      <span>⚡</span> <span>Extracción nativa raster (Opción A)</span>
+                    </div>
+                  </div>
+                </div>
+              </details>
+
+              <details class="sidebar-seccion" data-seccion-id="pdf-editorial">
+                <summary>🎨 Editorial y Paleta</summary>
+                <div class="sidebar-seccion-contenido">
+                  <div class="campo-sidebar">
+                    <label for="pdf-opt-paleta">Paleta Editorial PDF:</label>
+                    <select id="pdf-opt-paleta" class="select-lateral"></select>
+                  </div>
+                  <button type="button" class="btn btn-fantasma chico btn-abrir-modal-paletas" style="width: 100%; margin-top: 0.2rem;" title="Gestionar y guardar paletas personalizadas (2 a 6 colores)">🎨 Paletas Personalizadas</button>
+                  <div class="campo-sidebar">
+                    <label for="pdf-opt-estilo">Estilo de maquetación:</label>
+                    <select id="pdf-opt-estilo" class="select-lateral"></select>
+                  </div>
+                  <div class="campo-sidebar">
+                    <label for="pdf-opt-modo-diseno">Modo de diseño / columnas:</label>
+                    <select id="pdf-opt-modo-diseno" class="select-lateral"></select>
+                  </div>
+                </div>
+              </details>
+
+              <details class="sidebar-seccion" data-seccion-id="pdf-tipografia">
+                <summary>🔤 Tipografía e Interlineado</summary>
+                <div class="sidebar-seccion-contenido">
+                  <div class="campo-sidebar">
+                    <label for="pdf-opt-fuente">Tipografía:</label>
+                    <select id="pdf-opt-fuente" class="select-lateral"></select>
+                  </div>
+                  <div class="campo-sidebar">
+                    <label for="pdf-opt-interlineado">Interlineado:</label>
+                    <select id="pdf-opt-interlineado" class="select-lateral"></select>
+                  </div>
+                </div>
+              </details>
+
+              <details class="sidebar-seccion" data-seccion-id="pdf-encabezados">
+                <summary>📑 Encabezados y Numeración</summary>
+                <div class="sidebar-seccion-contenido">
+                  <div class="campo-sidebar">
+                    <label for="pdf-opt-pie">Texto Footer en cada hoja:</label>
+                    <input type="text" id="pdf-opt-pie" class="select-lateral" placeholder="Ej: Memoria Técnica de Diseño">
+                  </div>
+                  <div class="campo-sidebar">
+                    <label class="chk-lateral"><input type="checkbox" id="pdf-opt-salto-cap" checked> <span>Salto de capítulo (H1 en nueva página)</span></label>
+                    <label class="chk-lateral"><input type="checkbox" id="pdf-opt-running-header" checked> <span>Running Header superior dinámico</span></label>
+                    <label class="chk-lateral"><input type="checkbox" id="pdf-opt-num-pag" checked> <span>Numerar páginas con anti-colisión</span></label>
+                    <label class="chk-lateral"><input type="checkbox" id="pdf-opt-toc" checked> <span>Índice / TOC al final</span></label>
+                  </div>
+                </div>
+              </details>
+            </div>
+
+            <div class="sidebar-pie-acciones">
+              <button id="btn-exportar-pdf-sidebar" class="btn btn-primario btn-ancho">📕 Exportar PDF</button>
+              <button id="btn-reset-pdf-sidebar" class="btn btn-fantasma btn-ancho chico">↺ Restablecer valores</button>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <!-- ── App: HTML — Visor Interactivo y Barra Lateral Derecha ── -->
+      <section id="panel-html" class="app-panel app-con-sidebar-derecha">
+        <div class="panel-cabecera">
+          <h2><span class="tile-html">🌐</span> Previsualización HTML Dedicada</h2>
+          <div class="panel-acciones">
+            <span class="badge neutral">documento activo de Docs</span>
+            <button id="btn-refrescar-html-dedicado" class="btn chico" title="Recompilar HTML desde el documento activo">↻ Refrescar desde Docs</button>
+            <a id="btn-abrir-html-dedicado" class="btn chico" href="#" target="_blank" rel="noopener" title="Abrir en pestaña nueva">↗ Abrir</a>
+            <button id="btn-exportar-html" class="btn btn-primario chico" title="Descargar archivo .html">🌐 Exportar HTML</button>
+            <a id="btn-descargar-html-dedicado" class="btn chico" href="#" download="" style="display:none;" title="Descarga directa">⬇ Descargar</a>
+          </div>
+        </div>
+
+        <div class="contenedor-area-con-sidebar">
+          <div class="area-principal-visor">
+            <div class="visor-html-contenedor vidrio" style="min-height: calc(100vh - 160px); border-radius: var(--radius-md); overflow:hidden; border: 1px solid var(--border-subtle);">
+              <iframe id="visor-html-dedicado" class="visor-html-iframe" style="width: 100%; height: calc(100vh - 165px); border: none; background: #fff;" title="Visor dedicado de documento HTML maquetado"></iframe>
+            </div>
+          </div>
+
+          <button id="btn-toggle-sidebar-html" class="btn-toggle-sidebar-flotante" title="Mostrar/ocultar opciones de HTML">
+            <span class="icono-toggle">⚙️</span>
+            <span class="texto-toggle">Opciones</span>
+          </button>
+
+          <aside id="sidebar-html-opciones" class="barra-lateral-derecha">
+            <div class="sidebar-cabecera">
+              <h4><span>🌐</span> Opciones de HTML</h4>
+              <button id="btn-cerrar-sidebar-html" class="btn-cerrar-sidebar" title="Ocultar barra lateral">✕</button>
+            </div>
+
+            <div class="sidebar-cuerpo">
+              <details class="sidebar-seccion" data-seccion-id="html-plantilla">
+                <summary>🎨 Plantilla y Paleta</summary>
+                <div class="sidebar-seccion-contenido">
+                  <div class="campo-sidebar">
+                    <label for="html-opt-tema">Plantilla de Tema HTML:</label>
+                    <select id="html-opt-tema" class="select-lateral"></select>
+                  </div>
+                  <div class="campo-sidebar">
+                    <label for="html-opt-paleta">Paleta Tri-Color Web:</label>
+                    <select id="html-opt-paleta" class="select-lateral"></select>
+                  </div>
+                  <button type="button" class="btn btn-fantasma chico btn-abrir-modal-paletas" style="width: 100%; margin-top: 0.2rem;" title="Gestionar y guardar paletas personalizadas (2 a 6 colores)">🎨 Paletas Personalizadas</button>
+                </div>
+              </details>
+
+              <details class="sidebar-seccion" data-seccion-id="html-diseno">
+                <summary>📐 Diseño y Lectura</summary>
+                <div class="sidebar-seccion-contenido">
+                  <div class="campo-sidebar">
+                    <label for="html-opt-ancho">Ancho Máximo de Lectura:</label>
+                    <select id="html-opt-ancho" class="select-lateral"></select>
+                  </div>
+                  <div class="campo-sidebar">
+                    <label for="html-opt-fuente">Tipografía:</label>
+                    <select id="html-opt-fuente" class="select-lateral"></select>
+                  </div>
+                  <div class="campo-sidebar">
+                    <label class="chk-lateral"><input type="checkbox" id="html-opt-justificado" checked> <span>Texto justificado web</span></label>
+                    <label class="chk-lateral"><input type="checkbox" id="html-opt-num-eq"> <span>Numeración de ecuaciones</span></label>
+                  </div>
+                </div>
+              </details>
+
+              <details class="sidebar-seccion" data-seccion-id="html-pie">
+                <summary>📌 Encabezado y Pie</summary>
+                <div class="sidebar-seccion-contenido">
+                  <div class="campo-sidebar">
+                    <label for="html-opt-footer-izq">Pie de página izquierdo:</label>
+                    <input type="text" id="html-opt-footer-izq" class="select-lateral" value="MarkFlow AI 2026">
+                  </div>
+                  <div class="campo-sidebar">
+                    <label for="html-opt-footer-der">Pie de página derecho:</label>
+                    <input type="text" id="html-opt-footer-der" class="select-lateral" value="Ing. Patricio Sarmiento Reinoso, Mgst.">
+                  </div>
+                </div>
+              </details>
+            </div>
+
+            <div class="sidebar-pie-acciones">
+              <button id="btn-exportar-html-sidebar" class="btn btn-primario btn-ancho">🌐 Exportar HTML</button>
+              <button id="btn-reset-html-sidebar" class="btn btn-fantasma btn-ancho chico">↺ Restablecer valores</button>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <!-- ── App: Tablas estilo Excel con Barra Lateral Derecha ── -->
+      <section id="panel-tablas" class="app-panel app-con-sidebar-derecha">
+        <div class="panel-cabecera">
+          <h2><span class="tile-tablas">📊</span> Tablas estilo Hoja de Cálculo Excel</h2>
+          <div class="panel-acciones">
+            <span id="badge-total-tablas" class="chip chip-verde">0 tablas detectadas</span>
+            <select id="sel-tabla-activa" class="select-chico" style="display:none;"></select>
+            <button id="btn-copiar-tabla-excel" class="btn chico" title="Copiar datos tabulados para pegar directamente en celdas de Excel con formato">📋 Copiar Tabla (Excel)</button>
+            <button id="btn-descargar-tabla-xlsx" class="btn btn-primario chico" title="Descargar libro Excel .xlsx">📥 Descargar Excel (.xlsx)</button>
+            <button id="btn-extraer-tablas-docs" class="btn btn-fantasma chico" title="Re-escanear tablas del documento activo">↻ Extraer de Docs</button>
+          </div>
+        </div>
+
+        <div class="contenedor-area-con-sidebar">
+          <div class="area-principal-visor">
+            <!-- Mensaje condicional de ausencia de tablas -->
+            <div id="excel-sin-tablas-aviso" class="alerta-sin-tablas" style="display:none; padding:2rem 1.5rem; text-align:center; background:var(--bg-card); border-radius:var(--radius-md); border:1px dashed var(--border-subtle); margin:1.5rem;">
+              <div style="font-size:2.5rem; margin-bottom:0.75rem;">📊</div>
+              <h3 style="margin:0 0 0.5rem 0; font-size:1.1rem; color:var(--text-heading);">Este documento no tiene tablas.</h3>
+              <p style="margin:0; font-size:0.9rem; color:var(--text-muted);">Inserta una tabla con el botón <code>⊞</code> en la barra de Docs o escribe una tabla Markdown con barras <code>|</code>.</p>
+            </div>
+
+            <div id="excel-contenedor-cuadricula-principal" class="hoja-calculo-excel-contenedor vidrio">
+              <div class="excel-barra-superior">
+                <div class="excel-cuadro-nombre">A1</div>
+                <div class="excel-fx">fx</div>
+                <div id="excel-barra-formula" class="excel-barra-formula">Selecciona una celda para ver su contenido</div>
+              </div>
+
+              <div id="contenedor-cuadricula-excel" class="excel-cuadricula-scroll">
+                <div class="excel-mesa-trabajo">
+                  <table id="tabla-excel-render" class="tabla-excel estilo-excel-clasico" style="display:none;">
+                    <thead id="thead-excel"></thead>
+                    <tbody id="tbody-excel"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <button id="btn-toggle-sidebar-excel" class="btn-toggle-sidebar-flotante" title="Mostrar/ocultar opciones de Excel">
+            <span class="icono-toggle">⚙️</span>
+            <span class="texto-toggle">Opciones</span>
+          </button>
+
+          <aside id="sidebar-excel-opciones" class="barra-lateral-derecha">
+            <div class="sidebar-cabecera">
+              <h4><span>📊</span> Opciones de Hoja Excel</h4>
+              <button id="btn-cerrar-sidebar-excel" class="btn-cerrar-sidebar" title="Ocultar barra lateral">✕</button>
+            </div>
+
+            <div class="sidebar-cuerpo">
+              <details class="sidebar-seccion" data-seccion-id="excel-paleta">
+                <summary>🎨 Paleta y Colores</summary>
+                <div class="sidebar-seccion-contenido">
+                  <div class="campo-sidebar">
+                    <label for="excel-opt-paleta">Plantilla de Color:</label>
+                    <select id="excel-opt-paleta" class="select-lateral"></select>
+                  </div>
+                  <button type="button" class="btn btn-fantasma chico btn-abrir-modal-paletas" style="width: 100%; margin-top: 0.2rem;" title="Gestionar y guardar paletas personalizadas (2 a 6 colores)">🎨 Paletas Personalizadas</button>
+                </div>
+              </details>
+
+              <details class="sidebar-seccion" data-seccion-id="excel-dimensiones">
+                <summary>📐 Dimensiones y Fuentes</summary>
+                <div class="sidebar-seccion-contenido">
+                  <div class="campo-sidebar">
+                    <label for="excel-opt-ancho-col">Ancho estándar de columnas:</label>
+                    <select id="excel-opt-ancho-col" class="select-lateral"></select>
+                  </div>
+                  <div class="campo-sidebar">
+                    <label for="excel-opt-fuente-tam">Tamaño de fuente de celdas:</label>
+                    <select id="excel-opt-fuente-tam" class="select-lateral"></select>
+                  </div>
+                </div>
+              </details>
+
+              <details class="sidebar-seccion" data-seccion-id="excel-libro">
+                <summary>📑 Libro y Estructura</summary>
+                <div class="sidebar-seccion-contenido">
+                  <div class="campo-sidebar">
+                    <label for="excel-opt-modo-hojas">Modo de generación de hojas:</label>
+                    <select id="excel-opt-modo-hojas" class="select-lateral"></select>
+                  </div>
+                  <div class="campo-sidebar">
+                    <label class="chk-lateral"><input type="checkbox" id="excel-opt-gridlines" checked> <span>Cuadrícula visible en .xlsx</span></label>
+                    <label class="chk-lateral"><input type="checkbox" id="excel-opt-autofit" checked> <span>Autoajuste de celdas al contenido</span></label>
+                  </div>
+                </div>
+              </details>
+            </div>
+
+            <div class="sidebar-pie-acciones">
+              <button id="btn-copiar-tabla-excel-sidebar" class="btn btn-ancho" style="margin-bottom:0.4rem;">📋 Copiar con formato</button>
+              <button id="btn-exportar-excel-sidebar" class="btn btn-primario btn-ancho">📥 Exportar Excel (.xlsx)</button>
+              <button id="btn-reset-excel-sidebar" class="btn btn-fantasma btn-ancho chico">↺ Restablecer valores</button>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <!-- ── App: Entregables Generados en la Sesión ── -->
+      <section id="panel-entregables" class="app-panel" style="overflow-y: auto; height: 100%; padding: 1.5rem 2rem; box-sizing: border-box;">
+        <div class="panel-cabecera" style="margin-bottom: 1.25rem;">
+          <div>
+            <h2 style="margin: 0; font-size: 1.35rem; color: var(--text-heading); display: flex; align-items: center; gap: 0.5rem;">
+              <span>📦</span> Entregables Generados
+            </h2>
+            <p style="margin: 0.25rem 0 0 0; font-size: 0.85rem; color: var(--text-muted);">
+              Historial de exportaciones compiladas en la sesión actual. Descarga o visualiza tus archivos directamente.
+            </p>
+          </div>
+          <div class="panel-acciones">
+            <span id="badge-total-entregables" class="chip chip-azul">0 entregables</span>
+            <button id="btn-limpiar-entregables" class="btn btn-peligro chico" title="Limpiar lista de entregables de esta sesión">🗑️ Limpiar historial</button>
+          </div>
+        </div>
+
+        <div id="lista-entregables-sesion" class="lista-entregables-contenedor">
+          <div id="entregables-vacio" class="estado-vacio" style="padding: 3rem 1rem;">
+            <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">📦</div>
+            <p>Aún no se han generado entregables en esta sesión.<br>Exporta tu documento activo desde Word, HTML, PDF o Excel para registrarlo aquí.</p>
+          </div>
+          <div id="cuadricula-entregables" class="entregables-grid" style="display:none;"></div>
+        </div>
+      </section>
+
+      <!-- ── App: Configuración ── -->
+      <section id="panel-config" class="app-panel">
+        <div class="panel-cabecera">
+          <h2>⚙️ Configuración</h2>
+          <div class="panel-acciones">
+            <span class="badge neutral">offline primero</span>
+          </div>
+        </div>
+
+        <div class="vidrio tarjeta tarjeta-config">
+          <h3>✨ Inteligencia artificial (BYO-key / local)</h3>
+          <div class="controles-grid" style="grid-template-columns: 1fr 1fr;">
+            <label>Ollama · URL local<br>
+              <input id="ia-base-url" type="text" placeholder="http://localhost:11434">
+            </label>
+            <label>Ollama · modelo<br>
+              <input id="ia-modelo" type="text" placeholder="llama3">
+            </label>
+            <label>Proveedor externo<br>
+              <select id="ia-proveedor">
+                <option value="" selected>Ninguno (solo local)</option>
+                <option value="openai">OpenAI</option>
+                <option value="anthropic">Anthropic</option>
+                <option value="gemini">Google Gemini</option>
+              </select>
+            </label>
+            <label>Modelo externo<br>
+              <input id="ia-modelo-ext" type="text" placeholder="gpt-4o">
+            </label>
+            <label style="grid-column: 1 / -1;">Clave API externa (se guarda solo en este equipo)<br>
+              <input id="ia-clave" type="password" placeholder="sk-…">
+            </label>
+          </div>
+          <div class="fila-acciones">
+            <button id="btn-guardar-ia" class="btn btn-primario">💾 Guardar configuración</button>
+            <button id="btn-probar-ia" class="btn chico">🔌 Probar conexión</button>
+          </div>
+          <p id="ia-estado" class="nota-estado">Con Ollama local, la suite funciona 100&nbsp;% offline.</p>
+        </div>
+
+        <div class="vidrio tarjeta tarjeta-config">
+          <h3>ℹ️ Acerca de</h3>
+          <dl class="acerca-lista">
+            <div><dt>Producto</dt><dd>{{ nombre }} <span class="chip">v{{ version }}</span></dd></div>
+            <div><dt>Motor de conversión</dt><dd>MarkFlow (saneamiento, QA, temas, PDF editorial)</dd></div>
+            <div><dt>Núcleo DOCX</dt><dd>byte-preserving · OMML · tracked changes (Apache-2.0, atribución GenOffice)</dd></div>
+            <div><dt>Distribución de agente</dt><dd>CLI <code>python -m interfaces.cli</code> · MCP <code>python -m interfaces.mcp</code> · Skill en <code>interfaces/skill/SKILL.md</code></dd></div>
+          </dl>
+        </div>
+      </section>
+
+      <!-- ── App: Plantillas y Placeholders Dinámicos (Independiente) ── -->
+      <section id="panel-plantillas" class="app-panel" style="overflow-y: auto; height: 100%; padding: 1.5rem 2rem; box-sizing: border-box;">
+        <div class="plantillas-ancho-extendido">
+
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 0.75rem;">
+            <div>
+              <h2 style="margin: 0; font-size: 1.35rem; color: var(--text-heading); display: flex; align-items: center; gap: 0.5rem;">
+                <span>🧩</span> Plantillas y Placeholders Dinámicos
+              </h2>
+              <p style="margin: 0.25rem 0 0 0; font-size: 0.85rem; color: var(--text-muted);">
+                Crea plantillas reutilizables, mapea variables en Excel/JSON y genera documentos en lote con estilo sutil sin globos invasivos.
+              </p>
+            </div>
+            <!-- Sub-pestañas: Crear plantilla vs Usar plantilla -->
+            <div class="sub-tabs-nav" style="margin-bottom: 0;">
+              <button type="button" class="sub-tab-btn activo" id="btn-subtab-crear-plantilla">✏️ Crear plantilla</button>
+              <button type="button" class="sub-tab-btn" id="btn-subtab-usar-plantilla">📄 Usar plantilla</button>
+            </div>
+          </div>
+
+          <!-- ==================================================================== -->
+          <!-- FINALIDAD A · CREAR PLANTILLA                                        -->
+          <!-- ==================================================================== -->
+          <div id="subpanel-crear-plantilla" class="sub-tab-panel activo">
+
+            <!-- 1 · Origen del Documento Base -->
+            <div class="vidrio tarjeta">
+              <div class="cabecera-tarjeta">
+                <h2>1 · Documento Markdown Origen</h2>
+                <span class="chip">Finalidad A · Detección Heurística</span>
+              </div>
+              <p class="sec">
+                Arrastra el documento Markdown de un proyecto real para detectar automáticamente los datos que varían
+                (nombres, caudales, fechas, presupuestos) y convertirlos en placeholders <code>&#123;&#123;nombre&#125;&#125;</code>.
+              </p>
+
+              <div style="display: flex; gap: 1rem; align-items: flex-end; margin-bottom: 1rem; flex-wrap: wrap;">
+                <label style="flex: 1; min-width: 250px; display: flex; flex-direction: column; gap: 0.35rem; font-weight: 600; font-size: 0.88rem;">
+                  Nombre del proyecto base:
+                  <input type="text" id="input-nombre-proyecto-base" value="Hidrosanitario Norte" placeholder="Ej: Hidrosanitario Norte"
+                         style="padding: 0.55rem 0.8rem; border-radius: var(--radius-md); border: 1px solid var(--border-subtle); background: var(--bg-card); color: var(--text-main);">
+                </label>
+                <button type="button" id="btn-analizar-plantilla-md" class="btn btn-primario" style="height: 40px;">
+                  🔍 Analizar y Detectar Candidatos
+                </button>
+              </div>
+
+              <div id="zona-suelta-plantilla" class="zona-suelta" tabindex="0" role="button" aria-label="Arrastra un archivo Markdown aquí">
+                <input type="file" id="entrada-plantilla-md" accept=".md,.markdown,.txt,text/markdown,text/plain" hidden>
+                <div class="zona-icono" aria-hidden="true">🧩</div>
+                <div class="zona-texto">
+                  <b>Arrastra aquí el documento Markdown base</b><br>
+                  <small>o haz clic para seleccionar archivo (.md)</small>
+                </div>
+              </div>
+            </div>
+
+            <!-- 2 · Tabla de Revisión de Candidatos -->
+            <div id="tarjeta-candidatos-plantilla" class="vidrio tarjeta" style="display: none;">
+              <div class="cabecera-tarjeta">
+                <h2>2 · Revisión de Placeholders Candidatos</h2>
+                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                  <button type="button" id="btn-marcar-todos-candidatos" class="btn btn-fantasma chico">Marcar todos</button>
+                  <button type="button" id="btn-solo-alta-candidatos" class="btn btn-fantasma chico">Solo alta confianza</button>
+                  <span id="badge-total-candidatos" class="chip chip-accent">0 candidatos</span>
+                </div>
+              </div>
+              <p class="sec">
+                Verifica los textos detectados, ajusta los nombres sugeridos (sin tildes ni espacios) y selecciona cuáles se convertirán en placeholders.
+              </p>
+
+              <div class="tabla-candidatos-contenedor">
+                <table class="tabla-candidatos">
+                  <thead>
+                    <tr>
+                      <th style="width: 45px; text-align: center;">Usar</th>
+                      <th>Texto en Documento</th>
+                      <th>Nombre Placeholder (&#123;&#123;nombre&#125;&#125;)</th>
+                      <th>Tipo de Dato</th>
+                      <th>Unidad</th>
+                      <th>Confianza</th>
+                      <th style="text-align: center;">Veces</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tbody-candidatos-plantilla">
+                    <!-- Dinámico -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- 3 · Editor con Vista Ancha, Selector de Modos y Edición Visual WYSIWYG -->
+            <div class="vidrio tarjeta" style="position: relative;">
+              <div class="cabecera-tarjeta" style="flex-wrap: wrap; gap: 0.75rem;">
+                <div>
+                  <h2>3 · Editor de Plantilla y Previsualización</h2>
+                  <p class="sec" style="margin: 0.2rem 0 0 0;">
+                    Izquierda: Resultado HTML real renderizado en vivo · Derecha: Manipulador interactivo de placeholders y variables.
+                  </p>
+                </div>
+
+                <!-- Barra de Modos de Vista -->
+                <div style="display: flex; align-items: center; gap: 0.75rem; margin-left: auto;">
+                  <div class="view-switcher-plantilla" role="group" aria-label="Modo de visualización">
+                    <button type="button" class="btn-modo-vista activo" data-modo="split" title="Pantalla Dividida (Izquierda: HTML Resultado | Derecha: Manipular Placeholders)">
+                      🖥️ Dividida
+                    </button>
+                    <button type="button" class="btn-modo-vista" data-modo="resultado" title="Solo Pantalla Renderizada con HTML (Resultado Final)">
+                      👁️ Solo Resultado (HTML)
+                    </button>
+                    <button type="button" class="btn-modo-vista" data-modo="placeholders" title="Solo Manipulador de Placeholders y Variables">
+                      🧩 Solo Placeholders
+                    </button>
+                  </div>
+
+                  <button type="button" id="btn-aplicar-candidatos-editor" class="btn chico btn-verde" title="Aplica los candidatos marcados">
+                    ⚡ Aplicar Candidatos
+                  </button>
+                  <button type="button" id="btn-convertir-seleccion-ph" class="btn chico btn-fantasma" title="Convierte la frase seleccionada y todas sus repeticiones globales en placeholder">
+                    🧩 Convertir Selección Global
+                  </button>
+                </div>
+              </div>
+
+              <!-- Grilla Conmutable (Modo Split / Resultado HTML / Manipulador Placeholders) -->
+              <div id="grid-editor-plantilla-main" class="grid-editor-plantilla modo-split" style="margin-top: 1rem;">
+                <!-- Columna Izquierda: Pantalla Renderizada con HTML (Resultado Real) -->
+                <div class="col-resultado-html-plantilla" style="display: flex; flex-direction: column; gap: 0.4rem;">
+                  <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; font-weight: 700; color: var(--text-muted);">
+                    <span>👁️ RESULTADO RENDERIZADO (HTML REAL)</span>
+                    <span class="chip chip-sm" style="font-size: 0.72rem; color: #10b981;">● Vista en Vivo</span>
+                  </div>
+                  <div id="preview-render-html-resultado" class="preview-render-html-box"
+                       style="flex: 1; min-height: 520px; max-height: 740px; overflow-y: auto; padding: 1.25rem; border-radius: var(--radius-md); border: 1px solid var(--border-subtle); background: var(--bg-card); font-size: 0.95rem; line-height: 1.7; outline: none;">
+                    <iframe id="iframe-preview-html-plantilla" title="Vista previa HTML de plantilla" sandbox="allow-same-origin"
+                            style="width: 100%; min-height: 500px; height: 100%; border: none; background: transparent;"></iframe>
+                  </div>
+                </div>
+
+                <!-- Columna Derecha: Manipulador de Placeholders y Editor de Variables -->
+                <div class="col-manipular-placeholders" style="display: flex; flex-direction: column; gap: 0.4rem;">
+                  <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; font-weight: 700; color: var(--text-muted);">
+                    <span>🧩 MANIPULADOR DE PLACEHOLDERS (TEXTO CON VARIABLES)</span>
+                    <span style="color: var(--color-danger, #ef4444); font-size: 0.78rem;">
+                      Variables en rojo · Clic para renombrar o eliminar
+                    </span>
+                  </div>
+                  <!-- Editor interactivo con variables resaltadas en rojo y clicables -->
+                  <div id="preview-render-plantilla-tags" contenteditable="true" spellcheck="false"
+                       style="flex: 1; min-height: 520px; max-height: 740px; overflow-y: auto; padding: 1.25rem; border-radius: var(--radius-md); border: 1px solid var(--border-subtle); background: var(--bg-card); font-size: 0.92rem; line-height: 1.7; outline: none; white-space: pre-wrap;">
+                    <em style="color: var(--text-muted);">Pega o carga el documento para manipular sus placeholders aquí...</em>
+                  </div>
+                  <!-- Textarea de sincronización SSOT de Markdown -->
+                  <textarea id="textarea-plantilla-md" style="display: none;"></textarea>
+                  <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-muted); padding: 0 4px;">
+                    <span id="caracteres-plantilla-md">0 caracteres</span>
+                    <span>💡 Selecciona texto con el cursor y haz clic en «Convertir Selección Global»</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Tooltip Contextual Interactivo Flotante -->
+              <div id="tooltip-ph-flotante" class="tooltip-ph-flotante" role="dialog" aria-modal="false">
+                <div class="tooltip-ph-flotante-header">
+                  <span id="tooltip-ph-titulo-variable">Variable: {{nombre}}</span>
+                  <button type="button" id="btn-tooltip-ph-cerrar" class="btn btn-icono chico" style="padding: 0 4px; font-size: 0.8rem;">✕</button>
+                </div>
+                <div class="tooltip-ph-flotante-cuerpo">
+                  <label style="font-size: 0.78rem; font-weight: 600; color: var(--text-muted);">Renombrar globalmente:</label>
+                  <input type="text" id="tooltip-ph-input-nombre" class="tooltip-ph-flotante-input" placeholder="nuevo_nombre">
+                </div>
+                <div class="tooltip-ph-flotante-acciones">
+                  <button type="button" id="btn-tooltip-ph-eliminar" class="btn chico btn-peligro" title="Revertir placeholder a texto normal">
+                    🗑 Deshacer
+                  </button>
+                  <button type="button" id="btn-tooltip-ph-guardar" class="btn chico btn-primario" title="Guardar nuevo nombre globalmente">
+                    💾 Renombrar
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- 4 · Generar Paquete Oficial de Plantilla -->
+            <div class="vidrio tarjeta">
+              <div class="cabecera-tarjeta">
+                <h2>4 · Generar Paquete de Plantilla</h2>
+                <span class="chip chip-accent">MD + Excel (.xlsx) + JSON + ZIP</span>
+              </div>
+              <p class="sec">
+                Selecciona los archivos que deseas descargar en el paquete oficial de plantilla. Se generarán tarjetas horizontales individuales con iconos modernos.
+              </p>
+
+              <!-- Casillas de verificación para seleccionar qué archivos descargar en el paquete -->
+              <div style="display: flex; gap: 1.25rem; margin: 1rem 0; flex-wrap: wrap;">
+                <label class="casilla"><input type="checkbox" id="chk-paquete-md" checked> <b>Plantilla Markdown</b> (.md)</label>
+                <label class="casilla"><input type="checkbox" id="chk-paquete-xlsx" checked> <b>Hoja Excel de Datos</b> (.xlsx)</label>
+                <label class="casilla"><input type="checkbox" id="chk-paquete-json" checked> <b>Esquema de Datos JSON</b> (.json)</label>
+                <label class="casilla"><input type="checkbox" id="chk-paquete-zip" checked> <b>Paquete Completo Comprimido</b> (.zip)</label>
+              </div>
+
+              <div style="display: flex; gap: 1rem; align-items: center; margin-top: 1rem; flex-wrap: wrap;">
+                <button type="button" id="btn-generar-paquete-plantilla" class="btn btn-primario" style="padding: 0.75rem 1.75rem; font-size: 0.95rem;">
+                  💾 Crear Plantilla y Generar Salidas
+                </button>
+              </div>
+
+              <!-- Contenedor de descargas de plantilla generada con tarjetas horizontales -->
+              <div id="contenedor-descargas-plantilla" style="display: none; margin-top: 1.25rem; padding: 1.25rem; border-radius: var(--radius-md); background: rgba(99, 102, 241, 0.05); border: 1px solid rgba(99, 102, 241, 0.2);">
+                <h3 style="margin-top: 0; margin-bottom: 0.75rem; font-size: 1rem; color: var(--accent-indigo);">🎉 ¡Paquete de Plantilla Generado Exitosamente!</h3>
+                <div id="lista-archivos-plantilla-generados" class="entregables" style="margin-top: 0.75rem;">
+                  <!-- Se pueblan las tarjetas de descarga horizontales -->
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+
+          <!-- ==================================================================== -->
+          <!-- FINALIDAD B · USAR PLANTILLA                                         -->
+          <!-- ==================================================================== -->
+          <div id="subpanel-usar-plantilla" class="sub-tab-panel">
+
+            <!-- 1 · Carga de Plantilla y Archivo de Datos -->
+            <div class="vidrio tarjeta">
+              <div class="cabecera-tarjeta">
+                <h2>1 · Subir Plantilla y Conjunto de Datos</h2>
+                <span class="chip">Finalidad B · Fusión Multimodal</span>
+              </div>
+              <p class="sec">
+                Carga tu plantilla en Markdown (<code>.md</code>) y tu hoja de cálculo Excel (<code>.xlsx</code>) o archivo de datos (<code>.json</code>).
+              </p>
+
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem;">
+                <!-- Zona 1: Subir Plantilla .md -->
+                <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                  <span style="font-weight: 700; font-size: 0.85rem; color: var(--text-heading);">A. Plantilla Markdown (.md)</span>
+                  <div id="zona-suelta-usar-md" class="zona-suelta" tabindex="0" role="button" aria-label="Cargar plantilla Markdown">
+                    <input type="file" id="entrada-usar-md" accept=".md,.markdown,.txt,text/markdown,text/plain" hidden>
+                    <div class="zona-icono" aria-hidden="true">📄</div>
+                    <div class="zona-texto">
+                      <b id="txt-nombre-plantilla-cargada">Arrastra aquí la plantilla (.md)</b><br>
+                      <small id="txt-meta-plantilla-cargada">o haz clic para explorar</small>
+                    </div>
+                  </div>
+                  <div id="contenedor-chips-placeholders-detectados" style="display: flex; flex-wrap: wrap; gap: 0.35rem; margin-top: 0.35rem;"></div>
+                </div>
+
+                <!-- Zona 2: Subir Datos .xlsx o .json -->
+                <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                  <span style="font-weight: 700; font-size: 0.85rem; color: var(--text-heading);">B. Datos del Proyecto (.xlsx o .json)</span>
+                  <div id="zona-suelta-usar-datos" class="zona-suelta" tabindex="0" role="button" aria-label="Cargar archivo Excel o JSON">
+                    <input type="file" id="entrada-usar-datos" accept=".xlsx,.json" hidden>
+                    <div class="zona-icono" aria-hidden="true">📊</div>
+                    <div class="zona-texto">
+                      <b id="txt-nombre-datos-cargados">Arrastra aquí el Excel (.xlsx) o JSON</b><br>
+                      <small id="txt-meta-datos-cargados">Estructura por columnas de proyecto</small>
+                    </div>
+                  </div>
+                  <div id="contenedor-proyectos-datos-detectados" style="display: flex; flex-wrap: wrap; gap: 0.35rem; margin-top: 0.35rem;"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 2 · Selección de Proyecto y Panel de Validación -->
+            <div class="vidrio tarjeta">
+              <div class="cabecera-tarjeta">
+                <h2>2 · Selección de Proyecto y Panel de Validación</h2>
+                <span class="chip">Validación Semántica Pre-Generación</span>
+              </div>
+              <p class="sec">
+                Elige el proyecto que deseas compilar o procesa todos en lote. La aplicación valida la consistencia de tipos y resalta datos faltantes.
+              </p>
+
+              <div style="display: flex; gap: 1rem; align-items: flex-end; margin-top: 0.75rem; flex-wrap: wrap;">
+                <label style="flex: 1; min-width: 260px; display: flex; flex-direction: column; gap: 0.35rem; font-weight: 600; font-size: 0.88rem;">
+                  Seleccionar proyecto a generar:
+                  <select id="sel-proyecto-usar" style="padding: 0.6rem 0.8rem; border-radius: var(--radius-md); border: 1px solid var(--border-subtle); background: var(--bg-card); color: var(--text-main);">
+                    <option value="__todos__">🔄 Generar lote (Todos los proyectos disponibles)</option>
+                  </select>
+                </label>
+                <button type="button" id="btn-revalidar-proyecto" class="btn btn-fantasma chico" style="height: 38px;">
+                  🔄 Revalidar datos
+                </button>
+              </div>
+
+              <!-- Resumen de validación con contadores -->
+              <div id="panel-resumen-validacion" style="margin-top: 1.25rem;">
+                <div class="resumen-validacion-grid">
+                  <div class="card-val-stat stat-ok">
+                    <span class="val-num" id="val-stat-completos">0</span>
+                    <span class="val-lbl">✅ Completos</span>
+                  </div>
+                  <div class="card-val-stat stat-danger">
+                    <span class="val-num" id="val-stat-vacios">0</span>
+                    <span class="val-lbl">🟥 Vacíos (Marcados en rojo)</span>
+                  </div>
+                  <div class="card-val-stat stat-warn">
+                    <span class="val-num" id="val-stat-tipo">0</span>
+                    <span class="val-lbl">⚠️ Tipo Incorrecto</span>
+                  </div>
+                  <div class="card-val-stat stat-info">
+                    <span class="val-num" id="val-stat-sobrantes">0</span>
+                    <span class="val-lbl">ℹ️ Sobrantes</span>
+                  </div>
+                </div>
+
+                <div id="detalle-validacion-texto" style="font-size: 0.86rem; color: var(--text-muted); margin-top: 0.5rem; padding: 0.6rem 0.85rem; border-radius: var(--radius-sm); background: var(--bg-card); border: 1px solid var(--border-subtle);">
+                  <em>Sube una plantilla y un archivo de datos para auditar la consistencia.</em>
+                </div>
+              </div>
+            </div>
+
+            <!-- 3 · Generación Final de Documentos -->
+            <div class="vidrio tarjeta">
+              <div class="cabecera-tarjeta">
+                <h2>3 · Formatos de Entrega y Generación</h2>
+                <span class="chip chip-accent">Pipeline Reutilizado Oficial</span>
+              </div>
+              <p class="sec">
+                Los documentos generados adoptan los temas y paletas configurados en la aplicación. Los campos vacíos se resaltan en rojo con la etiqueta <code>[nombre]</code>.
+              </p>
+
+              <div style="display: flex; gap: 1.5rem; margin: 1rem 0; flex-wrap: wrap;">
+                <label class="casilla"><input type="checkbox" id="chk-usar-formato-html" checked> <b>HTML Imprimible</b> (.html)</label>
+                <label class="casilla"><input type="checkbox" id="chk-usar-formato-word" checked> <b>Microsoft Word</b> (.docx)</label>
+                <label class="casilla"><input type="checkbox" id="chk-usar-formato-pdf" checked> <b>Editorial PDF</b> (.pdf)</label>
+                <label class="casilla"><input type="checkbox" id="chk-usar-formato-md"> <b>Markdown Sustituido</b> (.md)</label>
+                <label class="casilla"><input type="checkbox" id="chk-usar-formato-xlsx"> <b>Hoja Excel de Datos</b> (.xlsx)</label>
+                <label class="casilla"><input type="checkbox" id="chk-usar-formato-json"> <b>Esquema JSON</b> (.json)</label>
+              </div>
+
+              <div style="display: flex; gap: 1rem; align-items: center; margin-top: 1rem; flex-wrap: wrap;">
+                <button type="button" id="btn-ejecutar-generacion-plantilla" class="btn btn-primario" style="padding: 0.85rem 2rem; font-size: 1rem;">
+                  🚀 Generar Documentos Finales
+                </button>
+              </div>
+
+              <!-- Contenedor de resultados de generación -->
+              <div id="contenedor-resultados-usar-plantilla" style="display: none; margin-top: 1.5rem; padding: 1.25rem; border-radius: var(--radius-md); background: var(--bg-card); border: 1px solid var(--border-subtle);">
+                <h3 style="margin-top: 0; font-size: 1.05rem; color: var(--text-heading);">📑 Documentos Generados</h3>
+                <div id="lista-documentos-generados-grid" class="entregables" style="margin-top: 1rem;">
+                  <!-- Se pueblan las tarjetas de descarga de cada proyecto y formato -->
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ── App: MarkFlow Conversión Completa (Motor Clásico) ── -->
+      <section id="panel-markflow" class="app-panel" style="overflow: hidden; height: 100%; padding: 0; box-sizing: border-box;">
+        <div style="height: 100%; display: flex; flex-direction: column;">
+          <iframe id="marco-clasico" src="/clasico" title="MarkFlow Conversión Completa"
+                  style="width: 100%; height: 100%; flex: 1; border: none; background: var(--bg-main);"></iframe>
+        </div>
+      </section>
+
+      <!-- ── App: Manual de Usuario y Documentación Técnica ── -->
+      <section id="panel-manual" class="app-panel" style="overflow-y: auto; height: 100%; padding: 1.5rem 2rem; box-sizing: border-box;">
+        <div class="vidrio tarjeta" style="max-width: 1000px; margin: 0 auto 2rem auto;">
+          <div class="cabecera-tarjeta">
+            <h2>📖 Manual de Usuario y Documentación Técnica Integral</h2>
+            <span class="chip">MarkFlow Office · Guía Completa</span>
+          </div>
+
+          <div class="manual-seccion" style="margin-top: 1rem;">
+            <h3>1. Arquitectura de Documento Único y Pestañas de Formato</h3>
+            <p>
+              En MarkFlow Office, el contenido del documento se centraliza en la pestaña <strong>Docs</strong> (editor tipográfico y Markdown). Las pestañas de salida (<strong>Word</strong>, <strong>HTML</strong>, <strong>PDF</strong> y <strong>Excel</strong>) reflejan en tiempo real ese mismo contenido, aplicando las opciones específicas seleccionadas en su respectiva barra lateral deslizable.
+            </p>
+          </div>
+
+          <div class="manual-seccion" style="margin-top: 1rem;">
+            <h3>2. Pestaña Word: Temas Nativos vs. Personalizados</h3>
+            <p>
+              Al trabajar en la pestaña <strong>Word (.docx)</strong>:
+            </p>
+            <ul>
+              <li><strong>Temas Nativos (tema1, tema2, tema3):</strong> Cuentan con diseño y paleta cromática inmutable protegida. La barra lateral muestra el aviso de <em>Tema Nativo Inmutable</em> para evitar alteraciones visuales accidentales.</li>
+              <li><strong>Tema Personalizado (🎨):</strong> Desbloquea la selección de paletas suaves ejecutivas o paletas totalmente a medida con selectores de color RGB para títulos H1/H2, cabeceras de tabla, filas alternas y bordes.</li>
+              <li><strong>Round-Trip .docx:</strong> Permite importar documentos <code>.docx</code> existentes, extraer su texto limpio a Markdown, descargarlo como archivo <code>.md</code> o transferirlo directamente al editor Docs para continuar trabajando.</li>
+            </ul>
+          </div>
+
+          <div class="manual-seccion" style="margin-top: 1rem;">
+            <h3>3. Pestañas PDF, HTML y Tablas Excel</h3>
+            <div class="manual-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; margin-top: 0.75rem;">
+              <div class="manual-card" style="padding: 1rem; border-radius: var(--radius-md); background: var(--bg-card); border: 1px solid var(--border-subtle);">
+                <h4 style="margin: 0 0 0.4rem 0;">📕 Visor PDF en Vivo</h4>
+                <p style="margin: 0; font-size: 0.88rem; color: var(--text-muted);">Compila el documento con Chromium Headless local y CSS Paged Media. Permite maquetación de dos columnas, notas al pie, numeración y running header.</p>
+              </div>
+              <div class="manual-card" style="padding: 1rem; border-radius: var(--radius-md); background: var(--bg-card); border: 1px solid var(--border-subtle);">
+                <h4 style="margin: 0 0 0.4rem 0;">🌐 HTML Autónomo</h4>
+                <p style="margin: 0; font-size: 0.88rem; color: var(--text-muted);">Entrega un archivo web 100% independiente con estilos incrustados y fórmulas matemáticas renderizadas listas para compartir.</p>
+              </div>
+              <div class="manual-card" style="padding: 1rem; border-radius: var(--radius-md); background: var(--bg-card); border: 1px solid var(--border-subtle);">
+                <h4 style="margin: 0 0 0.4rem 0;">📊 Tablas Excel</h4>
+                <p style="margin: 0; font-size: 0.88rem; color: var(--text-muted);">Visualiza las tablas en formato hoja de cálculo, descarga libros <code>.xlsx</code> estilizados y copia al portapapeles con formato nativo para pegar en hojas de cálculo.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="manual-seccion" style="margin-top: 1rem;">
+            <h3>4. Placeholders Dinámicos y Generación por Lotes</h3>
+            <p>
+              La pestaña <strong>Plantillas</strong> permite convertir cualquier documento Markdown en una plantilla paramétrica con campos <code>&#123;&#123;variable&#125;&#125;</code>, mapear datos desde matrices tabulares y generar paquetes documentales completos con un solo clic.
+            </p>
+          </div>
+
+          <div class="manual-seccion" style="margin-top: 1rem;">
+            <h3>5. Entregables y Auditoría</h3>
+            <p>
+              Cada archivo exportado (.docx, .pdf, .html, .xlsx, .md) se registra en la pestaña <strong>Entregables</strong> con su hora de generación, tamaño y acceso directo para descarga o visualización.
+            </p>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <footer class="pie">
+      <span>{{ nombre }} v{{ version }}</span>
+      <span aria-hidden="true">·</span>
+      <span>Motor MarkFlow + núcleo GenOffice</span>
+      <span aria-hidden="true">·</span>
+      <span>100&nbsp;% offline</span>
+    </footer>
+  </div>
+
+  <!-- ══════════════ MODAL DE PALETAS PERSONALIZADAS (Fase 2) ══════════════ -->
+  <div id="modal-paletas-personalizadas" class="modal-fondo" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="modal-paletas-titulo">
+    <div class="modal-caja vidrio" style="max-width: 560px; width: 92%; max-height: 85vh; display: flex; flex-direction: column;">
+      <header class="modal-cabecera" style="display: flex; align-items: center; justify-content: space-between; padding: 1rem 1.25rem; border-bottom: 1px solid var(--border-subtle);">
+        <h3 id="modal-paletas-titulo" style="margin: 0; font-size: 1.05rem; display: flex; align-items: center; gap: 0.5rem; color: var(--text-heading);">
+          <span>🎨</span> Paletas de Color Personalizadas
+        </h3>
+        <button id="btn-cerrar-modal-paletas" class="btn btn-fantasma chico" title="Cerrar modal">✕</button>
+      </header>
+
+      <div class="modal-cuerpo" style="padding: 1.25rem; overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 1.25rem;">
+        <!-- Sección para crear una nueva paleta -->
+        <div class="tarjeta-crear-paleta" style="background: var(--bg-input); padding: 1rem; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
+          <h4 style="margin: 0 0 0.75rem 0; font-size: 0.9rem; color: var(--text-heading);">➕ Guardar Nueva Paleta (de 2 a 6 colores)</h4>
+          <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+            <div>
+              <label for="input-nombre-paleta-custom" style="font-size: 0.78rem; font-weight: 600; color: var(--text-muted); display: block; margin-bottom: 0.3rem;">Nombre de la paleta:</label>
+              <input type="text" id="input-nombre-paleta-custom" class="select-lateral" placeholder="Ej: Mi Paleta Hidrosanitaria" maxlength="40">
+            </div>
+
+            <div>
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.4rem;">
+                <span style="font-size: 0.78rem; font-weight: 600; color: var(--text-muted);">Muestras de Color (Haz clic para seleccionar visualmente):</span>
+                <div style="display: flex; gap: 0.35rem;">
+                  <button type="button" id="btn-paleta-agregar-color" class="btn chico" style="padding: 0.15rem 0.45rem; font-size: 0.75rem;" title="Agregar color (máx. 6)">＋ Color</button>
+                  <button type="button" id="btn-paleta-quitar-color" class="btn chico" style="padding: 0.15rem 0.45rem; font-size: 0.75rem;" title="Quitar color (mín. 2)">− Quitar</button>
+                </div>
+              </div>
+              <div id="contenedor-colores-nueva-paleta" style="display: flex; gap: 0.6rem; flex-wrap: wrap; align-items: center; padding: 0.5rem 0;">
+                <!-- Pastillas interactivas generadas dinámicamente -->
+              </div>
+            </div>
+
+            <button type="button" id="btn-guardar-nueva-paleta" class="btn btn-primario chico" style="margin-top: 0.2rem; align-self: flex-start;">
+              💾 Guardar Paleta en Almacenamiento Local
+            </button>
+          </div>
+        </div>
+
+        <!-- Lista de paletas guardadas -->
+        <div>
+          <h4 style="margin: 0 0 0.75rem 0; font-size: 0.9rem; color: var(--text-heading);">📚 Paletas Guardadas (Compartidas en toda la suite)</h4>
+          <div id="lista-paletas-guardadas" style="display: flex; flex-direction: column; gap: 0.6rem;">
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0;">No hay paletas guardadas aún.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════ MODAL DE VALIDACIÓN DE FÓRMULAS (Fase 2) ══════════════ -->
+  <div id="modal-validar-formulas" class="modal-fondo" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="modal-formulas-titulo">
+    <div class="modal-caja vidrio" style="max-width: 680px; width: 92%; max-height: 85vh; display: flex; flex-direction: column;">
+      <header class="modal-cabecera" style="display: flex; align-items: center; justify-content: space-between; padding: 1rem 1.25rem; border-bottom: 1px solid var(--border-subtle);">
+        <h3 id="modal-formulas-titulo" style="margin: 0; font-size: 1.05rem; display: flex; align-items: center; gap: 0.5rem; color: var(--text-heading);">
+          <span>∑</span> Diagnóstico y Validación de Fórmulas
+        </h3>
+        <button id="btn-cerrar-modal-formulas" class="btn btn-fantasma chico" title="Cerrar modal">✕</button>
+      </header>
+
+      <div class="modal-cuerpo" style="padding: 1.25rem; overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 1rem;">
+        <div id="resumen-formulas-stats" style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap;">
+          <span class="chip" id="stat-total-formulas">Total: 0</span>
+          <span class="chip" id="stat-correctas-formulas" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">Correctas: 0</span>
+          <span class="chip" id="stat-error-formulas" style="background: rgba(239, 68, 68, 0.15); color: #ef4444;">Con error: 0</span>
+        </div>
+
+        <div id="contenedor-lista-errores-formulas" style="display: flex; flex-direction: column; gap: 0.75rem;">
+          <!-- Aquí se insertan dinámicamente los errores con número de línea y botón para ir a la línea -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════ MODAL DE ORDEN DE FUSIÓN DE DOCUMENTOS (Fase 1) ══════════════ -->
+  <div id="modal-orden-fusion" class="modal-fondo" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="modal-fusion-titulo">
+    <div class="modal-caja vidrio" style="max-width: 620px; width: 92%; max-height: 85vh; display: flex; flex-direction: column;">
+      <header class="modal-cabecera" style="display: flex; align-items: center; justify-content: space-between; padding: 1rem 1.25rem; border-bottom: 1px solid var(--border-subtle);">
+        <h3 id="modal-fusion-titulo" style="margin: 0; font-size: 1.05rem; display: flex; align-items: center; gap: 0.5rem; color: var(--text-heading);">
+          <span>🔗</span> Fusión de Documentos — Orden de Secuencia
+        </h3>
+        <button id="btn-cerrar-modal-fusion" class="btn btn-fantasma chico" title="Cerrar modal">✕</button>
+      </header>
+
+      <div class="modal-cuerpo" style="padding: 1.25rem; overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 1rem;">
+        <p style="margin: 0; font-size: 0.88rem; color: var(--text-dimmed);">
+          Reordena los documentos para definir el orden de compilación final. Usa los botones <strong>▲ Subir</strong> y <strong>▼ Bajar</strong> para ajustar la secuencia.
+        </p>
+
+        <div id="lista-orden-fusion" class="lista-orden-fusion" style="display: flex; flex-direction: column; gap: 0.5rem;">
+          <!-- Nodos de documentos generados dinámicamente -->
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 0.4rem; margin-top: 0.5rem;">
+          <label for="input-nombre-fusion" style="font-size: 0.82rem; font-weight: 600; color: var(--text-muted);">Nombre del documento fusionado:</label>
+          <input id="input-nombre-fusion" type="text" class="entrada-busqueda" style="width: 100%; box-sizing: border-box;" placeholder="Fusión: Documento 1 + N más">
+        </div>
+
+        <label class="check-capitulos-label" style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.88rem; cursor: pointer; margin-top: 0.25rem;">
+          <input type="checkbox" id="chk-modal-fusion-capitulos" checked>
+          <span><strong>Cada documento es un capítulo distinto</strong> (inicia en hoja nueva y numera 1., 2., 3...)</span>
+        </label>
+      </div>
+
+      <footer class="modal-pie" style="display: flex; justify-content: flex-end; gap: 0.6rem; padding: 0.9rem 1.25rem; border-top: 1px solid var(--border-subtle);">
+        <button id="btn-cancelar-modal-fusion" class="btn btn-fantasma chico">Cancelar</button>
+        <button id="btn-confirmar-fusion" class="btn btn-primario chico">🔗 Confirmar Fusión</button>
+      </footer>
+    </div>
+  </div>
+
+  <!-- ══════════════ PANEL DE IA (derecha, colapsable) ══════════════ -->
+  <aside id="panel-ia" class="panel-ia" hidden>
+    <header class="ia-cabecera">
+      <h3>✨ Preguntar IA</h3>
+      <button id="btn-cerrar-ia" class="btn btn-fantasma chico" title="Cerrar panel">✕</button>
+    </header>
+    <div id="ia-mensajes" class="ia-mensajes" aria-live="polite">
+      <div class="ia-mensaje ia-ayuda">
+        Pregunta sobre el documento abierto. Con <strong>Ollama local</strong> la respuesta
+        se genera en tu equipo, sin salir a internet.
+      </div>
+    </div>
+    <div class="ia-composer">
+      <label class="casilla">
+        <input id="ia-usar-contexto" type="checkbox" checked>
+        Usar documento abierto como contexto
+      </label>
+      <div class="ia-fila">
+        <textarea id="ia-entrada" rows="2" placeholder="Ej.: ¿Dónde está el cálculo de la demanda máxima?"></textarea>
+        <button id="btn-enviar-ia" class="btn btn-primario" title="Enviar pregunta">➤</button>
+      </div>
+      <span id="ia-proveedor-chip" class="chip">ollama-local</span>
+    </div>
+  </aside>
+
+</div>
+
+<script src="/static/js/registro_temas.js?v={{ version }}" defer></script>
+<script src="/static/js/editor_docs.js?v={{ version }}" defer></script>
+<script src="/static/js/visor_pdf.js?v={{ version }}" defer></script>
+<script src="/static/js/office.js?v={{ version }}" defer></script>
+<script src="/static/js/plantillas.js?v={{ version }}" defer></script>
+</body>
+</html>

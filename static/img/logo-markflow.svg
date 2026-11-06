@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 64">
+  <defs>
+    <linearGradient id="mfl" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#3b82f6"/>
+      <stop offset="1" stop-color="#8b5cf6"/>
+    </linearGradient>
+  </defs>
+  <!-- Isotipo -->
+  <rect x="2" y="8" width="48" height="48" rx="14" fill="url(#mfl)"/>
+  <path d="M12 42 V22.5 l7.5 9.5 7.5-9.5 V42"
+        fill="none" stroke="#ffffff" stroke-width="4.5"
+        stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M30 42 c2.8-3.2 6 2.4 8.8-0.8"
+        fill="none" stroke="#ffffff" stroke-width="3.2"
+        stroke-linecap="round" opacity="0.85"/>
+  <!-- Logotipo tipográfico -->
+  <text x="62" y="40"
+        font-family="Segoe UI, system-ui, sans-serif"
+        font-size="26" font-weight="600" fill="currentColor">
+    Mark<tspan fill="url(#mfl)" font-weight="700">Flow</tspan><tspan fill="url(#mfl)" font-weight="300" dx="2"> AI</tspan>
+  </text>
+</svg>

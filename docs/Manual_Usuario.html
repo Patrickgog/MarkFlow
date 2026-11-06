@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Manual de Usuario — MarkFlow Office v1.2.0</title>
+<style>
+  /* ═══════════ Tokens (consistente con la suite) ═══════════ */
+  :root{
+    --bg:#101114; --bg-card:#1b1c24; --bg-elev:#23242e; --bg-input:#121319;
+    --text:#f3f4f8; --text-2:#d6d8e0; --text-dim:#a3a8b8; --text-mute:#6f7487;
+    --borde:#34364a; --borde-suave:rgba(255,255,255,.07);
+    --acento:#6366f1; --acento-2:#818cf8; --violeta:#8b5cf6;
+    --ok:#38d9a9; --warn:#fcc419; --peligro:#ff6b6b;
+    --grad:linear-gradient(120deg,#6366f1,#8b5cf6);
+    --radio:12px; --mono:"Cascadia Code",Consolas,"Courier New",monospace;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0; background:var(--bg); color:var(--text-2);
+    font:15px/1.65 "Segoe UI",system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;
+  }
+  h1,h2,h3,h4{color:var(--text); line-height:1.25; margin:0 0 .5em}
+  code,kbd{font-family:var(--mono); font-size:.92em}
+  a{color:var(--acento-2); text-decoration:none}
+  a:hover{text-decoration:underline}
+
+  /* ═══════════ Cabecera ═══════════ */
+  .topbar{
+    position:sticky; top:0; z-index:10; display:flex; align-items:center; gap:14px;
+    padding:12px 22px; background:rgba(16,17,20,.9); backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--borde-suave);
+  }
+  .logo{
+    width:34px; height:34px; border-radius:10px; display:grid; place-items:center;
+    background:var(--grad); color:#fff; font-weight:800; font-size:1.05rem; flex:none;
+  }
+  .topbar h1{font-size:1.06rem; margin:0}
+  .topbar h1 small{display:block; font-weight:400; color:var(--text-dim); font-size:.78rem}
+  .chip{
+    padding:3px 10px; border-radius:999px; border:1px solid var(--borde);
+    color:var(--acento-2); font-size:.75rem; font-weight:600; background:rgba(99,102,241,.1);
+  }
+  .topbar .resorte{flex:1}
+
+  /* ═══════════ Layout: pestañas verticales + contenido ═══════════ */
+  .cuerpo{display:flex; min-height:calc(100vh - 59px)}
+  .indice{
+    width:264px; flex:none; border-right:1px solid var(--borde-suave);
+    padding:18px 12px 26px; position:sticky; top:59px; height:calc(100vh - 59px);
+    overflow:auto; background:rgba(16,17,20,.55);
+  }
+  .indice .filtro{
+    width:100%; margin:0 0 12px; padding:9px 12px; border-radius:10px;
+    border:1px solid var(--borde); background:var(--bg-input); color:var(--text);
+    font-size:.88rem; outline:none;
+  }
+  .indice .filtro:focus{border-color:var(--acento)}
+  .indice button{
+    display:flex; width:100%; align-items:center; gap:10px; text-align:left;
+    padding:10px 12px; margin:0 0 4px; border:0; border-radius:10px; cursor:pointer;
+    background:transparent; color:var(--text-dim); font-size:.92rem; transition:.15s;
+  }
+  .indice button:hover{background:rgba(255,255,255,.05); color:var(--text)}
+  .indice button .num{
+    flex:none; width:24px; height:24px; border-radius:8px; display:grid; place-items:center;
+    background:var(--bg-elev); border:1px solid var(--borde-suave); font-size:.72rem; font-weight:700;
+  }
+  .indice button.activo{
+    background:rgba(99,102,241,.14); color:var(--text); font-weight:600;
+    box-shadow:inset 3px 0 0 var(--acento);
+  }
+  .indice button.activo .num{background:var(--grad); border-color:transparent; color:#fff}
+  .indice .oculto{display:none}
+  .indice .pie-indice{margin-top:14px; padding:10px 12px; font-size:.75rem; color:var(--text-mute); border-top:1px solid var(--borde-suave)}
+
+  main{flex:1; padding:30px 44px 70px; max-width:1040px}
+  article{display:none; animation:aparece .25s ease}
+  article.activo{display:block}
+  @keyframes aparece{from{opacity:0; transform:translateY(6px)} to{opacity:1; transform:none}}
+
+  .cap-cab{display:flex; align-items:center; gap:14px; margin-bottom:20px}
+  .cap-cab .num{
+    width:46px; height:46px; border-radius:14px; display:grid; place-items:center;
+    background:var(--grad); color:#fff; font-weight:800; font-size:1.2rem; flex:none;
+  }
+  .cap-cab h2{margin:0; font-size:1.5rem}
+  .cap-cab .sub{color:var(--text-dim); font-size:.9rem}
+
+  h3{font-size:1.12rem; margin:26px 0 10px; padding-left:11px; border-left:3px solid var(--acento)}
+  h4{font-size:.98rem; margin:18px 0 8px}
+  p{margin:.45em 0 .9em}
+  ul,ol{margin:.4em 0 1em; padding-left:1.35em}
+  li{margin:.25em 0}
+  li::marker{color:var(--acento-2)}
+
+  .tarjeta{
+    background:var(--bg-card); border:1px solid var(--borde-suave); border-radius:var(--radio);
+    padding:16px 20px; margin:14px 0;
+  }
+  .grid2{display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:14px}
+  .nota{
+    display:flex; gap:10px; padding:12px 16px; border-radius:10px; margin:12px 0;
+    font-size:.92rem; border:1px solid;
+  }
+  .nota.tip{background:rgba(56,217,169,.08); border-color:rgba(56,217,169,.35); color:#b9f0e0}
+  .nota.aviso{background:rgba(252,196,25,.08); border-color:rgba(252,196,25,.35); color:#ffe9a8}
+  .nota.info{background:rgba(99,102,241,.08); border-color:rgba(99,102,241,.35); color:#cdd0f5}
+
+  kbd{
+    display:inline-block; padding:2px 7px; border-radius:6px; border:1px solid var(--borde);
+    border-bottom-width:2px; background:var(--bg-elev); color:var(--text); font-size:.8rem; white-space:nowrap;
+  }
+  code{background:rgba(255,255,255,.06); padding:1px 6px; border-radius:6px; color:#e6d9ff; word-break:break-word}
+  pre{
+    background:var(--bg-input); border:1px solid var(--borde-suave); border-radius:10px;
+    padding:14px 16px; overflow:auto; font-size:.85rem; line-height:1.55;
+  }
+  pre code{background:none; padding:0}
+
+  table{width:100%; border-collapse:collapse; margin:12px 0; font-size:.9rem}
+  th,td{border:1px solid var(--borde); padding:9px 12px; text-align:left; vertical-align:top}
+  th{background:rgba(99,102,241,.12); color:var(--text); font-weight:700}
+  tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+
+  .nav-pie{display:flex; justify-content:space-between; gap:10px; margin-top:34px}
+  .nav-pie button{
+    padding:10px 18px; border-radius:10px; border:1px solid var(--borde); cursor:pointer;
+    background:var(--bg-card); color:var(--text-2); font-size:.9rem; transition:.15s;
+  }
+  .nav-pie button:hover{border-color:var(--acento); color:#fff}
+  .nav-pie button[disabled]{opacity:.35; cursor:default}
+
+  .pie{
+    padding:18px 22px; border-top:1px solid var(--borde-suave); color:var(--text-mute);
+    font-size:.8rem; text-align:center;
+  }
+  .riel{display:inline-flex; gap:6px; flex-wrap:wrap; margin:6px 0 0}
+  .riel span{
+    padding:5px 12px; border-radius:8px; border:1px solid var(--borde);
+    background:var(--bg-card); font-size:.8rem; color:var(--text-2);
+  }
+  .riel span i{font-style:normal; margin-right:5px}
+  @media (max-width:860px){
+    .indice{width:74px; padding:14px 8px}
+    .indice button span.etq, .indice .pie-indice, .indice .filtro{display:none}
+    .indice button{justify-content:center}
+    .indice button .num{width:30px; height:30px; font-size:.85rem}
+    main{padding:22px 18px 60px}
+  }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="logo">M</div>
+  <h1>Manual de Usuario — MarkFlow Office
+    <small>Motor MarkFlow + núcleo GenOffice · suite de documentos con IA</small></h1>
+  <span class="resorte"></span>
+  <span class="chip">v1.2.0 · 100 % offline</span>
+</header>
+
+<div class="cuerpo">
+  <!-- ═══════════ Pestañas verticales (índice de capítulos) ═══════════ -->
+  <nav class="indice" aria-label="Capítulos del manual">
+    <input class="filtro" type="search" placeholder="Filtrar capítulos…" aria-label="Filtrar capítulos">
+    <button data-cap="1"  class="activo"><span class="num">1</span><span class="etq">🏠 Bienvenida</span></button>
+    <button data-cap="2"><span class="num">2</span><span class="etq">🚀 Inicio rápido</span></button>
+    <button data-cap="3"><span class="num">3</span><span class="etq">📄 Documentos</span></button>
+    <button data-cap="4"><span class="num">4</span><span class="etq">📝 Editor Docs</span></button>
+    <button data-cap="5"><span class="num">5</span><span class="etq">📊 Tablas GFM</span></button>
+    <button data-cap="6"><span class="num">6</span><span class="etq">⌨️ Atajos de teclado</span></button>
+    <button data-cap="7"><span class="num">7</span><span class="etq">🧠 IA (panel y config)</span></button>
+    <button data-cap="8"><span class="num">8</span><span class="etq">📤 Exportar a Word</span></button>
+    <button data-cap="9"><span class="num">9</span><span class="etq">⚡ Motor MarkFlow clásico</span></button>
+    <button data-cap="10"><span class="num">10</span><span class="etq">🛠️ Solución de problemas</span></button>
+    <button data-cap="11"><span class="num">11</span><span class="etq">ℹ️ Acerca de y licencias</span></button>
+    <div class="pie-indice">Manual correspondiente a la versión <strong>v1.2.0</strong> de la aplicación. La app siempre muestra su versión real en el riel y el pie de página.</div>
+  </nav>
+
+  <main>
+  <!-- ═══════════ Cap. 1 — Bienvenida ═══════════ -->
+  <article id="cap-1" class="activo">
+    <div class="cap-cab"><div class="num">1</div><div><h2>Bienvenida</h2><div class="sub">Qué es MarkFlow Office y cómo está construida la suite</div></div></div>
+
+    <p><strong>MarkFlow Office</strong> es una suite de documentos con IA que funciona <strong>100&nbsp;% local</strong>
+    en tu equipo: sin nube, sin cuentas y sin enviar contenido a terceros. Combina dos motores:</p>
+    <div class="grid2">
+      <div class="tarjeta"><h4>⚙️ Motor MarkFlow</h4><p>Conversión y calidad editorial: ingesta (Markdown, Word, PDF), saneamiento del texto, auditoría QA, fórmulas KaTeX, diagramas Mermaid y entregables MD / HTML / DOCX / PDF con temas profesionales.</p></div>
+      <div class="tarjeta"><h4>🧬 Núcleo GenOffice</h4><p>Generación DOCX de nivel Word: exportación directa o <strong>byte-preserving</strong> sobre plantillas (conserva estilos, cabeceras y numeración heredados), tablas y fórmulas OMML.</p></div>
+    </div>
+
+    <h3>La interfaz en 30 segundos</h3>
+    <p>La shell tiene tres zonas: el <strong>riel de apps</strong> (columna izquierda con botones M / W / P),
+    el <strong>panel de la app activa</strong> (centro) y el <strong>panel IA</strong> colapsable (botón ✨ IA arriba a la derecha).</p>
+    <div class="riel">
+      <span><i>📄</i>Documentos</span><span><i>📝</i>Docs</span><span><i>⚡</i>MarkFlow</span>
+      <span><i>W</i>Word</span><span><i>P</i>PDF (en desarrollo)</span><span><i>⚙️</i>Config</span>
+    </div>
+    <p>El pie de página muestra siempre la versión activa leída del código (<code>app/version.py</code> — nunca está escrita a mano en la interfaz).</p>
+
+    <h3>Principios del producto</h3>
+    <ul>
+      <li><strong>Offline-first real:</strong> ProseMirror, KaTeX, Mermaid y las fuentes están vendorizadas en el proyecto; nada se descarga al usar la app.</li>
+      <li><strong>El texto Markdown es la fuente de la verdad:</strong> el editor visual, la previsualización, la IA y las exportaciones leen siempre el mismo documento.</li>
+      <li><strong>Higiene:</strong> los entregables van a carpetas de sesión en <code>salidas/</code> que se purgan al arrancar y apagar el servidor.</li>
+    </ul>
+
+    <div class="nota info">ℹ️ Este manual describe la versión <strong>v1.2.0</strong> (editor Docs con tablas GFM nativas).
+    La app <strong>PDF</strong> del riel aparece como placeholder y se activa en la siguiente iteración (pdf.js local).</div>
+  </article>
+
+  <!-- ═══════════ Cap. 2 — Inicio rápido ═══════════ -->
+  <article id="cap-2">
+    <div class="cap-cab"><div class="num">2</div><div><h2>Inicio rápido</h2><div class="sub">De cero a tu primer documento exportado en 5 minutos</div></div></div>
+
+    <h3>Requisitos</h3>
+    <table>
+      <tr><th>Requisito</th><th>Para qué</th><th>Obligatorio</th></tr>
+      <tr><td>Python 3.12+ con el entorno <code>.venv</code> del proyecto</td><td>Servidor de la suite (FastAPI + Uvicorn)</td><td>Sí</td></tr>
+      <tr><td>Pandoc</td><td>Exportación .docx del motor clásico y generación de índices</td><td>Solo para DOCX clásico</td></tr>
+      <tr><td>Ollama (opcional)</td><td>Respuestas IA 100 % locales (<code>http://localhost:11434</code>)</td><td>No</td></tr>
+    </table>
+
+    <h3>Lanzar la suite</h3>
+    <p>Doble clic en <code>lanza_MarkFlowOffice.bat</code> (o ejecútalo en consola). El script sube el
+    servidor en <code>http://127.0.0.1:8320</code> y abre el navegador. La barra de título muestra la versión:</p>
+    <pre><code>MarkFlow Office v1.2.0 — Suite de documentos con IA (offline-first)</code></pre>
+
+    <h3>Tu primera vuelta completa</h3>
+    <ol>
+      <li><strong>Crear documento:</strong> riel → 📄 Documentos → <kbd>＋ Nuevo</kbd>, asígnale nombre (p.&nbsp;ej. <em>Informe de mezcla</em>) y confirma.</li>
+      <li><strong>Abrir y editar:</strong> <kbd>Abrir</kbd> en la tarjeta. Se abre el riel → 📝 Docs con el editor visual: escribe un título con <kbd>H1</kbd>, un párrafo con <kbd>B</kbd>/<kbd>I</kbd> y una tabla con <kbd>⊞</kbd>.</li>
+      <li><strong>Previsualizar:</strong> la columna derecha renderiza el documento en vivo (títulos, fórmulas KaTeX con <code>$...$</code>, diagramas Mermaid con bloques <code>```mermaid</code>).</li>
+      <li><strong>Guardar:</strong> botón 💾 Guardar (o <kbd>Ctrl+S</kbd> desde el editor). El badge cambia a <em>guardado</em>.</li>
+      <li><strong>Exportar Word:</strong> riel → W Word → <kbd>📄 Exportar .docx</kbd> (con plantilla byte-preserving activada por defecto).</li>
+    </ol>
+
+    <div class="nota tip">💡 <span>Enlaces directos: <code>/?app=docs</code> abre el editor y <code>/?app=docs&doc=Nombre</code> abre además el documento. Sirven para marcadores o accesos del equipo de trabajo.</span></div>
+  </article>
+
+  <!-- ═══════════ Cap. 3 — Documentos ═══════════ -->
+  <article id="cap-3">
+    <div class="cap-cab"><div class="num">3</div><div><h2>Documentos</h2><div class="sub">Almacén local con búsqueda de texto completo</div></div></div>
+
+    <p>La app <strong>Documentos</strong> gestiona el repositorio de trabajo en <code>storage/documentos/</code>:
+    cada documento es un archivo <code>.md</code> plano, portátil y versionable con Git si lo deseas.</p>
+
+    <h3>Crear y abrir</h3>
+    <ul>
+      <li><kbd>＋ Nuevo</kbd> → pide el nombre y crea el documento con contenido inicial de bienvenida.</li>
+      <li><kbd>Abrir</kbd> en la tarjeta → carga el documento en el editor Docs.</li>
+      <li><kbd>🗑</kbd> → elimina el documento (acción definitiva; pide confirmación).</li>
+      <li>La tarjeta muestra <strong>tamaño</strong> y <strong>última modificación</strong>.</li>
+    </ul>
+
+    <h3>Búsqueda FTS5</h3>
+    <p>El buscador (<code>🔍 Buscar en todos los documentos…</code>) usa <strong>SQLite FTS5</strong>: busca en
+    el contenido completo de todos los documentos, no solo en el título. Los resultados aparecen en un
+    panel superior con el fragmento encontrado y el resaltado del término; haz clic en un resultado para
+    abrir ese documento.</p>
+    <div class="nota tip">💡 <span>Búsqueda útil en ingeniería: <code>demanda máxima</code>, <code>Q diseño</code>, <code>Imhoff</code>, <code>caudal</code>… El índice se actualiza al guardar.</span></div>
+
+    <h3>¿Dónde están mis archivos?</h3>
+    <table>
+      <tr><th>Ruta</th><th>Contenido</th></tr>
+      <tr><td><code>storage/documentos/</code></td><td>Documentos .md del usuario (persistentes)</td></tr>
+      <tr><td><code>salidas/&lt;sesión&gt;/</code></td><td>Entregables generados (md/html/docx/pdf) — sesión efímera</td></tr>
+    </table>
+  </article>
+
+  <!-- ═══════════ Cap. 4 — Editor Docs ═══════════ -->
+  <article id="cap-4">
+    <div class="cap-cab"><div class="num">4</div><div><h2>Editor Docs</h2><div class="sub">Edición visual ProseMirror sincronizada con el Markdown</div></div></div>
+
+    <p><strong>Docs</strong> es un editor WYSIWYG sobre el documento abierto. A la izquierda editas en visual;
+    a la derecha ves la <strong>previsualización en vivo</strong> con KaTeX y Mermaid. Debajo del capó hay un
+    textarea oculto (<code>#editor-markdown</code>) que es la <strong>fuente de la verdad</strong>: guardar,
+    exportar e IA leen de él.</p>
+
+    <h3>Cabecera del panel</h3>
+    <table>
+      <tr><th>Control</th><th>Función</th></tr>
+      <tr><td>Badge <em>cargado / guardado</em></td><td>Estado de sincronización del documento con el almacén</td></tr>
+      <tr><td>💾 <strong>Guardar</strong></td><td>Persiste el Markdown en <code>storage/documentos/</code></td></tr>
+      <tr><td>📄 <strong>Exportar Word</strong></td><td>Salta a la app Word con este documento como origen</td></tr>
+      <tr><td>← Documentos</td><td>Vuelve a la biblioteca</td></tr>
+    </table>
+
+    <h3>Barra de herramientas</h3>
+    <table>
+      <tr><th>Grupo</th><th>Botones</th><th>Qué hace</th></tr>
+      <tr><td>Marcas</td><td><strong>B</strong> · <em>I</em> · <s>S</s> · &lt;&gt;</td><td>Negrita, cursiva, tachado y código en línea</td></tr>
+      <tr><td>Bloques</td><td>¶ · H1 · H2 · H3</td><td>Párrafo y títulos (H4–H6 vía Markdown en modo fuente)</td></tr>
+      <tr><td>Listas</td><td>•≡ · 1. · ❝ · { }</td><td>Viñetas, numerada, cita y bloque de código con lenguaje</td></tr>
+      <tr><td>Objetos</td><td>🔗 · 🖼 · —</td><td>Enlace (Ctrl+K), imagen y separador horizontal</td></tr>
+      <tr><td>Tablas</td><td>⊞ · ⇧+ · ⇧− · ↔+ · ↔− · 🗑</td><td>Insertar tabla y operar filas/columnas — ver capítulo 5</td></tr>
+      <tr><td>Historial</td><td>↩ · ↪</td><td>Deshacer / rehacer</td></tr>
+      <tr><td>Derecha</td><td>stats · 🧹 Sanear · &lt;/&gt; Fuente</td><td>Estadísticas en vivo, saneamiento del motor, modo Markdown crudo</td></tr>
+    </table>
+
+    <h3>Estadísticas en vivo</h3>
+    <p>Junto a los botones finales la barra muestra <em>«N palabras · M caracteres»</em> del documento completo; se actualiza con cada tecla.</p>
+
+    <h3>Modo fuente &lt;/&gt;</h3>
+    <ul>
+      <li>Muestra el <strong>Markdown crudo</strong> en su lugar (útil para pegar texto externo, editar HTML de imagen, H4-H6 o alineación de tablas con <code>:---:</code>).</li>
+      <li>Al volver al modo visual el texto se re-parsea al editor. Si ProseMirror no pudiera cargar (navegador antiguo), Docs <strong>cae automáticamente</strong> al modo fuente y avisa.</li>
+    </ul>
+
+    <h3>🧹 Sanear</h3>
+    <p>Ejecuta el pipeline del motor sobre el texto pegado: corrige listas pisadas, localiza fórmulas
+    (las contabiliza en un badge de <em>avisos</em>) y reduce imágenes Base64. Úsalo tras pegar contenido
+    de Word, chats o PDFs para que el editor lo estructuré correctamente.</p>
+
+    <h3>Previsualización en vivo</h3>
+    <ul>
+      <li><strong>Fórmulas:</strong> <code>$E = mc^2$</code> en línea y <code>$$...$$</code> en bloque (KaTeX local).</li>
+      <li><strong>Diagramas:</strong> bloques <code>```mermaid</code> se renderizan como diagrama (Mermaid local).</li>
+      <li><strong>Temas:</strong> el selector de temas del motor también aplica a la vista.</li>
+    </ul>
+  </article>
+
+  <!-- ═══════════ Cap. 5 — Tablas GFM ═══════════ -->
+  <article id="cap-5">
+    <div class="cap-cab"><div class="num">5</div><div><h2>Tablas GFM</h2><div class="sub">Novedad v1.2.0 — tablas nativas que sobreviven al round-trip y llegan a Word</div></div></div>
+
+    <p>Desde v1.2.0 las tablas son <strong>nodos nativos</strong> del editor (no bloques de código): se ven como
+    tablas, se editan con la barra y se exportan formateadas al .docx mediante el núcleo GenOffice.</p>
+
+    <h3>Insertar una tabla</h3>
+    <ol>
+      <li>Pulsa <kbd>⊞</kbd> (o pon el cursor donde quieras la tabla y haz clic).</li>
+      <li>Responde al diálogo con el tamaño: <code>3x3</code>, <code>5x2</code>… (formato <em>filas&nbsp;x&nbsp;columnas</em>; límite 12&nbsp;filas × 8&nbsp;columnas).</li>
+      <li>La tabla se inserta con la <strong>primera fila como cabecera</strong> y el cursor dentro de la primera celda.</li>
+    </ol>
+
+    <h3>Operar filas y columnas</h3>
+    <table>
+      <tr><th>Botón</th><th>Acción</th><th>Detalle</th></tr>
+      <tr><td><kbd>⇧+</kbd></td><td>Fila debajo</td><td>Se inserta bajo la fila actual, conservando el tipo de celdas</td></tr>
+      <tr><td><kbd>⇧−</kbd></td><td>Eliminar fila</td><td>Si borras la cabecera, la fila siguiente se convierte en la nueva cabecera (GFM exige cabecera)</td></tr>
+      <tr><td><kbd>↔+</kbd></td><td>Columna a la derecha</td><td>Añade una celda a cada fila en esa posición</td></tr>
+      <tr><td><kbd>↔−</kbd></td><td>Eliminar columna</td><td>Si queda una sola columna, se elimina la tabla completa</td></tr>
+      <tr><td><kbd>🗑</kbd></td><td>Eliminar tabla</td><td>Quita la tabla entera del documento</td></tr>
+    </table>
+    <div class="nota tip">💡 <span><kbd>Tab</kbd> salta a la celda siguiente y <kbd>Shift+Tab</kbd> a la anterior. <kbd>Tab</kbd> en la <strong>última celda</strong> crea automáticamente una fila nueva al final — así llenas tablas largas sin tocar la barra.</span></div>
+
+    <h3>Contenido de celdas</h3>
+    <ul>
+      <li>Se admiten marcas: <code>**negrita**</code>, <code>*cursiva*</code>, <code>`código`</code>.</li>
+      <li>Un <strong>pipe literal</strong> dentro de una celda se escribe escapado <code>\|</code> (así el separador de columnas no se rompe).</li>
+      <li>El contenido multilínea de una celda se aplana a espacios al serializar (una fila GFM es una línea).</li>
+    </ul>
+
+    <h3>Alineación de columnas</h3>
+    <p>La alineación se define en el separador GFM (modo fuente <code>&lt;/&gt;</code>):</p>
+    <pre><code>| Tramo | Q (l/s) | Diámetro |
+|:-:|--:|---|
+| AB | 25,4 | DN 100 |</code></pre>
+    <table>
+      <tr><th>Separador</th><th>Significado</th></tr>
+      <tr><td><code>:---:</code></td><td>Centrado (números)</td></tr>
+      <tr><td><code>---:</code></td><td>Alineado a la derecha (cifras)</td></tr>
+      <tr><td><code>:---</code> / <code>---</code></td><td>Alineado a la izquierda</td></tr>
+    </table>
+    <p>Al re-parsear, la alineación se conserva: viaja dentro del documento (idempotencia <code>md → doc → md → doc</code>) y llega al HTML y al Word.</p>
+
+    <div class="nota aviso">⚠️ <span>La primera fila de toda tabla es siempre cabecera: el formato GFM no representa tablas sin cabecera. Limitaciones conocidas de v1.2.0: sin redimensionado de columnas ni combinación de celdas (colspan/rowspan) en la interfaz.</span></div>
+  </article>
+
+  <!-- ═══════════ Cap. 6 — Atajos ═══════════ -->
+  <article id="cap-6">
+    <div class="cap-cab"><div class="num">6</div><div><h2>Atajos de teclado</h2><div class="sub">Referencia completa del editor Docs</div></div></div>
+
+    <h3>Formato</h3>
+    <table>
+      <tr><th>Atajo</th><th>Acción</th></tr>
+      <tr><td><kbd>Ctrl+B</kbd></td><td>Negrita</td></tr>
+      <tr><td><kbd>Ctrl+I</kbd></td><td>Cursiva</td></tr>
+      <tr><td><kbd>Ctrl+`</kbd></td><td>Código en línea</td></tr>
+      <tr><td><kbd>Ctrl+K</kbd></td><td>Enlace (URL con prompt; añade el texto si no hay selección)</td></tr>
+    </table>
+
+    <h3>Bloques</h3>
+    <table>
+      <tr><th>Atajo</th><th>Acción</th></tr>
+      <tr><td><kbd>Shift+Ctrl+0</kbd></td><td>Párrafo</td></tr>
+      <tr><td><kbd>Shift+Ctrl+1</kbd> … <kbd>3</kbd></td><td>Título 1 … 3</td></tr>
+      <tr><td><kbd>Shift+Ctrl+8</kbd></td><td>Lista de viñetas</td></tr>
+      <tr><td><kbd>Shift+Ctrl+9</kbd></td><td>Lista numerada</td></tr>
+      <tr><td><kbd>Shift+Ctrl+\</kbd></td><td>Bloque de código</td></tr>
+      <tr><td><kbd>Ctrl+&gt;</kbd></td><td>Cita</td></tr>
+      <tr><td><kbd>Ctrl+[</kbd> / <kbd>Ctrl+]</kbd></td><td>Desindentar / indentar ítem de lista</td></tr>
+      <tr><td><kbd>Shift+Enter</kbd></td><td>Salto de línea duro (<code>\</code> + nueva línea)</td></tr>
+    </table>
+
+    <h3>Tablas</h3>
+    <table>
+      <tr><th>Atajo</th><th>Acción</th></tr>
+      <tr><td><kbd>Tab</kbd></td><td>Celda siguiente · en la última celda crea fila nueva</td></tr>
+      <tr><td><kbd>Shift+Tab</kbd></td><td>Celda anterior</td></tr>
+    </table>
+
+    <h3>Historial y sistema</h3>
+    <table>
+      <tr><th>Atajo</th><th>Acción</th></tr>
+      <tr><td><kbd>Ctrl+Z</kbd> / <kbd>Ctrl+Y</kbd></td><td>Deshacer / rehacer</td></tr>
+      <tr><td><kbd>Ctrl+S</kbd></td><td>Guardar documento</td></tr>
+    </table>
+
+    <h3>Reglas de entrada (autocompletado al escribir)</h3>
+    <ul>
+      <li><code>``` </code> + espacio → bloque de código</li>
+      <li><code>#</code>, <code>##</code>, <code>###</code> + espacio → títulos</li>
+      <li><code>&gt;</code> + espacio → cita</li>
+      <li><code>-</code> o <code>*</code> + espacio → viñeta · <code>1.</code> + espacio → lista numerada</li>
+      <li><code>---</code> → separador horizontal</li>
+    </ul>
+  </article>
+
+  <!-- ═══════════ Cap. 7 — IA ═══════════ -->
+  <article id="cap-7">
+    <div class="cap-cab"><div class="num">7</div><div><h2>IA — panel y configuración</h2><div class="sub">«Preguntar al documento» con Ollama local o tu propia clave</div></div></div>
+
+    <h3>Panel ✨ IA</h3>
+    <p>El botón <strong>✨ IA</strong> (arriba a la derecha) abre un panel lateral de chat sobre el
+    <strong>documento abierto</strong>:</p>
+    <ul>
+      <li><strong>Usar documento abierto como contexto</strong> (casilla activada): la pregunta se envía junto con el Markdown del documento → respuestas sobre <em>tu</em> contenido.</li>
+      <li>El chip inferior (<code>ollama-local</code>, <code>openai</code>…) indica el proveedor activo.</li>
+      <li>El historial de la conversación queda en el panel; ciérralo con ✕.</li>
+    </ul>
+
+    <h3>Configuración (riel → ⚙️ Config)</h3>
+    <table>
+      <tr><th>Campo</th><th>Valor típico</th><th>Notas</th></tr>
+      <tr><td>Proveedor</td><td><code>ollama</code> (local) · <code>openai</code> · <code>anthropic</code> · <code>gemini</code></td><td>El primero funciona sin internet</td></tr>
+      <tr><td>Base URL (Ollama)</td><td><code>http://localhost:11434</code></td><td>Endpoint nativo <code>/api/generate</code></td></tr>
+      <tr><td>Modelo local</td><td><code>llama3</code>, <code>qwen2.5</code>…</td><td>Debe estar descargado en Ollama</td></tr>
+      <tr><td>Modelo externo</td><td><code>gpt-4o</code>, <code>claude-3-5-sonnet</code>…</td><td>Solo si eliges proveedor externo</td></tr>
+      <tr><td>Clave API</td><td><code>sk-…</code></td><td>Se guarda enmascarada; la app nunca la re-muestra completa</td></tr>
+    </table>
+    <div class="nota aviso">⚠️ <span>Con proveedores externos (OpenAI/Anthropic/Gemini) el contenido del documento sale de tu equipo. Para trabajo confidencial usa <strong>Ollama local</strong>: la suite queda 100&nbsp;% offline.</span></div>
+  </article>
+
+  <!-- ═══════════ Cap. 8 — Word ═══════════ -->
+  <article id="cap-8">
+    <div class="cap-cab"><div class="num">8</div><div><h2>Exportar a Word (.docx)</h2><div class="sub">Núcleo GenOffice — directo o byte-preserving con plantilla</div></div></div>
+
+    <p>La app <strong>Word</strong> convierte el documento en un <code>.docx</code> real de nivel Word, con títulos,
+    tablas y fórmulas. Controles del panel:</p>
+    <table>
+      <tr><th>Control</th><th>Función</th></tr>
+      <tr><td>Nombre del archivo</td><td>Nombre del .docx resultante</td></tr>
+      <tr><td>Origen del contenido</td><td><em>Documento abierto en Docs</em> o texto pegado abajo</td></tr>
+      <tr><td>Usar plantilla base (✔ por defecto)</td><td><strong>Byte-preserving:</strong> el núcleo inyecta el contenido sobre la plantilla conservando estilos, cabeceras, pies y numeración heredados</td></tr>
+    </table>
+
+    <h3>Qué llega al .docx</h3>
+    <ul>
+      <li>Títulos con estilos reales de Word (navegables en el panel de esquema).</li>
+      <li><strong>Tablas GFM formateadas</strong> (v1.2.0): cabecera, bordes y contenido de celdas con sus marcas.</li>
+      <li>Fórmulas convertidas a <strong>OMML</strong> (editor de ecuaciones nativo de Word) cuando el motor las detecta.</li>
+      <li>Listas, citas, bloques de código, enlaces e imágenes.</li>
+    </ul>
+
+    <div class="nota info">ℹ️ El .docx también queda guardado en <code>storage/salidas/</code>; desde el motor clásico los entregables van a <code>salidas/&lt;sesión&gt;/</code> con enlace de descarga y visor flotante.</div>
+  </article>
+
+  <!-- ═══════════ Cap. 9 — Clásico ═══════════ -->
+  <article id="cap-9">
+    <div class="cap-cab"><div class="num">9</div><div><h2>Motor MarkFlow clásico</h2><div class="sub">Ingesta → QA → salidas HTML/DOCX/PDF con configuración editorial</div></div></div>
+
+    <p>La app <strong>MarkFlow</strong> embebe el motor clásico completo (pestaña original del proyecto) para
+    procesos por lotes y control editorial fino. Pipeline: <strong>ingesta → saneamiento → QA → entregables</strong>.</p>
+
+    <h3>Ingesta</h3>
+    <ul>
+      <li>Formatos aceptados: <code>.md</code>, <code>.txt</code>, <code>.docx</code> y <code>.pdf</code> (el binario se registra y pega su texto extraído en el editor).</li>
+      <li>El saneamiento corrige listas pisadas, fórmulas y ruido de copiado.</li>
+    </ul>
+
+    <h3>QA (auditoría)</h3>
+    <p>Antes de exportar, el motor audita el documento: paridad de fórmulas entre Markdown y HTML,
+    estructura de tablas, ecuaciones numeradas y avisos de saneamiento.</p>
+
+    <h3>Entregables y formato</h3>
+    <ul>
+      <li><strong>MD / HTML / DOCX / PDF</strong> con el mismo texto saneado.</li>
+      <li>Configuración editorial (sliders): tamaño de fuente, interlineado, alineación (incluida justificada), ancho máximo.</li>
+      <li><strong>HTML:</strong> temas editoriales, paleta de tablas, footer izquierdo/derecho personalizable, ecuaciones numeradas, KaTeX localizado junto al entregable.</li>
+      <li><strong>PDF:</strong> estilos de maquetación «informe» y paletas editoriales (p.&nbsp;ej. <em>pizarra carbón</em>).</li>
+      <li><strong>DOCX:</strong> tema Word, color de títulos, normas APA, índice automático (con posición), pie de página y numeración de páginas, tamaño de tabla dedicado.</li>
+    </ul>
+
+    <h3>Sesiones y visor flotante</h3>
+    <p>Cada proceso corre en una <strong>sesión aislada</strong> <code>salidas/&lt;id&gt;/</code> que se purga al
+    arrancar/apagar el servidor. Cada entregable tiene botones de <strong>descarga</strong> y <strong>visor
+    flotante</strong> (el PDF/HTML se abre en línea con <code>/api/ver/…</code>).</p>
+  </article>
+
+  <!-- ═══════════ Cap. 10 — Problemas ═══════════ -->
+  <article id="cap-10">
+    <div class="cap-cab"><div class="num">10</div><div><h2>Solución de problemas</h2><div class="sub">Diagnóstico rápido de los fallos más comunes</div></div></div>
+
+    <table>
+      <tr><th>Síntoma</th><th>Causa probable</th><th>Solución</th></tr>
+      <tr><td>«El motor DOCX requiere pandoc»</td><td>Pandoc no instalado</td><td>Instala Pandoc y reinicia la suite; el botón Exportar Word del panel Docs usa el núcleo GenOffice y no lo necesita</td></tr>
+      <tr><td>El editor visual no carga</td><td>Navegador sin soporte o bundle bloqueado</td><td>Docs cae solo a modo fuente; recarga con <kbd>Ctrl+F5</kbd>. El bundle es local (<code>static/vendor/</code>)</td></tr>
+      <tr><td>La IA responde «no disponible»</td><td>Ollama apagado o clave externa inválida</td><td>Verifica <code>http://localhost:11434</code> y el modelo descargado; en proveedores externos revisa la clave en ⚙️ Config</td></tr>
+      <tr><td>El puerto 8320 aparece ocupado</td><td>Instancia zombi previa</td><td>Cierra los procesos <code>python.exe</code> de uvicorn en el Administrador de tareas y relanza el .bat</td></tr>
+      <tr><td>Una tabla se ve como texto con pipes</td><td>Estás en modo fuente</td><td>Pulsa <kbd>&lt;/&gt; Fuente</kbd> para volver al modo visual</td></tr>
+      <tr><td>Saltos de línea raros tras pegar de Word/ChatGPT</td><td>Ruido de copiado</td><td>Usa <kbd>🧹 Sanear</kbd>: normaliza listas, fórmulas e imágenes Base64</td></tr>
+      <tr><td>La búsqueda no encuentra algo nuevo</td><td>Índice anterior al último guardado</td><td>Guarda el documento (💾 / Ctrl+S) y vuelve a buscar</td></tr>
+    </table>
+
+    <h3>Diagnóstico de salud</h3>
+    <p><code>GET /api/office/salud</code> y la propia consola del servidor (la ventana del .bat) registran cada
+    petición — útiles para reportar incidencias con precisión.</p>
+  </article>
+
+  <!-- ═══════════ Cap. 11 — Acerca de ═══════════ -->
+  <article id="cap-11">
+    <div class="cap-cab"><div class="num">11</div><div><h2>Acerca de y licencias</h2><div class="sub">Gobernanza, atribuciones y estructura del proyecto</div></div></div>
+
+    <h3>Gobernanza de versión</h3>
+    <p>La versión vive en un único punto (<code>app/version.py</code>) y se propaga a la interfaz, favicon,
+    lanzador y MCP. <strong>Nunca</strong> se escribe a mano en la UI: lo que ves en el riel y el pie es siempre la versión real del código.</p>
+
+    <h3>Licencias y atribuciones</h3>
+    <table>
+      <tr><th>Componente</th><th>Licencia</th><th>Uso en la suite</th></tr>
+      <tr><td>MarkFlow Office</td><td>Apache-2.0</td><td>Producto</td></tr>
+      <tr><td>Núcleo GenOffice (<code>nucleo/docx_avanzado/</code>)</td><td>Apache-2.0 (atribución en NOTICE)</td><td>DOCX byte-preserving, OMML, tracked changes</td></tr>
+      <tr><td>ProseMirror (<code>static/vendor/prosemirror/</code>)</td><td>MIT</td><td>Editor visual Docs</td></tr>
+      <tr><td>KaTeX / Mermaid</td><td>MIT</td><td>Fórmulas y diagramas (locales)</td></tr>
+    </table>
+
+    <h3>Estructura del proyecto</h3>
+    <pre><code>app/                  Servidor FastAPI (rutas, servicios, SSOT de versión)
+motor/                Motor MarkFlow (conversión, QA, sanear, PDF editorial)
+nucleo/docx_avanzado/ Núcleo GenOffice (byte_preserver, omml_math, tracked_changes)
+static/vendor/        ProseMirror y estilos del editor (locales, sin CDN)
+templates/            Shell Office (riel de apps)
+storage/documentos/   Documentos .md del usuario
+salidas/<id>/         Entregables por sesión (efímeros)
+Historial_de_versiones/  Bitácora cronológica del software</code></pre>
+
+    <div class="nota tip">💡 <span>Hoja de ruta (plan del producto): Fase 2 continúa con el visor PDF (pdf.js local) y el round-trip .docx real; luego IA semántica (Fase 3), CLI/MCP/Skills (Fase 4) y Sheets/Slides (Fase 5).</span></div>
+  </article>
+
+  <div class="nav-pie">
+    <button id="nav-prev">← Anterior</button>
+    <button id="nav-next">Siguiente →</button>
+  </div>
+  </main>
+</div>
+
+<footer class="pie">
+  Manual de Usuario · MarkFlow Office v1.2.0 · Motor MarkFlow + núcleo GenOffice · 100 % offline · Apache-2.0
+</footer>
+
+<script>
+(function () {
+  "use strict";
+  var caps = Array.prototype.slice.call(document.querySelectorAll(".indice button"));
+  var arts = Array.prototype.slice.call(document.querySelectorAll("main article"));
+  var actual = 0;
+
+  function mostrar(i) {
+    i = Math.max(0, Math.min(caps.length - 1, i));
+    actual = i;
+    caps.forEach(function (b, k) { b.classList.toggle("activo", k === i); });
+    arts.forEach(function (a, k) { a.classList.toggle("activo", k === i); });
+    document.getElementById("nav-prev").disabled = (i === 0);
+    document.getElementById("nav-next").disabled = (i === caps.length - 1);
+    window.scrollTo({ top: 0 });
+    try { history.replaceState(null, "", "#cap-" + (i + 1)); } catch (e) {}
+  }
+
+  caps.forEach(function (b, k) { b.addEventListener("click", function () { mostrar(k); }); });
+  document.getElementById("nav-prev").addEventListener("click", function () { mostrar(actual - 1); });
+  document.getElementById("nav-next").addEventListener("click", function () { mostrar(actual + 1); });
+
+  /* Navegación con flechas ← → */
+  document.addEventListener("keydown", function (e) {
+    if (e.target && /INPUT|TEXTAREA/.test(e.target.tagName)) return;
+    if (e.key === "ArrowRight") mostrar(actual + 1);
+    if (e.key === "ArrowLeft") mostrar(actual - 1);
+  });
+
+  /* Filtro del índice */
+  document.querySelector(".indice .filtro").addEventListener("input", function (e) {
+    var q = e.target.value.toLowerCase().trim();
+    caps.forEach(function (b) {
+      b.classList.toggle("oculto", q && b.textContent.toLowerCase().indexOf(q) === -1);
+    });
+  });
+
+  /* Deep-link #cap-N */
+  var m = (location.hash || "").match(/^#cap-(\d+)$/);
+  if (m) mostrar(+m[1] - 1);
+})();
+</script>
+</body>
+</html>
