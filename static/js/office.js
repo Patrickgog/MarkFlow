@@ -1362,6 +1362,52 @@ function poblarSelect(selId, lista, { conservarValor = true } = {}) {
   }
 }
 
+// Recolecta los datos de la portada premium desde el panel de la barra lateral PDF
+function recolectarPortadaPremium() {
+  const incluir = document.querySelector("#pdf-portada-incluir")?.checked;
+  if (!incluir) return null;
+  const fotos = [];
+  const inputFotos = document.querySelector("#pdf-portada-fotos");
+  if (inputFotos && inputFotos.files) {
+    // Convertir a data URIs (base64) de forma síncrona usando FileReader
+    // Se hace en el handler de exportación; aquí solo guardamos las rutas File
+    // El backend acepta data URIs. Convertimos ahora:
+    // (simplificado: guardamos los File objects para convertir en exportar)
+  }
+  return {
+    incluir: true,
+    tema: document.querySelector("#pdf-portada-tema")?.value || "clasica_blanca",
+    datos: {
+      tipo_documento: document.querySelector("#pdf-portada-tipo-doc")?.value || "ESTUDIO DE CONSULTORÍA DEL PROYECTO:",
+      titulo_proyecto: document.querySelector("#pdf-portada-titulo")?.value || "",
+      memoria_fase: document.querySelector("#pdf-portada-memoria")?.value || "",
+      componente: document.querySelector("#pdf-portada-componente")?.value || "",
+      consultor: document.querySelector("#pdf-portada-consultor")?.value || "",
+      fecha: document.querySelector("#pdf-portada-fecha")?.value || "",
+      codigo_proyecto: document.querySelector("#pdf-portada-codigo")?.value || "",
+    },
+    imagenes: [],  // se rellena de forma asíncrona antes del envío
+  };
+}
+
+// Convierte los archivos seleccionados en data URIs (base64)
+async function convertirFotosPortada() {
+  const input = document.querySelector("#pdf-portada-fotos");
+  if (!input || !input.files || input.files.length === 0) return [];
+  const files = Array.from(input.files).slice(0, 6);
+  const dataUris = [];
+  for (const f of files) {
+    const uri = await new Promise((resolve, reject) => {
+      const r = new FileReader();
+      r.onload = () => resolve(r.result);
+      r.onerror = reject;
+      r.readAsDataURL(f);
+    });
+    dataUris.push(uri);
+  }
+  return dataUris;
+}
+
 async function inicializarBarrasLaterales() {
   if (!window.MFORegistro) return;
   try { await window.MFORegistro.cargar(); } catch (e) { console.error("Registro de opciones no disponible:", e); return; }
@@ -3211,6 +3257,7 @@ async function refrescarVisorPdfEnVivo() {
           zona_right: zonaPdfRight,
           estilo_maquetacion: $("#pdf-opt-estilo")?.value || opc.estilo_maquetacion || "informe",
           modo_columnas: $("#pdf-opt-modo-diseno")?.value || opc.modo_columnas || "estandar",
+          portada_premium: await (async () => { const _pp = recolectarPortadaPremium(); if (_pp) _pp.imagenes = await convertirFotosPortada(); return _pp; })(),
           fuente: $("#pdf-opt-fuente")?.value || opc.fuente || "Calibri",
           interlineado: parseFloat($("#pdf-opt-interlineado")?.value || opc.interlineado || "1.15"),
           pie_pagina: $("#pdf-opt-pie") ? $("#pdf-opt-pie").value : (opc.pie_pagina || ""),
@@ -3540,6 +3587,7 @@ async function ejecutarExportarPdf() {
         zona_right: zonaPdfRight,
         estilo_maquetacion: $("#pdf-opt-estilo")?.value || opc.estilo_maquetacion || "informe",
         modo_columnas: $("#pdf-opt-modo-diseno")?.value || opc.modo_columnas || "estandar",
+        portada_premium: await (async () => { const _pp = recolectarPortadaPremium(); if (_pp) _pp.imagenes = await convertirFotosPortada(); return _pp; })(),
         fuente: $("#pdf-opt-fuente")?.value || opc.fuente || "Calibri",
         interlineado: parseFloat($("#pdf-opt-interlineado")?.value || opc.interlineado || "1.15"),
         pie_pagina: $("#pdf-opt-pie") ? $("#pdf-opt-pie").value : (opc.pie_pagina || ""),

@@ -668,6 +668,52 @@
                   <div class="campo-sidebar">
                     <label for="pdf-opt-modo-diseno">Modo de diseño / columnas:</label>
                     <select id="pdf-opt-modo-diseno" class="select-lateral"></select>
+                   </div>
+                 </div>
+               </details>
+
+               <details class="sidebar-seccion" data-seccion-id="pdf-portada-premium">
+                 <summary>Portada Premium (primera hoja)</summary>
+                 <div class="sidebar-seccion-contenido">
+                   <label class="chk-lateral"><input type="checkbox" id="pdf-portada-incluir"> <span>Incluir portada premium</span></label>
+                   <div class="campo-sidebar">
+                     <label for="pdf-portada-tema">Tema de portada:</label>
+                     <select id="pdf-portada-tema" class="select-lateral">
+                       <option value="clasica_blanca">Clasica Blanca</option>
+                       <option value="ejecutiva_navy">Ejecutiva Navy</option>
+                       <option value="consultoria_verde">Consultoria Verde / Agua</option>
+                       <option value="blueprint">Blueprint Tecnico</option>
+                       <option value="foto_hero">Foto Hero</option>
+                       <option value="minimal_slate">Minimal Slate</option>
+                     </select>
+                   </div>
+                   <div class="campo-sidebar">
+                     <label for="pdf-portada-titulo">Titulo del proyecto (largo):</label>
+                     <textarea id="pdf-portada-titulo" class="select-lateral" rows="3" placeholder="Nombre completo del proyecto"></textarea>
+                   </div>
+                   <div class="campo-sidebar">
+                     <label for="pdf-portada-memoria">Memoria / Fase:</label>
+                     <input type="text" id="pdf-portada-memoria" class="select-lateral" placeholder="MEMORIA TECNICA FASE II">
+                   </div>
+                   <div class="campo-sidebar">
+                     <label for="pdf-portada-componente">Componente:</label>
+                     <input type="text" id="pdf-portada-componente" class="select-lateral" placeholder="COMPONENTE AGUA POTABLE">
+                   </div>
+                   <div class="campo-sidebar">
+                     <label for="pdf-portada-consultor">Consultor / Autor:</label>
+                     <input type="text" id="pdf-portada-consultor" class="select-lateral" placeholder="Ing. Patricio Sarmiento Reinoso">
+                   </div>
+                   <div class="campo-sidebar">
+                     <label for="pdf-portada-fecha">Fecha:</label>
+                     <input type="text" id="pdf-portada-fecha" class="select-lateral" placeholder="JULIO 2024">
+                   </div>
+                   <div class="campo-sidebar">
+                     <label>Fotografias de campo (1 a 6):</label>
+                     <input type="file" id="pdf-portada-fotos" class="select-lateral" accept="image/*" multiple>
+                     <div id="pdf-portada-fotos-preview" style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-top:4px;"></div>
+                   </div>
+                 </div>
+               </details>
                   </div>
                 </div>
               </details>

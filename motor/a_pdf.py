@@ -1088,6 +1088,24 @@ def _generar_html_impresion(
 <head>
     <meta charset="utf-8">
     <title>{titulo}</title>
+    <link rel="stylesheet" href="file:///D:/APPS/Apps_2026/3_App_convertir_MARKFLOW_office/motor/assets/katex/katex.min.css">
+    <script defer src="file:///D:/APPS/Apps_2026/3_App_convertir_MARKFLOW_office/motor/assets/katex/katex.min.js"></script>
+    <script defer src="file:///D:/APPS/Apps_2026/3_App_convertir_MARKFLOW_office/motor/assets/katex/contrib/auto-render.min.js"></script>
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {{
+        if (window.renderMathInElement) {{
+            renderMathInElement(document.body, {{
+                delimiters: [
+                    {{left: "$$", right: "$$", display: true}},
+                    {{left: "$", right: "$", display: false}},
+                    {{left: "\\\\(", right: "\\\\)", display: false}},
+                    {{left: "\\\\[", right: "\\\\]", display: true}}
+                ],
+                throwOnError: false
+            }});
+        }}
+    }});
+    </script>
     <style>
 {css}
     </style>
@@ -1457,7 +1475,7 @@ def a_pdf(
         exe_pandoc,
         "--from", "markdown+tex_math_dollars+tex_math_single_backslash+tex_math_double_backslash+raw_tex+link_attributes",
         "--to", "html",
-        "--mathml",
+        "--mathjax",
     ]
     proc_p = subprocess.run(
         cmd_pandoc,
@@ -1593,6 +1611,7 @@ def a_pdf(
         "--headless",
         "--disable-gpu",
         "--no-pdf-header-footer",
+        "--virtual-time-budget=8000",
         f"--print-to-pdf={str(pdf_temp.resolve())}",
         str(html_temp.resolve()),
     ]
