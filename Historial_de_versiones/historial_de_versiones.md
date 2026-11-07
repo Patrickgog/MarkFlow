@@ -9,6 +9,20 @@ hardcodea la versión).
 
 ## 📦 Registro de Versiones
 
+### 📌 [v1.23.2] — 2026-11-06 00:00:00
+* **Tipo de Incremento:** PATCH (Corrección total del registro de opciones)
+* **Archivo SSOT:** `app/version.py` → `APP_VERSION = "1.23.2"`
+* **Componentes Afectados:**
+  - `motor/registro_opciones.py`: normalizador `_a_lista_opciones` / `_normalizar_arbol_registro`; listas nuevas (fuentes_tabla, tamanios_tabla, alineaciones_pie, posiciones_indice, anchos_columna, tamanios_fuente); defaults alineados.
+  - `static/js/registro_temas.js`: convertido en cargador dinámico (eliminado `const REGISTRO` hardcodeado).
+  - `static/js/office.js`: `poblarSelect` reemplaza `poblarSelectSiVacio`; `inicializarBarrasLaterales` async con `MFORegistro.cargar()`.
+  - `tests/test_registro_contrato.py`: nuevo test de contrato.
+* **Descripción Técnica de Cambios:**
+  1. Contrato único: todas las listas del registro se devuelven como arrays `{valor, nombre}`.
+  2. Eliminado el hardcodeo de opciones del frontend.
+  3. Corregido: los selects PDF/Word quedaban vacíos tras v1.23.1 (dict vs array).
+
+
 ### 📌 [v1.23.1] — 2026-11-06 00:00:00
 * **Tipo de Incremento:** PATCH (Portada Premium configurable)
 * **Archivo SSOT:** `app/version.py` → `APP_VERSION = "1.23.1"`

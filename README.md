@@ -4,7 +4,7 @@
 > Motor de conversión **MarkFlow** + núcleo DOCX **byte-preserving de GenOffice**,
 > con distribución agnóstica del agente (CLI · MCP · Skill) al estilo REA.
 
-![Versión](https://img.shields.io/badge/versi%C3%B3n-1.23.1-4c6ef5) ![Licencia](https://img.shields.io/badge/licencia-Apache--2.0-green) ![Python](https://img.shields.io/badge/python-3.10%2B-blue) ![FastAPI](https://img.shields.io/badge/FastAPI-0.110%2B-009688)
+![Versión](https://img.shields.io/badge/versi%C3%B3n-1.23.2-4c6ef5) ![Licencia](https://img.shields.io/badge/licencia-Apache--2.0-green) ![Python](https://img.shields.io/badge/python-3.10%2B-blue) ![FastAPI](https://img.shields.io/badge/FastAPI-0.110%2B-009688)
 
 ---
 
@@ -227,7 +227,7 @@ las fases de membrete (Word/PDF), la paridad de renderizado y el round-trip.
 El proyecto sigue **SemVer** (`X.Y.Z`). El SSOT de la versión es `app/version.py`
 (`APP_VERSION`); la UI y los planes leen esa constante (nunca se hardcodea).
 Cada incremento se registra en `historial-resumenes/` (archivo `AAAA-MM-DD_vX.Y.Z_titulo.md`).
-Versión vigente: **1.23.1**.
+Versión vigente: **1.23.2**.
 
 ## Licencias y atribuciones
 

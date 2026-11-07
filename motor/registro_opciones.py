@@ -9,6 +9,8 @@ Single Source of Truth (SSOT) del backend para:
 
 from __future__ import annotations
 
+import copy
+
 # ─────────────────────────────────────────────────────────────────────────────
 # 1. TEMAS Y PALETAS HTML
 # ─────────────────────────────────────────────────────────────────────────────
@@ -85,7 +87,43 @@ INTERLINEADOS_WORD = [
     {"valor": 2.0, "nombre": "Doble 2.0"},
 ]
 ALINEACIONES_WORD = ["justificado", "izquierda", "centrado", "derecha"]
-TAMANIOS_TABLA_WORD = ["auto", 7, 8, 9, 10, 11, 12]
+TAMANIOS_TABLA_WORD = [
+    {"valor": "auto", "nombre": "Automático / Adaptativo"},
+    {"valor": "7", "nombre": "7 pt"},
+    {"valor": "8", "nombre": "8 pt"},
+    {"valor": "9", "nombre": "9 pt"},
+    {"valor": "10", "nombre": "10 pt (Recomendado)"},
+    {"valor": "11", "nombre": "11 pt"},
+    {"valor": "12", "nombre": "12 pt"},
+]
+FUENTES_TABLA_WORD = [
+    {"valor": "heredar", "nombre": "Heredar del documento"},
+    {"valor": "Calibri", "nombre": "Calibri"},
+    {"valor": "Arial", "nombre": "Arial"},
+    {"valor": "Times New Roman", "nombre": "Times New Roman"},
+    {"valor": "Georgia", "nombre": "Georgia"},
+    {"valor": "Aptos", "nombre": "Aptos"},
+    {"valor": "Century Gothic", "nombre": "Century Gothic"},
+]
+ALINEACIONES_PIE_WORD = [
+    {"valor": "derecha", "nombre": "Derecha"},
+    {"valor": "centro", "nombre": "Centro"},
+    {"valor": "izquierda", "nombre": "Izquierda"},
+]
+POSICIONES_INDICE_WORD = [
+    {"valor": "inicio", "nombre": "Al inicio del documento"},
+    {"valor": "final", "nombre": "Al final del documento"},
+]
+ANCHOS_COLUMNA_EXCEL = [
+    {"valor": "compacto", "nombre": "Compacto (130 px)"},
+    {"valor": "estandar", "nombre": "Estándar (160 px)"},
+    {"valor": "amplio", "nombre": "Amplio (220 px)"},
+]
+TAMANIOS_FUENTE_EXCEL = [
+    {"valor": "9", "nombre": "9 pt"},
+    {"valor": "10", "nombre": "10 pt (Estándar)"},
+    {"valor": "11", "nombre": "11 pt"},
+]
 
 # ─────────────────────────────────────────────────────────────────────────────
 # 3. TEMAS Y PALETAS PDF (.pdf)
@@ -181,6 +219,9 @@ REGISTRO_OPCIONES = {
         "interlineados": INTERLINEADOS_WORD,
         "alineaciones": ALINEACIONES_WORD,
         "tamanios_tabla": TAMANIOS_TABLA_WORD,
+        "fuentes_tabla": FUENTES_TABLA_WORD,
+        "alineaciones_pie": ALINEACIONES_PIE_WORD,
+        "posiciones_indice": POSICIONES_INDICE_WORD,
         "defaults": {
             "tema": "defecto",
             "paleta_suave": True,
@@ -260,6 +301,8 @@ REGISTRO_OPCIONES = {
     "excel": {
         "paletas": PALETAS_EXCEL,
         "modos_hojas": MODOS_HOJAS_EXCEL,
+        "anchos_columna": ANCHOS_COLUMNA_EXCEL,
+        "tamanios_fuente": TAMANIOS_FUENTE_EXCEL,
         "defaults": {
             "estilo": "clasico",
             "fuente": "Calibri",
@@ -270,9 +313,43 @@ REGISTRO_OPCIONES = {
 }
 
 
+_CLAVES_OPCIONES = {
+    "temas", "anchos", "paletas", "paletas_tricolor", "paletas_titulos",
+    "paletas_tablas", "estilos", "modos_columnas", "formatos_num",
+    "modos_hojas", "alineaciones", "fuentes_tabla", "tamanios_tabla",
+    "alineaciones_pie", "posiciones_indice", "anchos_columna",
+    "tamanios_fuente", "interlineados", "fuentes", "tamanios",
+}
+
+
+def _a_lista_opciones(valor):
+    if isinstance(valor, list):
+        return valor
+    if isinstance(valor, dict):
+        salida = []
+        for clave, dato in valor.items():
+            if isinstance(dato, dict):
+                salida.append({"valor": clave, **dato})
+            else:
+                salida.append({"valor": clave, "nombre": dato})
+        return salida
+    return valor
+
+
+def _normalizar_arbol_registro(arbol: dict) -> dict:
+    arbol = copy.deepcopy(arbol)
+    for formato, seccion in arbol.items():
+        if not isinstance(seccion, dict):
+            continue
+        for clave in list(seccion.keys()):
+            if clave in _CLAVES_OPCIONES:
+                seccion[clave] = _a_lista_opciones(seccion[clave])
+    return arbol
+
+
 def obtener_registro_completo() -> dict:
     """Devuelve el árbol completo del registro único serializable a JSON."""
-    return REGISTRO_OPCIONES
+    return _normalizar_arbol_registro(REGISTRO_OPCIONES)
 
 
 def obtener_arbol_opciones() -> dict:

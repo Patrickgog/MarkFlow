@@ -1336,91 +1336,64 @@ $("#btn-limpiar-entregables")?.addEventListener("click", () => {
 });
 
 /* ══════════════ 2. CONTROLADORES DE BARRAS LATERALES Y REGISTRO ══════════════ */
-function poblarSelectSiVacio(selId, lista) {
+function poblarSelect(selId, lista, { conservarValor = true } = {}) {
   const sel = $(selId);
-  if (!sel || !Array.isArray(lista) || sel.options.length > 0) return;
-  sel.innerHTML = lista.map(item => {
-    if (typeof item === "number") {
-      return `<option value="${item}">${item} pt</option>`;
-    }
+  if (!sel) return;
+  const previo = sel.value;
+  const items = Array.isArray(lista) ? lista : [];
+  if (!items.length) {
+    sel.innerHTML = `<option value="">Sin datos (reintente)</option>`;
+    sel.disabled = true;
+    return;
+  }
+  sel.disabled = false;
+  sel.innerHTML = items.map(item => {
+    if (typeof item === "number") return `<option value="${item}">${item} pt</option>`;
     if (typeof item === "string") {
-      const esNumero = /^\d+(\.\d+)?$/.test(item.trim());
-      const texto = esNumero ? `${item} pt` : item;
+      const texto = /^\d+(\.\d+)?$/.test(item.trim()) ? `${item} pt` : item;
       return `<option value="${item}">${texto}</option>`;
     }
-    const val = item.valor ?? item.id ?? item.clave ?? item.name ?? "";
-    const nom = item.nombre ?? item.etiqueta ?? item.name ?? val;
-    return `<option value="${val}">${nom}</option>`;
+    const valor = item.valor ?? item.clave ?? item.id ?? "";
+    const nombre = item.nombre ?? item.etiqueta ?? String(valor);
+    return `<option value="${valor}">${nombre}</option>`;
   }).join("");
+  if (conservarValor && previo && [...sel.options].some(o => o.value === previo)) {
+    sel.value = previo;
+  }
 }
 
-function inicializarBarrasLaterales() {
+async function inicializarBarrasLaterales() {
   if (!window.MFORegistro) return;
+  try { await window.MFORegistro.cargar(); } catch (e) { console.error("Registro de opciones no disponible:", e); return; }
 
   // 1. Poblar selects con datos del registro SSOT
-  poblarSelectSiVacio("#word-opt-tema", MFORegistro.TEMAS_WORD || MFORegistro.datos?.word?.temas);
-  poblarSelectSiVacio("#word-opt-paleta-titulos", MFORegistro.PALETAS_TITULOS_WORD || MFORegistro.datos?.word?.paletas_titulos);
-  poblarSelectSiVacio("#word-opt-paleta-tablas", MFORegistro.PALETAS_TABLAS_WORD || MFORegistro.datos?.word?.paletas_tablas);
-  poblarSelectSiVacio("#word-opt-fuente", MFORegistro.FUENTES_WORD || MFORegistro.datos?.word?.fuentes);
-  poblarSelectSiVacio("#word-opt-tamanio", MFORegistro.TAMANIOS_WORD || MFORegistro.datos?.word?.tamanios);
-  poblarSelectSiVacio("#word-opt-interlineado", MFORegistro.INTERLINEADOS_WORD || MFORegistro.datos?.word?.interlineados);
-  poblarSelectSiVacio("#word-opt-alineacion", MFORegistro.ALINEACIONES_WORD || [
-    { valor: "justificado", nombre: "Justificado" },
-    { valor: "izquierda", nombre: "Izquierda" },
-    { valor: "centrado", nombre: "Centrado" },
-    { valor: "derecha", nombre: "Derecha" }
-  ]);
-  poblarSelectSiVacio("#word-opt-fuente-tabla", [
-    { valor: "heredar", nombre: "Heredar del documento" },
-    { valor: "Calibri", nombre: "Calibri" },
-    { valor: "Arial", nombre: "Arial" },
-    { valor: "Times New Roman", nombre: "Times New Roman" },
-    { valor: "Georgia", nombre: "Georgia" },
-    { valor: "Aptos", nombre: "Aptos" },
-    { valor: "Century Gothic", nombre: "Century Gothic" }
-  ]);
-  poblarSelectSiVacio("#word-opt-tamanio-tabla", MFORegistro.TAMANIOS_TABLA_WORD || [
-    { valor: "auto", nombre: "Automático / Adaptativo" },
-    { valor: "7", nombre: "7 pt" },
-    { valor: "8", nombre: "8 pt" },
-    { valor: "9", nombre: "9 pt" },
-    { valor: "10", nombre: "10 pt (Recomendado)" },
-    { valor: "11", nombre: "11 pt" },
-    { valor: "12", nombre: "12 pt" }
-  ]);
-  poblarSelectSiVacio("#word-opt-alineacion-pie", [
-    { valor: "derecha", nombre: "Derecha" },
-    { valor: "centro", nombre: "Centro" },
-    { valor: "izquierda", nombre: "Izquierda" }
-  ]);
-  poblarSelectSiVacio("#word-opt-posicion-indice", [
-    { valor: "inicio", nombre: "Al inicio del documento" },
-    { valor: "final", nombre: "Al final del documento" }
-  ]);
+  poblarSelect("#word-opt-tema", MFORegistro.TEMAS_WORD);
+  poblarSelect("#word-opt-paleta-titulos", MFORegistro.PALETAS_TITULOS_WORD);
+  poblarSelect("#word-opt-paleta-tablas", MFORegistro.PALETAS_TABLAS_WORD);
+  poblarSelect("#word-opt-fuente", MFORegistro.FUENTES_WORD);
+  poblarSelect("#word-opt-tamanio", MFORegistro.TAMANIOS_WORD);
+  poblarSelect("#word-opt-interlineado", MFORegistro.INTERLINEADOS_WORD);
+  poblarSelect("#word-opt-alineacion", MFORegistro.ALINEACIONES_WORD);
+  poblarSelect("#word-opt-fuente-tabla", MFORegistro.FUENTES_TABLA_WORD);
+  poblarSelect("#word-opt-tamanio-tabla", MFORegistro.TAMANIOS_TABLA_WORD);
+  poblarSelect("#word-opt-alineacion-pie", MFORegistro.ALINEACIONES_PIE_WORD);
+  poblarSelect("#word-opt-posicion-indice", MFORegistro.POSICIONES_INDICE_WORD);
 
-  poblarSelectSiVacio("#html-opt-tema", MFORegistro.TEMAS_HTML || MFORegistro.datos?.html?.temas);
-  poblarSelectSiVacio("#html-opt-paleta", MFORegistro.PALETAS_HTML_TRICOLOR || MFORegistro.datos?.html?.paletas_tricolor);
-  poblarSelectSiVacio("#html-opt-ancho", MFORegistro.ANCHOS_HTML || MFORegistro.datos?.html?.anchos);
-  poblarSelectSiVacio("#html-opt-fuente", MFORegistro.FUENTES_HTML || MFORegistro.datos?.html?.fuentes);
+  poblarSelect("#html-opt-tema", MFORegistro.TEMAS_HTML);
+  poblarSelect("#html-opt-paleta", MFORegistro.PALETAS_HTML_TRICOLOR);
+  poblarSelect("#html-opt-ancho", MFORegistro.ANCHOS_HTML);
+  poblarSelect("#html-opt-fuente", MFORegistro.FUENTES_HTML);
 
-  poblarSelectSiVacio("#pdf-opt-paleta", MFORegistro.PALETAS_EDITORIAL_PDF || MFORegistro.datos?.pdf?.paletas);
-  poblarSelectSiVacio("#pdf-opt-estilo", MFORegistro.ESTILOS_MAQUETACION_PDF || MFORegistro.datos?.pdf?.estilos);
-  poblarSelectSiVacio("#pdf-opt-modo-diseno", MFORegistro.MODOS_COLUMNAS_PDF || MFORegistro.datos?.pdf?.modos_columnas);
-  poblarSelectSiVacio("#pdf-opt-fuente", MFORegistro.FUENTES_PDF || MFORegistro.datos?.pdf?.fuentes);
-  poblarSelectSiVacio("#pdf-opt-interlineado", MFORegistro.INTERLINEADOS_PDF || MFORegistro.datos?.pdf?.interlineados);
+  poblarSelect("#pdf-opt-paleta", MFORegistro.PALETAS_EDITORIAL_PDF);
+  poblarSelect("#pdf-opt-estilo", MFORegistro.ESTILOS_MAQUETACION_PDF);
+  poblarSelect("#pdf-opt-modo-diseno", MFORegistro.MODOS_COLUMNAS_PDF);
+  poblarSelect("#pdf-opt-fuente", MFORegistro.FUENTES_PDF);
+  poblarSelect("#pdf-opt-interlineado", MFORegistro.INTERLINEADOS_PDF);
 
-  poblarSelectSiVacio("#excel-opt-paleta", MFORegistro.PALETAS_EXCEL || MFORegistro.datos?.excel?.paletas);
-  poblarSelectSiVacio("#excel-opt-ancho-col", [
-    { valor: "compacto", nombre: "Compacto (130 px)" },
-    { valor: "estandar", nombre: "Estándar (160 px)" },
-    { valor: "amplio", nombre: "Amplio (220 px)" }
-  ]);
-  poblarSelectSiVacio("#excel-opt-fuente-tam", [
-    { valor: "9", nombre: "9 pt" },
-    { valor: "10", nombre: "10 pt (Estándar)" },
-    { valor: "11", nombre: "11 pt" }
-  ]);
-  poblarSelectSiVacio("#excel-opt-modo-hojas", MFORegistro.MODOS_HOJAS_EXCEL || MFORegistro.datos?.excel?.modos_hojas);
+  poblarSelect("#excel-opt-paleta", MFORegistro.PALETAS_EXCEL);
+  poblarSelect("#excel-opt-ancho-col", MFORegistro.ANCHOS_COLUMNA_EXCEL);
+  poblarSelect("#excel-opt-fuente-tam", MFORegistro.TAMANIOS_FUENTE_EXCEL);
+  poblarSelect("#excel-opt-modo-hojas", MFORegistro.MODOS_HOJAS_EXCEL);
 
   // Poblar paletas personalizadas guardadas en los selects de Word, PDF, HTML y Excel
   poblarPaletasPersonalizadasEnSelects();
@@ -3928,31 +3901,11 @@ $("#btn-exportar-excel-sidebar")?.addEventListener("click", ejecutarExportarExce
 
 // Inicializar barras laterales y listeners al cargar
 setTimeout(async () => {
-  // Cargar registro dinámicamente desde el backend (elimina hardcodeo)
   try {
-    const resp = await fetch("/api/registro-opciones");
-    if (resp.ok) {
-      const cuerpo = await resp.json();
-      const datos = cuerpo?.datos || cuerpo;
-      if (datos?.pdf) {
-        if (window.MFORegistro) {
-          window.MFORegistro.datos = window.MFORegistro.datos || {};
-          window.MFORegistro.datos.pdf = Object.assign({}, window.MFORegistro.datos.pdf || {}, datos.pdf);
-          if (datos.pdf.modos_columnas) window.MFORegistro.MODOS_COLUMNAS_PDF = datos.pdf.modos_columnas;
-          if (datos.pdf.estilos) window.MFORegistro.ESTILOS_MAQUETACION_PDF = datos.pdf.estilos;
-          if (datos.pdf.paletas) window.MFORegistro.PALETAS_EDITORIAL_PDF = datos.pdf.paletas;
-          if (datos.pdf.fuentes) window.MFORegistro.FUENTES_PDF = datos.pdf.fuentes;
-        }
-      }
-    }
-  } catch (e) { console.warn("No se pudo cargar el registro dinámico:", e); }
-
-  // Forzar repoblación de los selects PDF (limpiar + rellenar)
-  const selModo = document.querySelector("#pdf-opt-modo-diseno");
-  const selEstilo = document.querySelector("#pdf-opt-estilo");
-  if (selModo) selModo.innerHTML = "";
-  if (selEstilo) selEstilo.innerHTML = "";
-  inicializarBarrasLaterales();
+    await inicializarBarrasLaterales();
+  } catch (e) {
+    console.error("Error inicializando barras laterales:", e);
+  }
   registrarListenersReactivos();
 }, 100);
 
