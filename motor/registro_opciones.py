@@ -109,6 +109,14 @@ MODOS_COLUMNAS_PDF = {
     "dos_columnas": "📰 Dos Columnas (2 Col)",
     "paper_cientifico": "🔬 Paper Científico (IEEE / Academic 2 Col)",
     "revista": "🎨 Modo Revista (Editorial Magazine)",
+    "premium": "✨ Premium Ejecutivo (Tarjetas + Layout Mixto)",
+}
+
+ESTILOS_MAQUETACION_PDF = {
+    "informe": "Informe Técnico Moderno",
+    "academico": "Académico / Booktabs",
+    "portada": "Ejecutivo con Portada",
+    "premium": "Premium Consultoría (Tarjetas + Resumen)",
 }
 
 FUENTES_PDF = ["Calibri", "Inter", "Roboto", "Georgia", "Times New Roman", "Garamond"]
@@ -198,6 +206,35 @@ REGISTRO_OPCIONES = {
         "paletas": PALETAS_EDITORIAL_PDF,
         "estilos": ESTILOS_MAQUETACION_PDF,
         "modos_columnas": MODOS_COLUMNAS_PDF,
+        "portada_premium": {
+            "temas": {
+                "clasica_blanca": "Clásica Blanca (ejemplo actual)",
+                "ejecutiva_navy": "Ejecutiva Navy",
+                "consultoria_verde": "Consultoría Verde / Agua",
+                "blueprint": "Blueprint Técnico",
+                "foto_hero": "Foto Hero",
+                "minimal_slate": "Minimal Slate",
+            },
+            "layouts_fotos": {
+                "1": "1 foto centrada grande",
+                "2": "2 fotos lado a lado",
+                "3": "2 arriba + 1 centrada abajo",
+                "4": "Grid 2x2",
+                "5": "2x2 + 1 centrada abajo",
+                "6": "Grid 3x2",
+            },
+            "defaults": {
+                "incluir": False,
+                "tema": "clasica_blanca",
+                "tipo_documento": "ESTUDIO DE CONSULTORÍA DEL PROYECTO:",
+                "titulo_proyecto": "",
+                "memoria_fase": "",
+                "componente": "",
+                "consultor": "",
+                "fecha": "",
+                "codigo_proyecto": "",
+            },
+        },
         "fuentes": FUENTES_PDF,
         "tamanios": TAMANIOS_PDF,
         "interlineados": INTERLINEADOS_PDF,

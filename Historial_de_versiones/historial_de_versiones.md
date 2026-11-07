@@ -9,6 +9,31 @@ hardcodea la versión).
 
 ## 📦 Registro de Versiones
 
+### 📌 [v1.23.1] — 2026-11-06 00:00:00
+* **Tipo de Incremento:** PATCH (Portada Premium configurable)
+* **Archivo SSOT:** `app/version.py` → `APP_VERSION = "1.23.1"`
+* **Componentes Afectados:**
+  - `motor/registro_opciones.py`: bloque `portada_premium` (temas, layouts de fotos, defaults).
+  - `motor/a_pdf.py`: función `_generar_html_portada_premium` + `_imagen_a_datauri` + `_layout_fotos`; integración en `a_pdf` (prepend portada, omitir numeración en página 1).
+  - `app/rutas/office.py`: campo `portada_premium` en `ModeloExportarPdf` y paso a `a_pdf`.
+* **Descripción Técnica de Cambios:**
+  1. Portada premium configurable con 6 temas y galería de 1-6 fotos con layout automático.
+  2. Imágenes convertidas a data URI base64 para incrustación.
+  3. Numeración de páginas omite la portada cuando está activa.
+
+
+### 📌 [v1.23.0] — 2026-11-06 00:00:00
+* **Tipo de Incremento:** MINOR (Nueva funcionalidad: modo de maquetación Premium para PDF)
+* **Archivo SSOT:** `app/version.py` → `APP_VERSION = "1.23.0"`
+* **Componentes Afectados:**
+  - `motor/registro_opciones.py`: añadida opción "premium" en `MODOS_COLUMNAS_PDF` y `ESTILOS_MAQUETACION_PDF`.
+  - `motor/a_pdf.py`: CSS premium (tarjetas KPI, columnas selectivas, figuras premium, callouts), parser de bloques `:::kpi` y post-proceso de `:::columns-premium`.
+* **Descripción Técnica de Cambios:**
+  1. Nuevo modo "✨ Premium Ejecutivo (Tarjetas + Layout Mixto)" seleccionable en la pestaña PDF.
+  2. Soporte de marcadores Markdown `:::kpi` (tarjetas) y `:::columns-premium` (columnas locales).
+  3. Clase `modo-premium` aplicada al cuerpo editorial cuando corresponde.
+
+
 ### 📌 [v1.22.2] — 2026-10-31 19:50:00
 * **Tipo de Incremento:** PATCH (Depuración y supresión de frontmatter YAML en PDF, verificación de sangrado físico total de borde a borde y reinicio del servidor de desarrollo con recarga activa --reload).
 * **Archivo SSOT:** `app/version.py` → `APP_VERSION = "1.22.2"`

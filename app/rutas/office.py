@@ -1055,7 +1055,8 @@ class ModeloExportarPdf(BaseModel):
     zona_right: float | None = None
     alineacion_num: str = "derecha"
     posicion_numero: str = "derecha"
-
+    # Portada premium configurable
+    portada_premium: dict | None = None
 
 @router.post("/exportar-pdf")
 async def endpoint_exportar_pdf(modelo: ModeloExportarPdf) -> Response:
@@ -1107,6 +1108,7 @@ async def endpoint_exportar_pdf(modelo: ModeloExportarPdf) -> Response:
                 plantilla_word=candidato_plantilla,
                 zona_cm=zona_req,
                 alineacion_num=pos_num,
+                portada_premium=modelo.portada_premium,
             )
             pdf_bytes = ruta_res.read_bytes()
         except Exception as exc:

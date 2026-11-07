@@ -139,13 +139,15 @@
       estilos: [
         { valor: "informe", nombre: "Informe Técnico Moderno" },
         { valor: "academico", nombre: "Académico / Booktabs" },
-        { valor: "portada", nombre: "Ejecutivo con Portada" }
+        { valor: "portada", nombre: "Ejecutivo con Portada" },
+        { valor: "premium", nombre: "Premium Consultoría (Tarjetas + Resumen)" }
       ],
       modos_columnas: [
         { valor: "estandar", nombre: "📄 Estándar (1 Columna)" },
         { valor: "dos_columnas", nombre: "📰 Dos Columnas (2 Col)" },
         { valor: "paper_cientifico", nombre: "🔬 Paper Científico (IEEE / Academic 2 Col)" },
-        { valor: "revista", nombre: "🎨 Modo Revista (Editorial Magazine)" }
+        { valor: "revista", nombre: "🎨 Modo Revista (Editorial Magazine)" },
+        { valor: "premium", nombre: "✨ Premium Ejecutivo (Tarjetas + Layout Mixto)" }
       ],
       fuentes: ["Calibri", "Inter", "Roboto", "Georgia", "Times New Roman", "Garamond"],
       tamanios: ["10", "10.5", "11", "12"],

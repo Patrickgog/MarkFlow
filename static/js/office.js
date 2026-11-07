@@ -3927,7 +3927,31 @@ $("#btn-descargar-tabla-xlsx")?.addEventListener("click", ejecutarExportarExcel)
 $("#btn-exportar-excel-sidebar")?.addEventListener("click", ejecutarExportarExcel);
 
 // Inicializar barras laterales y listeners al cargar
-setTimeout(() => {
+setTimeout(async () => {
+  // Cargar registro dinámicamente desde el backend (elimina hardcodeo)
+  try {
+    const resp = await fetch("/api/registro-opciones");
+    if (resp.ok) {
+      const cuerpo = await resp.json();
+      const datos = cuerpo?.datos || cuerpo;
+      if (datos?.pdf) {
+        if (window.MFORegistro) {
+          window.MFORegistro.datos = window.MFORegistro.datos || {};
+          window.MFORegistro.datos.pdf = Object.assign({}, window.MFORegistro.datos.pdf || {}, datos.pdf);
+          if (datos.pdf.modos_columnas) window.MFORegistro.MODOS_COLUMNAS_PDF = datos.pdf.modos_columnas;
+          if (datos.pdf.estilos) window.MFORegistro.ESTILOS_MAQUETACION_PDF = datos.pdf.estilos;
+          if (datos.pdf.paletas) window.MFORegistro.PALETAS_EDITORIAL_PDF = datos.pdf.paletas;
+          if (datos.pdf.fuentes) window.MFORegistro.FUENTES_PDF = datos.pdf.fuentes;
+        }
+      }
+    }
+  } catch (e) { console.warn("No se pudo cargar el registro dinámico:", e); }
+
+  // Forzar repoblación de los selects PDF (limpiar + rellenar)
+  const selModo = document.querySelector("#pdf-opt-modo-diseno");
+  const selEstilo = document.querySelector("#pdf-opt-estilo");
+  if (selModo) selModo.innerHTML = "";
+  if (selEstilo) selEstilo.innerHTML = "";
   inicializarBarrasLaterales();
   registrarListenersReactivos();
 }, 100);

@@ -112,6 +112,159 @@ def _hex_a_rgb_unitario(hex_color: str) -> tuple[float, float, float]:
     return (0.28, 0.33, 0.41)
 
 
+def _transformar_kpi_premium(texto: str) -> str:
+    """Convierte bloques :::kpi ... ::: en HTML crudo de tarjetas (pasa por pandoc)."""
+    import re
+    patron = re.compile(r":::kpi\s*\n(.*?)\n:::", re.DOTALL | re.IGNORECASE)
+
+    def _repl(m):
+        inner = m.group(1).strip()
+        cards = []
+        for line in inner.splitlines():
+            line = line.strip()
+            if not line:
+                continue
+            # formato: **label** | value  o  label | value
+            if "|" in line:
+                partes = line.split("|", 1)
+                label = partes[0].strip().strip("*").strip()
+                valor = partes[1].strip() if len(partes) > 1 else ""
+            else:
+                label = line.strip("*").strip()
+                valor = ""
+            cards.append(
+                f'<div class="kpi-card"><div class="kpi-valor">{valor}</div>'
+                f'<div class="kpi-label">{label}</div></div>'
+            )
+        return '<div class="kpi-grid">\n' + "\n".join(cards) + "\n</div>"
+
+    return patron.sub(_repl, texto)
+
+
+def _postprocesar_columnas_premium(html: str) -> str:
+    """Divide los div.columns-premium en dos columnas usando el <hr /> como separador."""
+    import re
+    patron = re.compile(r'<div class="columns-premium">(.*?)</div>', re.DOTALL)
+
+    def _repl(m):
+        inner = m.group(1)
+        # separar por <hr> o <hr />
+        partes = re.split(r"<hr\s*/?>", inner, flags=re.IGNORECASE)
+        cols = []
+        for p in partes:
+            p = p.strip()
+            if p:
+                cols.append(f"<div>{p}</div>")
+        if len(cols) < 2:
+            cols = [f"<div>{inner.strip()}</div>", "<div></div>"]
+        return '<div class="columns-premium">\n' + "\n".join(cols) + "\n</div>"
+
+    return patron.sub(_repl, html)
+
+
+def _imagen_a_datauri(img) -> str:
+    """Convierte una imagen (ruta o data-uri) a data URI base64."""
+    import base64
+    import mimetypes
+    from pathlib import Path
+    if isinstance(img, str) and img.strip().startswith("data:"):
+        return img.strip()
+    p = Path(str(img))
+    if p.exists():
+        mime = mimetypes.guess_type(str(p))[0] or "image/png"
+        b64 = base64.b64encode(p.read_bytes()).decode("ascii")
+        return f"data:{mime};base64,{b64}"
+    return str(img)
+
+
+def _layout_fotos(n: int) -> str:
+    n = max(1, min(6, n))
+    layouts = {
+        1: "grid-template-columns: 1fr;",
+        2: "grid-template-columns: 1fr 1fr;",
+        3: "grid-template-columns: 1fr 1fr; grid-template-rows: auto auto;",
+        4: "grid-template-columns: 1fr 1fr;",
+        5: "grid-template-columns: 1fr 1fr;",
+        6: "grid-template-columns: 1fr 1fr 1fr;",
+    }
+    return layouts.get(n, "grid-template-columns: 1fr 1fr;")
+
+
+def _generar_html_portada_premium(tema: str, datos: dict, imagenes: list, paleta: dict) -> str:
+    """Genera el HTML de una portada premium (primera página)."""
+    tema = (tema or "clasica_blanca").lower()
+    tipo_doc = datos.get("tipo_documento", "ESTUDIO DE CONSULTORÍA DEL PROYECTO:")
+    titulo = datos.get("titulo_proyecto", "")
+    memoria = datos.get("memoria_fase", "")
+    componente = datos.get("componente", "")
+    consultor = datos.get("consultor", "")
+    fecha = datos.get("fecha", "")
+    codigo = datos.get("codigo_proyecto", "")
+
+    imgs = [_imagen_a_datauri(i) for i in (imagenes or [])]
+    n = len(imgs)
+
+    # Estilos por tema
+    if tema == "ejecutiva_navy":
+        bg = "#1E3A5F"
+        fg = "#FFFFFF"
+        acento = "#38bdf8"
+        card_bg = "rgba(255,255,255,0.08)"
+    elif tema == "consultoria_verde":
+        bg = "#1C2E24"
+        fg = "#FFFFFF"
+        acento = "#34d399"
+        card_bg = "rgba(255,255,255,0.08)"
+    elif tema == "blueprint":
+        bg = "#0F172A"
+        fg = "#E2E8F0"
+        acento = "#60A5FA"
+        card_bg = "rgba(96,165,250,0.08)"
+    elif tema == "minimal_slate":
+        bg = "#F8FAFC"
+        fg = "#0F172A"
+        acento = paleta.get("primario", "#1E293B")
+        card_bg = "#FFFFFF"
+    elif tema == "foto_hero":
+        bg = "#0F172A"
+        fg = "#FFFFFF"
+        acento = "#F59E0B"
+        card_bg = "rgba(255,255,255,0.10)"
+    else:  # clasica_blanca
+        bg = "#FFFFFF"
+        fg = "#0F172A"
+        acento = paleta.get("primario", "#1E293B")
+        card_bg = "#F8FAFC"
+
+    # Galería de fotos
+    fotos_html = ""
+    if imgs:
+        layout = _layout_fotos(n)
+        cells = []
+        for src in imgs:
+            cells.append(f'<div class="portada-foto"><img src="{src}" alt="Foto de campo" /></div>')
+        fotos_html = f'<div class="portada-galeria" style="{layout}">' + "".join(cells) + "</div>"
+
+    html = f'''
+<div class="portada-premium tema-{tema}" style="background:{bg}; color:{fg};">
+  <div class="portada-banda" style="border-bottom: 3pt solid {acento};"></div>
+  <div class="portada-contenido">
+    <p class="portada-tipo" style="color:{acento};">{tipo_doc}</p>
+    <h1 class="portada-titulo" style="color:{fg};">{titulo}</h1>
+    {f'<p class="portada-memoria" style="color:{acento};">{memoria}</p>' if memoria else ""}
+    {f'<p class="portada-componente">{componente}</p>' if componente else ""}
+    {fotos_html}
+    <div class="portada-datos" style="background:{card_bg};">
+      {f'<p><b>Consultor:</b> {consultor}</p>' if consultor else ""}
+      {f'<p><b>Fecha:</b> {fecha}</p>' if fecha else ""}
+      {f'<p><b>Código:</b> {codigo}</p>' if codigo else ""}
+    </div>
+  </div>
+</div>
+'''
+    return html
+
+
 def _generar_html_impresion(
     cuerpo_html: str,
     titulo: str,
@@ -350,6 +503,106 @@ def _generar_html_impresion(
     }}
     """
 
+    elif modo_clean in ("premium", "premium_ejecutivo", "ejecutivo"):
+        diseno_columnas_css = f"""
+    /* ===== MODO PREMIUM EJECUTIVO ===== */
+    .kpi-grid {{
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: 10px;
+        margin: 1.4em 0 1.8em 0;
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }}
+    .kpi-card {{
+        background: var(--fondo-suave, {paleta["fondo_suave"]});
+        border-left: 3.5pt solid {paleta["primario"]};
+        border-radius: 0 6px 6px 0;
+        padding: 12px 14px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    }}
+    .kpi-valor {{
+        font-size: 1.35em;
+        font-weight: 800;
+        color: {paleta["primario"]};
+        line-height: 1.15;
+    }}
+    .kpi-label {{
+        font-size: 0.78em;
+        color: {paleta["secundario"]};
+        margin-top: 3px;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+    }}
+    .columns-premium {{
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14mm;
+        margin: 1.3em 0;
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }}
+    .figura-premium {{
+        margin: 1.6em auto;
+        text-align: center;
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }}
+    .figura-premium img {{
+        max-width: 100%;
+        border-radius: 4px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }}
+    .caption-premium {{
+        font-size: 8.5pt;
+        color: #64748b;
+        font-style: italic;
+        margin-top: 6px;
+    }}
+    .callout-premium {{
+        border-left: 4pt solid {paleta["secundario"]};
+        background: {paleta["fondo_suave"]};
+        padding: 12px 16px;
+        margin: 1.5em 0;
+        break-inside: avoid;
+        border-radius: 0 6px 6px 0;
+    }}
+    .separador-premium {{
+        border: none;
+        border-top: 1.5pt solid {paleta["secundario"]};
+        margin: 1.8em 0;
+        opacity: 0.6;
+    }}
+    .cuerpo-editorial h1 {{
+        color: {paleta["primario"]};
+        letter-spacing: 0.3px;
+    }}
+    .cuerpo-editorial table {{
+        border-collapse: collapse;
+        width: 100%;
+        break-inside: avoid;
+    }}
+    .cuerpo-editorial th {{
+        background: {paleta["primario"]};
+        color: #ffffff;
+        font-weight: 700;
+        padding: 8px 10px;
+    }}
+    .cuerpo-editorial td {{
+        padding: 6px 10px;
+        border-bottom: 0.5pt solid #e2e8f0;
+    }}
+    .cuerpo-editorial figure,
+    .cuerpo-editorial .mermaid-contenedor,
+    .cuerpo-editorial img,
+    .cuerpo-editorial .table-container,
+    .cuerpo-editorial .indice-final-documento,
+    .cuerpo-editorial .bloque-firma {{
+        break-inside: avoid !important;
+        page-break-inside: avoid !important;
+    }}
+    """
+
     portada_html = ""
     if estilo_maquetacion == "portada":
         portada_html = f"""
@@ -369,7 +622,66 @@ def _generar_html_impresion(
     # Fondo transparente si hay membrete para permitir que PyMuPDF estampe el fondo en toda la hoja A4
     fondo_body_css = "background: transparent !important;" if elementos_membrete else "background: #ffffff;"
 
-    css = f"""
+    portada_css = """
+    .portada-premium {
+        page-break-after: always;
+        min-height: 100%;
+        padding: 2cm 1.5cm;
+        box-sizing: border-box;
+        position: relative;
+        font-family: "Calibri", "Inter", sans-serif;
+    }
+    .portada-premium .portada-banda {
+        height: 6pt;
+        margin-bottom: 2cm;
+    }
+    .portada-premium .portada-tipo {
+        font-size: 10pt;
+        font-weight: 700;
+        letter-spacing: 1.2px;
+        text-transform: uppercase;
+        margin-bottom: 0.6cm;
+    }
+    .portada-premium .portada-titulo {
+        font-size: 20pt;
+        font-weight: 800;
+        line-height: 1.15;
+        margin: 0 0 0.4cm 0;
+    }
+    .portada-premium .portada-memoria {
+        font-size: 12pt;
+        font-weight: 600;
+        margin-bottom: 0.3cm;
+    }
+    .portada-premium .portada-componente {
+        font-size: 11pt;
+        opacity: 0.85;
+        margin-bottom: 1.2cm;
+    }
+    .portada-premium .portada-galeria {
+        display: grid;
+        gap: 8px;
+        margin: 1.2cm 0;
+    }
+    .portada-premium .portada-foto img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 4px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+    }
+    .portada-premium .portada-datos {
+        margin-top: 1.5cm;
+        padding: 1cm;
+        border-radius: 6px;
+        font-size: 10pt;
+        line-height: 1.5;
+    }
+    .portada-premium .portada-datos p {
+        margin: 0.2cm 0;
+    }
+    """
+    css = portada_css + f"""
     @page {{
         size: A4;
         margin: {margen_css};
@@ -939,6 +1251,7 @@ def a_pdf(
     indice_al_final: bool = True,
     plantilla_word: str | Path | None = None,
     zona_cm: dict[str, float] | None = None,
+    portada_premium: dict | None = None,
 ) -> tuple[Path, int, list[str]]:
     """Transforma texto Markdown saneado en un PDF Editorial Profesional de Alta Gama.
 
@@ -972,6 +1285,9 @@ def a_pdf(
     # Resolución robusta de imágenes a Data URI Base64 (docs/mejoras/mejoras_app_01.md)
     texto_conversion = incrustar_imagenes_base64_en_markdown(texto_conversion, destino.parent)
 
+    # Transformación de bloques premium (:::kpi) a HTML crudo (pasa a través de pandoc)
+    texto_conversion = _transformar_kpi_premium(texto_conversion)
+
     exe_chromium = ruta_chromium()
     if exe_chromium is None:
         raise ErrorMotorPDF(
@@ -1004,6 +1320,16 @@ def a_pdf(
         paleta = PALETAS_EDITORIAL_PDF.get(paleta_clave.lower(), PALETAS_EDITORIAL_PDF["pizarra_carbon"])
 
     # 2. Generar fragmento HTML semántico con MathML nativo
+    # Portada premium (primera pagina) si se solicita
+    tiene_portada_premium = bool(portada_premium and portada_premium.get("incluir"))
+    if tiene_portada_premium:
+        pp = portada_premium or {}
+        datos_pp = pp.get("datos", pp)
+        imagenes_pp = pp.get("imagenes", [])
+        tema_pp = pp.get("tema", datos_pp.get("tema", "clasica_blanca"))
+        portada_html = _generar_html_portada_premium(tema_pp, datos_pp, imagenes_pp, paleta)
+        texto_conversion = portada_html + "\n\n" + texto_conversion
+
     html_temp = destino.parent / f"{destino.stem}_temp.html"
     pdf_temp = destino.parent / f"{destino.stem}_crudo.pdf"
 
@@ -1024,6 +1350,13 @@ def a_pdf(
         raise ErrorMotorPDF(f"Error procesando estructura del documento: {detalle}")
 
     cuerpo_html = proc_p.stdout.decode("utf-8", errors="replace")
+
+    # Post-proceso de bloques premium: columnas selectivas (dividir en <hr>)
+    cuerpo_html = _postprocesar_columnas_premium(cuerpo_html)
+
+    # Añadir clase modo-premium al cuerpo si aplica
+    if (modo_diseno or "estandar").lower() in ("premium", "premium_ejecutivo", "ejecutivo"):
+        cuerpo_html = cuerpo_html.replace('<div class="cuerpo-editorial"', '<div class="cuerpo-editorial modo-premium"', 1)
 
     # Supresión estricta de componentes de interfaz de usuario (botones, sidebars, selectores de tema)
     cuerpo_html = re.sub(r'<button\b[^>]*>[\s\S]*?</button>', '', cuerpo_html, flags=re.IGNORECASE)
@@ -1164,7 +1497,7 @@ def a_pdf(
     # Extraer encabezados de la estructura para el árbol de navegación TOC
     encabezados_toc = [(n, t) for n, t, _ in encabezados_meta]
 
-    omitir_portada = (estilo_maquetacion == "portada")
+    omitir_portada = (estilo_maquetacion == "portada") or tiene_portada_premium
     _postprocesar_con_pymupdf(
         ruta_pdf=destino,
         titulo=titulo,
