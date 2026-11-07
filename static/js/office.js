@@ -3230,7 +3230,9 @@ async function refrescarVisorPdfEnVivo() {
       });
 
       if (!resp.ok) {
-        throw new Error(`Error ${resp.status} al compilar PDF`);
+        let detalle = "";
+        try { detalle = (await resp.json()).detail || ""; } catch (_) { /* respuesta no JSON */ }
+        throw new Error(`Error ${resp.status} al compilar PDF${detalle ? ": " + detalle : ""}`);
       }
 
       const blob = await resp.blob();
