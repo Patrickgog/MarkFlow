@@ -280,13 +280,36 @@ class ErrorMotor(RuntimeError):
     """Fallo de un motor de transformación (documento no generado)."""
 
 
+def _candidatos_pandoc_sistema() -> list[Path]:
+    """Ubicaciones habituales de instalación de pandoc (Windows y Unix)."""
+    import os as _os
+    nombre = "pandoc.exe" if _os.name == "nt" else "pandoc"
+    bases = [
+        _os.environ.get("LOCALAPPDATA"),
+        _os.environ.get("ProgramFiles"),
+        _os.environ.get("ProgramFiles(x86)"),
+        _os.environ.get("USERPROFILE"),
+    ]
+    rutas = []
+    for base in bases:
+        if not base:
+            continue
+        rutas.append(Path(base) / "Pandoc" / nombre)
+        rutas.append(Path(base) / "Programs" / "Pandoc" / nombre)
+    rutas += [Path("/usr/bin") / nombre, Path("/usr/local/bin") / nombre]
+    return rutas
+
+
 def ruta_pandoc() -> str | None:
-    """Ejecutable de pandoc disponible (PATH o respaldo local)."""
+    """Ejecutable de pandoc: PATH, respaldo local del proyecto o instalación estándar."""
     en_path = shutil.which("pandoc")
     if en_path:
         return en_path
     if _PANDOC_LOCAL.is_file():
         return str(_PANDOC_LOCAL)
+    for ruta in _candidatos_pandoc_sistema():
+        if ruta.is_file():
+            return str(ruta)
     return None
 
 
