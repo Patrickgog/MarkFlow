@@ -17,13 +17,18 @@
     return [];
   }
 
+  // Solo estas claves son listas de opciones; el resto (defaults, temas_disco,
+  // ui) conserva su forma de objeto tal como la entrega el servidor.
+  const CLAVES_NO_LISTA = new Set(["defaults", "temas_disco", "ui"]);
+
   function normalizarArbol(arbol) {
     const salida = {};
     for (const [formato, seccion] of Object.entries(arbol || {})) {
+      if (formato === "ui") { salida[formato] = seccion; continue; }
       if (!seccion || typeof seccion !== "object") { salida[formato] = seccion; continue; }
       const s = {};
       for (const [clave, valor] of Object.entries(seccion)) {
-        s[clave] = clave === "defaults" ? valor
+        s[clave] = CLAVES_NO_LISTA.has(clave) ? valor
                  : (Array.isArray(valor) || (valor && typeof valor === "object") ? aLista(valor) : valor);
       }
       salida[formato] = s;
@@ -131,6 +136,7 @@
     cargar,
     opciones,
     defaults,
+    ui: (clave) => { const v = estado.datos?.ui?.[clave]; return v === undefined || v === null ? "" : v; },
     get datos() { return estado.datos; },
     // Acceso directo (getters dinámicos desde la API, sin hardcodeo)
     get TEMAS_WORD() { return opciones("word", "temas"); },

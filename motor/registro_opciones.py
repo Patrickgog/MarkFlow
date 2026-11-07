@@ -364,3 +364,86 @@ def obtener_defaults(formato: str) -> dict:
         return dict(REGISTRO_OPCIONES[formato_k].get("defaults", {}))
     return {}
 
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# DEFAULTS Y TEXTOS DE INTERFAZ QUE ANTES ESTABAN ESCRITOS EN office.js
+# Se fusionan en los defaults de cada formato y en la sección "ui" del registro.
+# ─────────────────────────────────────────────────────────────────────────────
+DEFAULTS_EXTRA = {
+    "word": {
+        "color_tit_h1": "#1E3A8A",
+        "color_tit_h2": "#3B82F6",
+        "paleta_tablas": "defecto",
+        "color_tabla_cabecera": "#1E3A8A",
+        "color_tabla_filas": "#F0F4F8",
+        "color_tabla_borde": "#CBD5E1",
+        "tamano_pt": 11,
+    },
+    "html": {"ancho_max": "900px"},
+    "pdf": {"estilo_maquetacion": "informe", "tamanio_pt": 11.0},
+    "excel": {"paleta": "clasico", "ancho_col": "estandar", "fuente_tam": 10},
+}
+
+UI = {
+    "nombre_documento": "documento",
+    "nombre_documento_corto": "doc",
+    "tema_app": "oscuro",
+    "app_inicial": "docs",
+    "etiqueta_exportar_html": "🌐 Exportar .html",
+    "etiqueta_exportar_xlsx": "📥 Exportar Excel (.xlsx)",
+    "sin_respuesta": "(sin respuesta)",
+    "marcador_vacio": "—",
+    "color_relleno_4": "#FFFFFF",
+    "color_relleno_5": "#CBD5E1",
+    "color_h1_defecto": "#111827",
+    "color_titulo_h1": "#1E3A8A",
+    "color_titulo_h2": "#3B82F6",
+    "color_fila_par": "#F0F4F8",
+    "color_borde": "#CBD5E1",
+    "tamanio_h1_pt": 15.0,
+    "tamanio_h2_pt": 14.0,
+    "tamanio_h3_pt": 12.0,
+    "estilo_bordes": "completo",
+    "tema_disco": "tema1",
+    "tema_portada": "clasica_blanca",
+    "ruta_ia_local": "http://localhost:11434",
+    "modelo_ia_local": "llama3",
+    "tema_pdf_pal_defecto": "pizarra_carbon",
+    "color_texto_oscuro": "#111827",
+    "color_texto_claro": "#FFFFFF",
+    "color_cabecera_defecto": "#F1F5F9",
+    "color_fila_par_defecto": "#FFFFFF",
+    "color_borde_defecto": "#9CA3AF",
+    "color_negro_h1": "#000000",
+    "color_negro_h2": "#111111",
+    "color_tinta_negra": "#000000",
+    "tema_html_preview": "defecto",
+    "color_constructor_fondo": "#EFF6FF",
+}
+
+for _formato, _vals in DEFAULTS_EXTRA.items():
+    REGISTRO_OPCIONES[_formato]["defaults"].update(_vals)
+REGISTRO_OPCIONES["ui"] = dict(UI)
+
+
+REGISTRO_OPCIONES["word"]["temas_disco"] = {
+    "tema1": {
+        "id": "tema1", "archivo": "tema1.docx", "nombre": "Tema 1: Memoria Técnica Clásica (tema1.docx)",
+        "fuente": "Calibri", "tamanio_pt": 11.0, "h1_color": "#111827", "h2_color": "#111827", "h3_color": "#111827",
+        "h1_pt": 15.0, "h2_pt": 14.0, "h3_pt": 12.0,
+        "tabla": {"cabecera_bg": "#F2F2F2", "cabecera_txt": "#111827", "fila_par_bg": "#FFFFFF", "borde": "#999999", "estilo_bordes": "exterior"},
+    },
+    "tema2": {
+        "id": "tema2", "archivo": "tema2.docx", "nombre": "Tema 2: Ingeniería Sobria Sin Laterales (tema2.docx)",
+        "fuente": "Calibri", "tamanio_pt": 11.0, "h1_color": "#111827", "h2_color": "#111827", "h3_color": "#111827",
+        "h1_pt": 13.0, "h2_pt": 12.0, "h3_pt": 11.0,
+        "tabla": {"cabecera_bg": "#F8FAFC", "cabecera_txt": "#111827", "fila_par_bg": "#FFFFFF", "borde": "#111827", "estilo_bordes": "horizontal"},
+    },
+    "tema3": {
+        "id": "tema3", "archivo": "tema3.docx", "nombre": "Tema 3: Editorial Azul Acero (tema3.docx)",
+        "fuente": "Calibri", "tamanio_pt": 11.0, "h1_color": "#0F4761", "h2_color": "#0F4761", "h3_color": "#0F4761",
+        "h1_pt": 16.0, "h2_pt": 14.0, "h3_pt": 12.0,
+        "tabla": {"cabecera_bg": "#4F81BD", "cabecera_txt": "#FFFFFF", "fila_par_bg": "#F2F2F2", "borde": "#BFBFBF", "estilo_bordes": "completo"},
+    },
+}

@@ -220,7 +220,6 @@ $("#btn-tema").addEventListener("click", () => {
   const actual = document.documentElement.getAttribute("data-tema");
   aplicarTema(actual === "oscuro" ? "claro" : "oscuro");
 });
-aplicarTema(document.documentElement.getAttribute("data-tema") || "oscuro");
 
 /* ─────────────────────────── Conmutación de apps ─────────────────────────── */
 function abrirApp(nombre) {
@@ -271,7 +270,7 @@ function cancelarSeleccionFusion() {
 
 function sugerirNombreFusion() {
   if (!seleccionadosDocsFusion.length) return "";
-  const primerDoc = (seleccionadosDocsFusion[0] || "doc").replace(/\.md$/i, "");
+  const primerDoc = (seleccionadosDocsFusion[0] || MFORegistro.ui("nombre_documento_corto")).replace(/\.md$/i, "");
   const restantes = seleccionadosDocsFusion.length - 1;
   return `Fusion - ${primerDoc} y ${restantes} mas`;
 }
@@ -530,7 +529,7 @@ async function abrirDocumento(nombre, appDestino = "docs") {
     }
     estado.sucio = false;
     notificar($("#docs-estado"), "cargado", "ok");
-    abrirApp(appDestino || "docs");
+    abrirApp(appDestino || MFORegistro.ui("app_inicial"));
     if (appDestino === "word") {
       renderizarHojaWordPreview().catch((e) => console.error("Error renderizando Word:", e));
     } else if (appDestino === "html") {
@@ -656,7 +655,7 @@ async function guardarDocumento(silencioso = false) {
 }
 
 async function guardarComoDocumento() {
-  const baseActual = ($("#docs-titulo-input")?.value || $("#titulo-documento").value || "documento").trim().replace(/\.md$/i, "");
+  const baseActual = ($("#docs-titulo-input")?.value || $("#titulo-documento").value || MFORegistro.ui("nombre_documento")).trim().replace(/\.md$/i, "");
   const nuevoNombre = prompt("Guardar como (nuevo nombre o copia):", `${baseActual}-copia`);
   if (!nuevoNombre) return;
 
@@ -1268,7 +1267,7 @@ function registrarEntregable(formato, archivo, url, tamano) {
     formato: fNorm,
     archivo: archivo,
     url: url,
-    tamano: tamano || "—",
+    tamano: tamano || MFORegistro.ui("marcador_vacio"),
     hora: new Date().toLocaleTimeString("es", { hour: "2-digit", minute: "2-digit" }),
   };
   entregablesSesion.unshift(nuevo);
@@ -1376,7 +1375,7 @@ function recolectarPortadaPremium() {
   }
   return {
     incluir: true,
-    tema: document.querySelector("#pdf-portada-tema")?.value || "clasica_blanca",
+    tema: document.querySelector("#pdf-portada-tema")?.value || MFORegistro.ui("tema_portada"),
     datos: {
       tipo_documento: document.querySelector("#pdf-portada-tipo-doc")?.value || "",
       titulo_proyecto: document.querySelector("#pdf-portada-titulo")?.value || "",
@@ -1411,6 +1410,11 @@ async function convertirFotosPortada() {
 async function inicializarBarrasLaterales() {
   if (!window.MFORegistro) return;
   try { await window.MFORegistro.cargar(); } catch (e) { console.error("Registro de opciones no disponible:", e); return; }
+  cacheTemasWordDisco = window.MFORegistro.datos?.word?.temas_disco || {};
+  aplicarTema(document.documentElement.getAttribute("data-tema") || MFORegistro.ui("tema_app"));
+  if (!constructorColoresPaleta.length) {
+    constructorColoresPaleta = [MFORegistro.ui("color_titulo_h1"), MFORegistro.ui("color_titulo_h2"), MFORegistro.ui("color_constructor_fondo")];
+  }
 
   // 1. Poblar selects con datos del registro SSOT
   poblarSelect("#word-opt-tema", MFORegistro.TEMAS_WORD);
@@ -1454,32 +1458,32 @@ async function inicializarBarrasLaterales() {
   // 2. Cargar valores persistidos del registro en controles de Word
   const opcWord = MFORegistro.obtenerOpciones("word");
   if ($("#word-opt-tema")) {
-    const temaInicial = (opcWord.tema && opcWord.tema !== "defecto") ? opcWord.tema : "tema1";
+    const temaInicial = (opcWord.tema && opcWord.tema !== "defecto") ? opcWord.tema : MFORegistro.ui("tema_disco");
     $("#word-opt-tema").value = temaInicial;
   }
-  if ($("#word-sel-modo-color-titulos")) $("#word-sel-modo-color-titulos").value = opcWord.modo_color_titulos || "negro";
-  if ($("#word-opt-paleta-titulos")) $("#word-opt-paleta-titulos").value = opcWord.color_titulos || "negro";
-  if ($("#word-picker-tit-h1")) $("#word-picker-tit-h1").value = opcWord.color_tit_h1 || "#1E3A8A";
-  if ($("#word-picker-tit-h2")) $("#word-picker-tit-h2").value = opcWord.color_tit_h2 || "#3B82F6";
+  if ($("#word-sel-modo-color-titulos")) $("#word-sel-modo-color-titulos").value = opcWord.modo_color_titulos || MFORegistro.defaults("word").modo_color_titulos;
+  if ($("#word-opt-paleta-titulos")) $("#word-opt-paleta-titulos").value = opcWord.color_titulos || MFORegistro.defaults("word").color_titulos;
+  if ($("#word-picker-tit-h1")) $("#word-picker-tit-h1").value = opcWord.color_tit_h1 || MFORegistro.defaults("word").color_tit_h1;
+  if ($("#word-picker-tit-h2")) $("#word-picker-tit-h2").value = opcWord.color_tit_h2 || MFORegistro.defaults("word").color_tit_h2;
 
   if ($("#word-opt-paleta-suave-tablas")) $("#word-opt-paleta-suave-tablas").checked = opcWord.paleta_suave_tablas !== false;
-  if ($("#word-opt-paleta-tablas")) $("#word-opt-paleta-tablas").value = opcWord.paleta_tablas || "defecto";
-  if ($("#word-picker-tabla-cabecera")) $("#word-picker-tabla-cabecera").value = opcWord.color_tabla_cabecera || "#1E3A8A";
-  if ($("#word-picker-tabla-filas")) $("#word-picker-tabla-filas").value = opcWord.color_tabla_filas || "#F0F4F8";
-  if ($("#word-picker-tabla-borde")) $("#word-picker-tabla-borde").value = opcWord.color_tabla_borde || "#CBD5E1";
+  if ($("#word-opt-paleta-tablas")) $("#word-opt-paleta-tablas").value = opcWord.paleta_tablas || MFORegistro.defaults("word").paleta_tablas;
+  if ($("#word-picker-tabla-cabecera")) $("#word-picker-tabla-cabecera").value = opcWord.color_tabla_cabecera || MFORegistro.defaults("word").color_tabla_cabecera;
+  if ($("#word-picker-tabla-filas")) $("#word-picker-tabla-filas").value = opcWord.color_tabla_filas || MFORegistro.defaults("word").color_tabla_filas;
+  if ($("#word-picker-tabla-borde")) $("#word-picker-tabla-borde").value = opcWord.color_tabla_borde || MFORegistro.defaults("word").color_tabla_borde;
 
-  if ($("#word-opt-fuente")) $("#word-opt-fuente").value = opcWord.fuente || "Calibri";
-  if ($("#word-opt-tamanio")) $("#word-opt-tamanio").value = String(opcWord.tamano_pt || 11);
-  if ($("#word-opt-interlineado")) $("#word-opt-interlineado").value = String(opcWord.interlineado || "1.0");
-  if ($("#word-opt-alineacion")) $("#word-opt-alineacion").value = opcWord.alineacion || "justificado";
-  if ($("#word-opt-fuente-tabla")) $("#word-opt-fuente-tabla").value = opcWord.fuente_tabla || "heredar";
-  if ($("#word-opt-tamanio-tabla")) $("#word-opt-tamanio-tabla").value = String(opcWord.tamanio_tabla || "10");
-  if ($("#word-opt-pie")) $("#word-opt-pie").value = opcWord.pie_pagina || "";
-  if ($("#word-opt-alineacion-pie")) $("#word-opt-alineacion-pie").value = opcWord.alineacion_pie || "derecha";
+  if ($("#word-opt-fuente")) $("#word-opt-fuente").value = opcWord.fuente || MFORegistro.defaults("word").fuente;
+  if ($("#word-opt-tamanio")) $("#word-opt-tamanio").value = String(opcWord.tamano_pt || MFORegistro.defaults("word").tamano_pt);
+  if ($("#word-opt-interlineado")) $("#word-opt-interlineado").value = String(opcWord.interlineado || MFORegistro.defaults("word").interlineado);
+  if ($("#word-opt-alineacion")) $("#word-opt-alineacion").value = opcWord.alineacion || MFORegistro.defaults("word").alineacion;
+  if ($("#word-opt-fuente-tabla")) $("#word-opt-fuente-tabla").value = opcWord.fuente_tabla || MFORegistro.defaults("word").fuente_tabla;
+  if ($("#word-opt-tamanio-tabla")) $("#word-opt-tamanio-tabla").value = String(opcWord.tamanio_tabla || MFORegistro.defaults("word").tamanio_tabla);
+  if ($("#word-opt-pie")) $("#word-opt-pie").value = opcWord.pie_pagina || MFORegistro.defaults("word").pie_pagina;
+  if ($("#word-opt-alineacion-pie")) $("#word-opt-alineacion-pie").value = opcWord.alineacion_pie || MFORegistro.defaults("word").alineacion_pie;
   if ($("#word-opt-apa7")) $("#word-opt-apa7").checked = !!opcWord.normas_apa;
   if ($("#word-opt-num-eq")) $("#word-opt-num-eq").checked = !!opcWord.numerar_ecuaciones;
   if ($("#word-opt-toc")) $("#word-opt-toc").checked = !!opcWord.indice_toc;
-  if ($("#word-opt-posicion-indice")) $("#word-opt-posicion-indice").value = opcWord.posicion_indice || "inicio";
+  if ($("#word-opt-posicion-indice")) $("#word-opt-posicion-indice").value = opcWord.posicion_indice || MFORegistro.defaults("word").posicion_indice;
   if ($("#word-opt-num-pag")) $("#word-opt-num-pag").checked = opcWord.numerar_paginas !== false;
   if ($("#word-opt-hoja-membrete") && opcWord.plantilla_word) {
     $("#word-opt-hoja-membrete").value = opcWord.plantilla_word;
@@ -1492,25 +1496,25 @@ async function inicializarBarrasLaterales() {
 
   // 3. Cargar valores en HTML
   const opcHtml = MFORegistro.obtenerOpciones("html");
-  if ($("#html-opt-tema")) $("#html-opt-tema").value = opcHtml.tema || "defecto";
-  if ($("#html-opt-paleta")) $("#html-opt-paleta").value = opcHtml.paleta_tricolor || "tema_default";
-  if ($("#html-opt-ancho")) $("#html-opt-ancho").value = opcHtml.ancho_max || "900px";
-  if ($("#html-opt-fuente")) $("#html-opt-fuente").value = opcHtml.fuente || "system-ui, -apple-system, sans-serif";
+  if ($("#html-opt-tema")) $("#html-opt-tema").value = opcHtml.tema || MFORegistro.defaults("html").tema;
+  if ($("#html-opt-paleta")) $("#html-opt-paleta").value = opcHtml.paleta_tricolor || MFORegistro.defaults("html").paleta_tricolor;
+  if ($("#html-opt-ancho")) $("#html-opt-ancho").value = opcHtml.ancho_max || MFORegistro.defaults("html").ancho_max;
+  if ($("#html-opt-fuente")) $("#html-opt-fuente").value = opcHtml.fuente || MFORegistro.defaults("html").fuente;
   if ($("#html-opt-justificado")) $("#html-opt-justificado").checked = opcHtml.justificado !== false;
   if ($("#html-opt-num-eq")) $("#html-opt-num-eq").checked = !!opcHtml.numerar_ecuaciones;
-  if ($("#html-opt-footer-izq")) $("#html-opt-footer-izq").value = opcHtml.footer_izq || "MarkFlow AI 2026";
-  if ($("#html-opt-footer-der")) $("#html-opt-footer-der").value = opcHtml.footer_der || "";
+  if ($("#html-opt-footer-izq")) $("#html-opt-footer-izq").value = opcHtml.footer_izq || MFORegistro.defaults("html").footer_izq;
+  if ($("#html-opt-footer-der")) $("#html-opt-footer-der").value = opcHtml.footer_der || MFORegistro.defaults("html").footer_der;
 
   // 4. Cargar valores en PDF
   const opcPdf = MFORegistro.obtenerOpciones("pdf");
-  if ($("#pdf-opt-paleta")) $("#pdf-opt-paleta").value = opcPdf.paleta || "pizarra_carbon";
-  if ($("#pdf-opt-estilo")) $("#pdf-opt-estilo").value = opcPdf.estilo_maquetacion || "informe";
-  if ($("#pdf-opt-modo-diseno")) $("#pdf-opt-modo-diseno").value = opcPdf.modo_columnas || "estandar";
-  if ($("#pdf-opt-fuente")) $("#pdf-opt-fuente").value = opcPdf.fuente || "Calibri";
+  if ($("#pdf-opt-paleta")) $("#pdf-opt-paleta").value = opcPdf.paleta || MFORegistro.defaults("pdf").paleta;
+  if ($("#pdf-opt-estilo")) $("#pdf-opt-estilo").value = opcPdf.estilo_maquetacion || MFORegistro.defaults("pdf").estilo_maquetacion;
+  if ($("#pdf-opt-modo-diseno")) $("#pdf-opt-modo-diseno").value = opcPdf.modo_columnas || MFORegistro.defaults("pdf").modo_columnas;
+  if ($("#pdf-opt-fuente")) $("#pdf-opt-fuente").value = opcPdf.fuente || MFORegistro.defaults("pdf").fuente;
   if ($("#pdf-opt-tamanio")) $("#pdf-opt-tamanio").value = String(opcPdf.tamanio ?? opcPdf.tamanio_pt ?? 11);
-  if ($("#pdf-opt-interlineado")) $("#pdf-opt-interlineado").value = String(opcPdf.interlineado || 1.15);
+  if ($("#pdf-opt-interlineado")) $("#pdf-opt-interlineado").value = String(opcPdf.interlineado || MFORegistro.defaults("pdf").interlineado);
   if ($("#pdf-opt-justificado")) $("#pdf-opt-justificado").checked = opcPdf.justificado !== false;
-  if ($("#pdf-opt-pie")) $("#pdf-opt-pie").value = opcPdf.pie_pagina || "";
+  if ($("#pdf-opt-pie")) $("#pdf-opt-pie").value = opcPdf.pie_pagina || MFORegistro.defaults("pdf").pie_pagina;
   if ($("#pdf-opt-salto-cap")) $("#pdf-opt-salto-cap").checked = opcPdf.salto_capitulo !== false;
   if ($("#pdf-opt-running-header")) $("#pdf-opt-running-header").checked = opcPdf.running_header !== false;
   if ($("#pdf-opt-num-pag")) $("#pdf-opt-num-pag").checked = opcPdf.numerar_paginas !== false;
@@ -1522,10 +1526,10 @@ async function inicializarBarrasLaterales() {
 
   // 5. Cargar valores en Excel
   const opcExcel = MFORegistro.obtenerOpciones("excel");
-  if ($("#excel-opt-paleta")) $("#excel-opt-paleta").value = opcExcel.paleta || "clasico";
-  if ($("#excel-opt-ancho-col")) $("#excel-opt-ancho-col").value = opcExcel.ancho_col || "estandar";
-  if ($("#excel-opt-fuente-tam")) $("#excel-opt-fuente-tam").value = String(opcExcel.fuente_tam || 10);
-  if ($("#excel-opt-modo-hojas")) $("#excel-opt-modo-hojas").value = opcExcel.modo_hojas || "multi_hoja";
+  if ($("#excel-opt-paleta")) $("#excel-opt-paleta").value = opcExcel.paleta || MFORegistro.defaults("excel").paleta;
+  if ($("#excel-opt-ancho-col")) $("#excel-opt-ancho-col").value = opcExcel.ancho_col || MFORegistro.defaults("excel").ancho_col;
+  if ($("#excel-opt-fuente-tam")) $("#excel-opt-fuente-tam").value = String(opcExcel.fuente_tam || MFORegistro.defaults("excel").fuente_tam);
+  if ($("#excel-opt-modo-hojas")) $("#excel-opt-modo-hojas").value = opcExcel.modo_hojas || MFORegistro.defaults("excel").modo_hojas;
   if ($("#excel-opt-gridlines")) $("#excel-opt-gridlines").checked = opcExcel.gridlines !== false;
   if ($("#excel-opt-autofit")) $("#excel-opt-autofit").checked = opcExcel.autofit !== false;
 
@@ -1540,7 +1544,7 @@ async function inicializarBarrasLaterales() {
 }
 
 function actualizarVisibilidadTemaWord() {
-  const tema = $("#word-opt-tema")?.value || "defecto";
+  const tema = $("#word-opt-tema")?.value || MFORegistro.defaults("word").tema;
   const esNativo = ["tema1", "tema2", "tema3"].includes(tema);
   const esPersonalizado = tema === "personalizado";
 
@@ -1558,7 +1562,7 @@ function actualizarVisibilidadTemaWord() {
   // Visibilidad títulos
   const contPalTitSelect = $("#contenedor-paleta-titulos-select");
   const contPickersTitCustom = $("#contenedor-pickers-titulos-custom");
-  const modoTit = selModoTit?.value || "negro";
+  const modoTit = selModoTit?.value || MFORegistro.defaults("word").modo_color_titulos;
 
   if (esNativo) {
     if (contPalTitSelect) contPalTitSelect.style.display = "none";
@@ -1655,17 +1659,17 @@ function guardarOpcionesWord() {
     color_tabla_filas: $("#word-picker-tabla-filas")?.value,
     color_tabla_borde: $("#word-picker-tabla-borde")?.value,
     fuente: $("#word-opt-fuente")?.value,
-    tamano_pt: parseInt($("#word-opt-tamanio")?.value || "11", 10),
-    interlineado: parseFloat($("#word-opt-interlineado")?.value || "1.0"),
-    alineacion: $("#word-opt-alineacion")?.value || "justificado",
-    fuente_tabla: $("#word-opt-fuente-tabla")?.value || "heredar",
-    tamanio_tabla: $("#word-opt-tamanio-tabla")?.value || "10",
+    tamano_pt: parseInt($("#word-opt-tamanio")?.value || MFORegistro.defaults("word").tamanio, 10),
+    interlineado: parseFloat($("#word-opt-interlineado")?.value || MFORegistro.defaults("word").interlineado),
+    alineacion: $("#word-opt-alineacion")?.value || MFORegistro.defaults("word").alineacion,
+    fuente_tabla: $("#word-opt-fuente-tabla")?.value || MFORegistro.defaults("word").fuente_tabla,
+    tamanio_tabla: $("#word-opt-tamanio-tabla")?.value || MFORegistro.defaults("word").tamanio_tabla,
     pie_pagina: $("#word-opt-pie")?.value,
-    alineacion_pie: $("#word-opt-alineacion-pie")?.value || "derecha",
+    alineacion_pie: $("#word-opt-alineacion-pie")?.value || MFORegistro.defaults("word").alineacion_pie,
     normas_apa: $("#word-opt-apa7")?.checked,
     numerar_ecuaciones: $("#word-opt-num-eq")?.checked,
     indice_toc: $("#word-opt-toc")?.checked,
-    posicion_indice: $("#word-opt-posicion-indice")?.value || "inicio",
+    posicion_indice: $("#word-opt-posicion-indice")?.value || MFORegistro.defaults("word").posicion_indice,
     numerar_paginas: $("#word-opt-num-pag")?.checked,
     plantilla_word: $("#word-opt-hoja-membrete")?.value || "",
   });
@@ -1776,7 +1780,7 @@ function configurarToggleSidebar(formato) {
 }
 
 /* ─────────────────── Modal de Paletas Personalizadas (Fase 2) ─────────────────── */
-let constructorColoresPaleta = ["#1E3A8A", "#3B82F6", "#EFF6FF"];
+let constructorColoresPaleta = [];
 
 function inicializarModalPaletasPersonalizadas() {
   const modal = $("#modal-paletas-personalizadas");
@@ -1950,8 +1954,8 @@ function inicializarModalPaletasPersonalizadas() {
         const c1 = pal.colores[0];
         const c2 = pal.colores[1];
         const c3 = pal.colores[2] || pal.colores[1];
-        const c4 = pal.colores[3] || "#FFFFFF";
-        const c5 = pal.colores[4] || "#CBD5E1";
+        const c4 = pal.colores[3] || MFORegistro.ui("color_relleno_4");
+        const c5 = pal.colores[4] || MFORegistro.ui("color_relleno_5");
         const tricolorCadena = `${c1}|${c2}|${c3}`;
 
         // 1. Aplicar a Word
@@ -2045,50 +2049,7 @@ function inicializarModalPaletasPersonalizadas() {
   }
 }
 
-let cacheTemasWordDisco = {
-  tema1: {
-    id: "tema1",
-    archivo: "tema1.docx",
-    nombre: "Tema 1: Memoria Técnica Clásica (tema1.docx)",
-    fuente: "Calibri",
-    tamanio_pt: 11.0,
-    h1_color: "#111827",
-    h2_color: "#111827",
-    h3_color: "#111827",
-    h1_pt: 15.0,
-    h2_pt: 14.0,
-    h3_pt: 12.0,
-    tabla: { cabecera_bg: "#F2F2F2", cabecera_txt: "#111827", fila_par_bg: "#FFFFFF", borde: "#999999", estilo_bordes: "exterior" }
-  },
-  tema2: {
-    id: "tema2",
-    archivo: "tema2.docx",
-    nombre: "Tema 2: Ingeniería Sobria Sin Laterales (tema2.docx)",
-    fuente: "Calibri",
-    tamanio_pt: 11.0,
-    h1_color: "#111827",
-    h2_color: "#111827",
-    h3_color: "#111827",
-    h1_pt: 13.0,
-    h2_pt: 12.0,
-    h3_pt: 11.0,
-    tabla: { cabecera_bg: "#F8FAFC", cabecera_txt: "#111827", fila_par_bg: "#FFFFFF", borde: "#111827", estilo_bordes: "horizontal" }
-  },
-  tema3: {
-    id: "tema3",
-    archivo: "tema3.docx",
-    nombre: "Tema 3: Editorial Azul Acero (tema3.docx)",
-    fuente: "Calibri",
-    tamanio_pt: 11.0,
-    h1_color: "#0F4761",
-    h2_color: "#0F4761",
-    h3_color: "#0F4761",
-    h1_pt: 16.0,
-    h2_pt: 14.0,
-    h3_pt: 12.0,
-    tabla: { cabecera_bg: "#4F81BD", cabecera_txt: "#FFFFFF", fila_par_bg: "#F2F2F2", borde: "#BFBFBF", estilo_bordes: "completo" }
-  }
-};
+let cacheTemasWordDisco = {}; // se rellena desde el registro al inicializar (word.temas_disco)
 
 async function consultarAnalisisMembrete(nombreArchivo) {
   const contZona = $("#contenedor-zona-membrete");
@@ -2298,7 +2259,7 @@ async function cargarTemasWordDesdeDisco() {
 
     const selTema = $("#word-opt-tema");
     if (selTema) {
-      const valActual = selTema.value || "tema1";
+      const valActual = selTema.value || MFORegistro.ui("tema_disco");
       selTema.innerHTML = lista.map((t) => `<option value="${t.id}">${escapeHtml(t.nombre)}</option>`).join("") +
         `<option value="personalizado">🎨 Tema Personalizado (Habilita paleta y colores)</option>`;
       if (selTema.querySelector(`option[value="${valActual}"]`)) {
@@ -2345,8 +2306,8 @@ function poblarPaletasPersonalizadasEnSelects() {
       const c1 = pal.colores[0];
       const c2 = pal.colores[1];
       const c3 = pal.colores[2] || pal.colores[1];
-      const c4 = pal.colores[3] || "#FFFFFF";
-      const c5 = pal.colores[4] || "#CBD5E1";
+      const c4 = pal.colores[3] || MFORegistro.ui("color_relleno_4");
+      const c5 = pal.colores[4] || MFORegistro.ui("color_relleno_5");
       const val = `${c1}|${c2}|${c3}|${c4}|${c5}`;
       if (!selWordTab.querySelector(`option[value="${val}"]`)) {
         const opt = document.createElement("option");
@@ -2395,8 +2356,8 @@ function poblarPaletasPersonalizadasEnSelects() {
       const c1 = pal.colores[0];
       const c2 = pal.colores[1];
       const c3 = pal.colores[2] || pal.colores[1];
-      const c4 = pal.colores[3] || "#FFFFFF";
-      const c5 = pal.colores[4] || "#CBD5E1";
+      const c4 = pal.colores[3] || MFORegistro.ui("color_relleno_4");
+      const c5 = pal.colores[4] || MFORegistro.ui("color_relleno_5");
       const val = `${c1}|${c2}|${c3}|${c4}|${c5}`;
       if (!selExcel.querySelector(`option[value="${val}"]`)) {
         const opt = document.createElement("option");
@@ -2558,9 +2519,9 @@ function registrarListenersReactivos() {
         estilo_maquetacion: $("#pdf-opt-estilo")?.value,
         modo_columnas: $("#pdf-opt-modo-diseno")?.value,
         fuente: $("#pdf-opt-fuente")?.value,
-        tamanio_pt: parseFloat($("#pdf-opt-tamanio")?.value || "11"),
+        tamanio_pt: parseFloat($("#pdf-opt-tamanio")?.value || MFORegistro.defaults("pdf").tamanio),
         justificado: $("#pdf-opt-justificado")?.checked ?? true,
-        interlineado: parseFloat($("#pdf-opt-interlineado")?.value || "1.15"),
+        interlineado: parseFloat($("#pdf-opt-interlineado")?.value || MFORegistro.defaults("pdf").interlineado),
         pie_pagina: $("#pdf-opt-pie")?.value,
         salto_capitulo: $("#pdf-opt-salto-cap")?.checked,
         running_header: $("#pdf-opt-running-header")?.checked,
@@ -2596,7 +2557,7 @@ function registrarListenersReactivos() {
       MFORegistro.guardarOpciones("excel", {
         paleta: $("#excel-opt-paleta")?.value,
         ancho_col: $("#excel-opt-ancho-col")?.value,
-        fuente_tam: parseInt($("#excel-opt-fuente-tam")?.value || "10", 10),
+        fuente_tam: parseInt($("#excel-opt-fuente-tam")?.value || MFORegistro.defaults("excel").fuente_tam, 10),
         modo_hojas: $("#excel-opt-modo-hojas")?.value,
         gridlines: $("#excel-opt-gridlines")?.checked,
         autofit: $("#excel-opt-autofit")?.checked,
@@ -2633,7 +2594,7 @@ async function renderizarHojaWordPreview() {
   if (!contenedorPaginas) return;
 
   const md = await obtenerMarkdownActual();
-  const nombreDoc = $("#titulo-documento").value.trim() || "documento";
+  const nombreDoc = $("#titulo-documento").value.trim() || MFORegistro.ui("nombre_documento");
 
   if (!md.trim()) {
     contenedorPaginas.innerHTML = `
@@ -2649,20 +2610,20 @@ async function renderizarHojaWordPreview() {
   }
 
   const opc = window.MFORegistro ? MFORegistro.obtenerOpciones("word") : {};
-  const temaWord = $("#word-opt-tema")?.value || opc.tema || "defecto";
-  const fuenteWord = $("#word-opt-fuente")?.value || opc.fuente || "Calibri";
-  const tamanoPt = parseFloat($("#word-opt-tamanio")?.value || opc.tamano_pt || "11");
-  const interlineado = parseFloat($("#word-opt-interlineado")?.value || opc.interlineado || "1.0");
-  const alineacion = $("#word-opt-alineacion")?.value || opc.alineacion || "justificado";
-  const pieTexto = $("#word-opt-pie")?.value || opc.pie_pagina || "";
-  const alineacionPie = $("#word-opt-alineacion-pie")?.value || opc.alineacion_pie || "derecha";
+  const temaWord = $("#word-opt-tema")?.value || opc.tema || MFORegistro.defaults("word").tema;
+  const fuenteWord = $("#word-opt-fuente")?.value || opc.fuente || MFORegistro.defaults("word").fuente;
+  const tamanoPt = parseFloat($("#word-opt-tamanio")?.value || opc.tamano_pt || MFORegistro.defaults("word").tamano_pt);
+  const interlineado = parseFloat($("#word-opt-interlineado")?.value || opc.interlineado || MFORegistro.defaults("word").interlineado);
+  const alineacion = $("#word-opt-alineacion")?.value || opc.alineacion || MFORegistro.defaults("word").alineacion;
+  const pieTexto = $("#word-opt-pie")?.value || opc.pie_pagina || MFORegistro.defaults("word").pie_pagina;
+  const alineacionPie = $("#word-opt-alineacion-pie")?.value || opc.alineacion_pie || MFORegistro.defaults("word").alineacion_pie;
   const normasApa = $("#word-opt-apa7")?.checked ?? !!opc.normas_apa;
   const numerarEcuaciones = $("#word-opt-num-eq")?.checked ?? !!opc.numerar_ecuaciones;
   const crearIndice = $("#word-opt-toc")?.checked ?? !!opc.indice_toc;
-  const posicionIndice = $("#word-opt-posicion-indice")?.value || opc.posicion_indice || "inicio";
+  const posicionIndice = $("#word-opt-posicion-indice")?.value || opc.posicion_indice || MFORegistro.defaults("word").posicion_indice;
   const numerarPaginas = $("#word-opt-num-pag")?.checked ?? (opc.numerar_paginas !== false);
-  const fuenteTabla = $("#word-opt-fuente-tabla")?.value || opc.fuente_tabla || "heredar";
-  const tamanioTabla = $("#word-opt-tamanio-tabla")?.value || opc.tamanio_tabla || "10";
+  const fuenteTabla = $("#word-opt-fuente-tabla")?.value || opc.fuente_tabla || MFORegistro.defaults("word").fuente_tabla;
+  const tamanioTabla = $("#word-opt-tamanio-tabla")?.value || opc.tamanio_tabla || MFORegistro.defaults("word").tamanio_tabla;
 
   // Validar existencia del tema cuando no es personalizado ni defecto
   const temaClean = (temaWord || "").toLowerCase();
@@ -2675,64 +2636,52 @@ async function renderizarHojaWordPreview() {
   }
 
   // 1. Cálculo del color y tamaño de títulos fiel a templates/temas_word/*.docx y motor/a_docx.py
-  let hexH1 = "#111827";
-  let hexH2H3 = "#111827";
+  let hexH1 = MFORegistro.ui("color_h1_defecto");
+  let hexH2H3 = MFORegistro.ui("color_h1_defecto");
   let h1Pt = 15.0;
   let h2Pt = 14.0;
   let h3Pt = 12.0;
-  const modoTit = $("#word-sel-modo-color-titulos")?.value || opc.modo_color_titulos || "negro";
+  const modoTit = $("#word-sel-modo-color-titulos")?.value || opc.modo_color_titulos || MFORegistro.defaults("word").modo_color_titulos;
 
   if (infoTemaDisco) {
-    hexH1 = infoTemaDisco.h1_color || "#111827";
-    hexH2H3 = infoTemaDisco.h2_color || infoTemaDisco.h1_color || "#111827";
-    h1Pt = infoTemaDisco.h1_pt || 15.0;
-    h2Pt = infoTemaDisco.h2_pt || 14.0;
-    h3Pt = infoTemaDisco.h3_pt || 12.0;
+    hexH1 = infoTemaDisco.h1_color || MFORegistro.ui("color_h1_defecto");
+    hexH2H3 = infoTemaDisco.h2_color || infoTemaDisco.h1_color || MFORegistro.ui("color_h1_defecto");
+    h1Pt = infoTemaDisco.h1_pt || MFORegistro.ui("tamanio_h1_pt");
+    h2Pt = infoTemaDisco.h2_pt || MFORegistro.ui("tamanio_h2_pt");
+    h3Pt = infoTemaDisco.h3_pt || MFORegistro.ui("tamanio_h3_pt");
   } else {
     if (modoTit === "personalizado") {
-      hexH1 = $("#word-picker-tit-h1")?.value || opc.color_tit_h1 || "#1E3A8A";
-      hexH2H3 = $("#word-picker-tit-h2")?.value || opc.color_tit_h2 || "#3B82F6";
+      hexH1 = $("#word-picker-tit-h1")?.value || opc.color_tit_h1 || MFORegistro.defaults("word").color_tit_h1;
+      hexH2H3 = $("#word-picker-tit-h2")?.value || opc.color_tit_h2 || MFORegistro.defaults("word").color_tit_h2;
     } else if (modoTit === "paleta") {
-      const palTit = $("#word-opt-paleta-titulos")?.value || opc.color_titulos || "negro";
-      const mapaPal = {
-        "negro": ["#000000", "#111111"],
-        "azul": ["#1E3A8A", "#2563EB"],
-        "corporate-blue": ["#003366", "#205081"],
-        "emerald-tech": ["#046A38", "#1F8A53"],
-        "slate-modern": ["#2F4F4F", "#4A6B6B"],
-        "burgundy-classic": ["#6B1426", "#85223A"],
-      };
-      if (mapaPal[palTit]) {
-        hexH1 = mapaPal[palTit][0];
-        hexH2H3 = mapaPal[palTit][1];
+      const palTit = $("#word-opt-paleta-titulos")?.value || opc.color_titulos || MFORegistro.defaults("word").color_titulos;
+      const paletaTit = MFORegistro.opciones("word", "paletas_titulos").find(p => p.valor === palTit);
+      if (paletaTit && Array.isArray(paletaTit.colores) && paletaTit.colores.length >= 2) {
+        hexH1 = paletaTit.colores[0];
+        hexH2H3 = paletaTit.colores[1];
       } else if (palTit.includes("|")) {
         const partes = palTit.split("|").map(s => s.trim());
-        hexH1 = partes[0] || "#1E3A8A";
+        hexH1 = partes[0] || MFORegistro.ui("color_titulo_h1");
         hexH2H3 = partes[1] || hexH1;
       }
     } else {
-      hexH1 = "#000000";
-      hexH2H3 = "#111111";
+      hexH1 = MFORegistro.ui("color_negro_h1");
+      hexH2H3 = MFORegistro.ui("color_negro_h2");
     }
   }
 
   // 2. Cálculo de paleta y estilos de tablas/cuadros fiel a motor/a_docx.py
-  const paletasTablaRegistro = {
-    defecto: { cabecera: "#F1F5F9", par: "#FFFFFF", borde: "#9CA3AF", texto: "#111827" },
-    gris_ejecutivo: { cabecera: "#E5E7EB", par: "#F9FAFB", borde: "#6B7280", texto: "#111827" },
-    salvia_suave: { cabecera: "#E6F0EB", par: "#F5FAF7", borde: "#A3C4B3", texto: "#1E3A2B" },
-    crema_neutro: { cabecera: "#F8F5EE", par: "#FDFBF7", borde: "#CFC4B0", texto: "#2D2A26" },
-    ceniza_formal: { cabecera: "#EBECEF", par: "#F7F8F9", borde: "#B4B8C2", texto: "#1A1D23" },
-    azul_acero_suave: { cabecera: "#E8EEF5", par: "#F6F9FC", borde: "#ADC3DC", texto: "#1E2D3D" }
-  };
+  const paletasTablaRegistro = Object.fromEntries(
+    MFORegistro.opciones("word", "paletas_tablas").map(p => [p.valor, { cabecera: p.cabecera, par: p.par, borde: p.borde }])
+  );
 
   const paletaSuaveActiva = $("#word-opt-paleta-suave-tablas")?.checked ?? (opc.paleta_suave_tablas !== false);
-  const clavePaleta = $("#word-opt-paleta-tablas")?.value || opc.paleta_tablas || "defecto";
+  const clavePaleta = $("#word-opt-paleta-tablas")?.value || opc.paleta_tablas || MFORegistro.defaults("word").paleta_tablas;
 
-  let cabeceraBg = "#F1F5F9";
-  let filaParBg = "#FFFFFF";
-  let bordeTabla = "#9CA3AF";
-  let cabeceraTxt = "#111827";
+  let cabeceraBg = MFORegistro.ui("color_cabecera_defecto");
+  let filaParBg = MFORegistro.ui("color_fila_par_defecto");
+  let bordeTabla = MFORegistro.ui("color_borde_defecto");
+  let cabeceraTxt = MFORegistro.ui("color_texto_oscuro");
   let estiloBordesTabla = "completo";
 
   function calcularTextoContraste(hexColor) {
@@ -2741,9 +2690,9 @@ async function renderizarHojaWordPreview() {
       const r = parseInt(hexNum.substring(0, 2), 16);
       const g = parseInt(hexNum.substring(2, 4), 16);
       const b = parseInt(hexNum.substring(4, 6), 16);
-      return (r * 0.299 + g * 0.587 + b * 0.114 < 145) ? "#FFFFFF" : "#111827";
+      return (r * 0.299 + g * 0.587 + b * 0.114 < 145) ? MFORegistro.ui("color_texto_claro") : MFORegistro.ui("color_texto_oscuro");
     }
-    return "#111827";
+    return MFORegistro.ui("color_texto_oscuro");
   }
 
   if (infoTemaDisco && infoTemaDisco.tabla) {
@@ -2751,24 +2700,24 @@ async function renderizarHojaWordPreview() {
     cabeceraTxt = infoTemaDisco.tabla.cabecera_txt || calcularTextoContraste(cabeceraBg);
     filaParBg = infoTemaDisco.tabla.fila_par_bg;
     bordeTabla = infoTemaDisco.tabla.borde;
-    estiloBordesTabla = infoTemaDisco.tabla.estilo_bordes || "completo";
+    estiloBordesTabla = infoTemaDisco.tabla.estilo_bordes || MFORegistro.ui("estilo_bordes");
   } else if (!paletaSuaveActiva) {
-    cabeceraBg = $("#word-picker-tabla-cabecera")?.value || opc.color_tabla_cabecera || "#1E3A8A";
-    filaParBg = $("#word-picker-tabla-filas")?.value || opc.color_tabla_filas || "#F0F4F8";
-    bordeTabla = $("#word-picker-tabla-borde")?.value || opc.color_tabla_borde || "#CBD5E1";
+    cabeceraBg = $("#word-picker-tabla-cabecera")?.value || opc.color_tabla_cabecera || MFORegistro.defaults("word").color_tabla_cabecera;
+    filaParBg = $("#word-picker-tabla-filas")?.value || opc.color_tabla_filas || MFORegistro.defaults("word").color_tabla_filas;
+    bordeTabla = $("#word-picker-tabla-borde")?.value || opc.color_tabla_borde || MFORegistro.defaults("word").color_tabla_borde;
     cabeceraTxt = calcularTextoContraste(cabeceraBg);
   } else if (clavePaleta.includes("|")) {
     const partesT = clavePaleta.split("|").map(s => s.trim());
-    cabeceraBg = partesT[0] || "#1E3A8A";
-    filaParBg = partesT[2] || partesT[1] || "#F0F4F8";
-    bordeTabla = partesT[4] || "#CBD5E1";
+    cabeceraBg = partesT[0] || MFORegistro.ui("color_titulo_h1");
+    filaParBg = partesT[2] || partesT[1] || MFORegistro.ui("color_fila_par");
+    bordeTabla = partesT[4] || MFORegistro.ui("color_borde");
     cabeceraTxt = calcularTextoContraste(cabeceraBg);
   } else if (paletasTablaRegistro[clavePaleta]) {
     const p = paletasTablaRegistro[clavePaleta];
     cabeceraBg = p.cabecera;
     filaParBg = p.par;
     bordeTabla = p.borde;
-    cabeceraTxt = p.texto;
+    cabeceraTxt = calcularTextoContraste(p.cabecera);
   }
 
   const cssFuenteTabla = (fuenteTabla && fuenteTabla !== "heredar") ? `'${fuenteTabla}', Calibri, sans-serif` : "inherit";
@@ -2778,7 +2727,7 @@ async function renderizarHojaWordPreview() {
     const resp = await fetch("/api/render-preview", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ texto: md, markdown: md, titulo: nombreDoc, tema_html: "defecto" }),
+      body: JSON.stringify({ texto: md, markdown: md, titulo: nombreDoc, tema_html: MFORegistro.ui("tema_html_preview") }),
     });
     const res = await resp.json();
     if (res.ok && res.datos && res.datos.html) {
@@ -3224,7 +3173,7 @@ let blobUrlPdfActual = null;
 async function refrescarVisorPdfEnVivo() {
   if (!window.MFOPDF) return;
   const md = await obtenerMarkdownActual();
-  const nombreDoc = ($("#titulo-documento").value.trim() || "documento").replace(/\.pdf$/i, "");
+  const nombreDoc = ($("#titulo-documento").value.trim() || MFORegistro.ui("nombre_documento")).replace(/\.pdf$/i, "");
   const opc = window.MFORegistro ? MFORegistro.obtenerOpciones("pdf") : {};
   const estadoEl = $("#pdf-estado");
   const vacioTexto = $("#pdf-vacio-texto");
@@ -3259,20 +3208,20 @@ async function refrescarVisorPdfEnVivo() {
         body: JSON.stringify({
           nombre: nombreDoc,
           markdown: md,
-          tema_pdf: $("#pdf-opt-paleta")?.value || opc.paleta || "pizarra_carbon",
+          tema_pdf: $("#pdf-opt-paleta")?.value || opc.paleta || MFORegistro.defaults("pdf").paleta,
           plantilla_word: plantillaPdfSel,
           zona_top: zonaPdfTop,
           zona_bottom: zonaPdfBottom,
           zona_left: zonaPdfLeft,
           zona_right: zonaPdfRight,
-          estilo_maquetacion: $("#pdf-opt-estilo")?.value || opc.estilo_maquetacion || "informe",
-          modo_columnas: $("#pdf-opt-modo-diseno")?.value || opc.modo_columnas || "estandar",
-          tamanio_pt: parseFloat($("#pdf-opt-tamanio")?.value || opc.tamanio_pt || "11"),
+          estilo_maquetacion: $("#pdf-opt-estilo")?.value || opc.estilo_maquetacion || MFORegistro.defaults("pdf").estilo_maquetacion,
+          modo_columnas: $("#pdf-opt-modo-diseno")?.value || opc.modo_columnas || MFORegistro.defaults("pdf").modo_columnas,
+          tamanio_pt: parseFloat($("#pdf-opt-tamanio")?.value || opc.tamanio_pt || MFORegistro.defaults("pdf").tamanio_pt),
           justificado: $("#pdf-opt-justificado") ? $("#pdf-opt-justificado").checked : (opc.justificado !== false),
           portada_premium: await (async () => { const _pp = recolectarPortadaPremium(); if (_pp) _pp.imagenes = await convertirFotosPortada(); return _pp; })(),
-          fuente: $("#pdf-opt-fuente")?.value || opc.fuente || "Calibri",
-          interlineado: parseFloat($("#pdf-opt-interlineado")?.value || opc.interlineado || "1.15"),
-          pie_pagina: $("#pdf-opt-pie") ? $("#pdf-opt-pie").value : (opc.pie_pagina || ""),
+          fuente: $("#pdf-opt-fuente")?.value || opc.fuente || MFORegistro.defaults("pdf").fuente,
+          interlineado: parseFloat($("#pdf-opt-interlineado")?.value || opc.interlineado || MFORegistro.defaults("pdf").interlineado),
+          pie_pagina: $("#pdf-opt-pie") ? $("#pdf-opt-pie").value : (opc.pie_pagina || MFORegistro.defaults("pdf").pie_pagina),
           salto_capitulo: $("#pdf-opt-salto-cap") ? $("#pdf-opt-salto-cap").checked : (opc.salto_capitulo !== false),
           running_header: $("#pdf-opt-running-header") ? $("#pdf-opt-running-header").checked : (opc.running_header !== false),
           numerar_paginas: $("#pdf-opt-num-pag") ? $("#pdf-opt-num-pag").checked : (opc.numerar_paginas !== false),
@@ -3314,7 +3263,7 @@ async function ejecutarExportarWord() {
     return;
   }
 
-  const nombreBase = ($("#titulo-documento").value.trim() || "documento").replace(/\.docx$/i, "");
+  const nombreBase = ($("#titulo-documento").value.trim() || MFORegistro.ui("nombre_documento")).replace(/\.docx$/i, "");
   const opc = window.MFORegistro ? MFORegistro.obtenerOpciones("word") : {};
 
   [btnHeader, btnSidebar].forEach(b => {
@@ -3323,22 +3272,22 @@ async function ejecutarExportarWord() {
   if (estadoEl) estadoEl.textContent = "Generando archivo .docx con motor profesional…";
 
   try {
-    const modoColorTit = $("#word-sel-modo-color-titulos")?.value || opc.modo_color_titulos || "negro";
-    let colorTitulosVal = "negro";
-    let colH1 = "#000000";
-    let colH2 = "#000000";
+    const modoColorTit = $("#word-sel-modo-color-titulos")?.value || opc.modo_color_titulos || MFORegistro.defaults("word").modo_color_titulos;
+    let colorTitulosVal = MFORegistro.defaults("word").color_titulos;
+    let colH1 = MFORegistro.ui("color_tinta_negra");
+    let colH2 = MFORegistro.ui("color_tinta_negra");
 
     if (modoColorTit === "paleta") {
-      colorTitulosVal = $("#word-opt-paleta-titulos")?.value || opc.color_titulos || "azul_corporativo";
+      colorTitulosVal = $("#word-opt-paleta-titulos")?.value || opc.color_titulos || MFORegistro.defaults("word").color_titulos;
       colH1 = "";
       colH2 = "";
     } else if (modoColorTit === "personalizado") {
       colorTitulosVal = "personalizado";
-      colH1 = $("#word-picker-tit-h1")?.value || opc.color_tit_h1 || "#1E3A8A";
-      colH2 = $("#word-picker-tit-h2")?.value || opc.color_tit_h2 || "#3B82F6";
+      colH1 = $("#word-picker-tit-h1")?.value || opc.color_tit_h1 || MFORegistro.defaults("word").color_tit_h1;
+      colH2 = $("#word-picker-tit-h2")?.value || opc.color_tit_h2 || MFORegistro.defaults("word").color_tit_h2;
     }
 
-    const temaSeleccionado = $("#word-opt-tema")?.value || opc.tema || "tema1";
+    const temaSeleccionado = $("#word-opt-tema")?.value || opc.tema || MFORegistro.defaults("word").tema;
     const esTemaNativo = ["tema1", "tema2", "tema3"].includes(temaSeleccionado.toLowerCase());
     const paletaSuaveChecked = $("#word-opt-paleta-suave-tablas") ? $("#word-opt-paleta-suave-tablas").checked : true;
     const usarColoresTablaCustom = !esTemaNativo && !paletaSuaveChecked;
@@ -3369,24 +3318,24 @@ async function ejecutarExportarWord() {
       color_tit_h1: colH1,
       color_tit_h2: colH2,
       paleta_suave_tablas: paletaSuaveChecked,
-      paleta_tabla: $("#word-opt-paleta-tablas")?.value || opc.paleta_tablas || opc.paleta_tabla || "defecto",
+      paleta_tabla: $("#word-opt-paleta-tablas")?.value || opc.paleta_tablas || opc.paleta_tabla || MFORegistro.defaults("word").paleta_tabla,
       con_plantilla: $("#word-plantilla") ? $("#word-plantilla").checked : true,
-      fuente: $("#word-opt-fuente")?.value || opc.fuente || "Calibri",
-      tamanio_pt: parseFloat($("#word-opt-tamanio")?.value || opc.tamano_pt || opc.tamanio || "11"),
-      interlineado: parseFloat($("#word-opt-interlineado")?.value || opc.interlineado || "1.0"),
-      alineacion: $("#word-opt-alineacion")?.value || opc.alineacion || "justificado",
-      fuente_tabla: $("#word-opt-fuente-tabla")?.value || opc.fuente_tabla || "heredar",
+      fuente: $("#word-opt-fuente")?.value || opc.fuente || MFORegistro.defaults("word").fuente,
+      tamanio_pt: parseFloat($("#word-opt-tamanio")?.value || opc.tamano_pt || opc.tamanio || MFORegistro.defaults("word").tamanio),
+      interlineado: parseFloat($("#word-opt-interlineado")?.value || opc.interlineado || MFORegistro.defaults("word").interlineado),
+      alineacion: $("#word-opt-alineacion")?.value || opc.alineacion || MFORegistro.defaults("word").alineacion,
+      fuente_tabla: $("#word-opt-fuente-tabla")?.value || opc.fuente_tabla || MFORegistro.defaults("word").fuente_tabla,
       tamanio_tabla_pt: $("#word-opt-tamanio-tabla")?.value && $("#word-opt-tamanio-tabla")?.value !== "auto" ? parseFloat($("#word-opt-tamanio-tabla").value) : null,
-      pie_pagina: $("#word-opt-pie")?.value || opc.pie_pagina || "",
-      alineacion_pie: $("#word-opt-alineacion-pie")?.value || opc.alineacion_pie || "derecha",
+      pie_pagina: $("#word-opt-pie")?.value || opc.pie_pagina || MFORegistro.defaults("word").pie_pagina,
+      alineacion_pie: $("#word-opt-alineacion-pie")?.value || opc.alineacion_pie || MFORegistro.defaults("word").alineacion_pie,
       normas_apa: $("#word-opt-apa7") ? $("#word-opt-apa7").checked : false,
       numerar_ecuaciones: $("#word-opt-num-eq") ? $("#word-opt-num-eq").checked : false,
       crear_indice: $("#word-opt-toc") ? $("#word-opt-toc").checked : false,
-      posicion_indice: $("#word-opt-posicion-indice")?.value || opc.posicion_indice || "inicio",
+      posicion_indice: $("#word-opt-posicion-indice")?.value || opc.posicion_indice || MFORegistro.defaults("word").posicion_indice,
       numerar_paginas: $("#word-opt-num-pag") ? $("#word-opt-num-pag").checked : true,
-      color_tabla_cabecera: usarColoresTablaCustom ? ($("#word-picker-tabla-cabecera")?.value || opc.color_tabla_cabecera || "") : "",
-      color_tabla_filas: usarColoresTablaCustom ? ($("#word-picker-tabla-filas")?.value || opc.color_tabla_filas || "") : "",
-      color_tabla_borde: usarColoresTablaCustom ? ($("#word-picker-tabla-borde")?.value || opc.color_tabla_borde || "") : "",
+      color_tabla_cabecera: usarColoresTablaCustom ? ($("#word-picker-tabla-cabecera")?.value || opc.color_tabla_cabecera || MFORegistro.defaults("word").color_tabla_cabecera) : "",
+      color_tabla_filas: usarColoresTablaCustom ? ($("#word-picker-tabla-filas")?.value || opc.color_tabla_filas || MFORegistro.defaults("word").color_tabla_filas) : "",
+      color_tabla_borde: usarColoresTablaCustom ? ($("#word-picker-tabla-borde")?.value || opc.color_tabla_borde || MFORegistro.defaults("word").color_tabla_borde) : "",
     };
 
     const respuesta = await fetch(`${API.office}/exportar-docx`, {
@@ -3427,14 +3376,14 @@ let htmlCompiladoBlobUrl = "";
 
 function construirPayloadHtml(md, nombreDoc) {
   const opc = window.MFORegistro ? MFORegistro.obtenerOpciones("html") : {};
-  const temaHtml = $("#html-opt-tema")?.value || opc.tema || "defecto";
-  const paletaTri = $("#html-opt-paleta")?.value || opc.paleta_tricolor || "tema_default";
-  const anchoMaximo = $("#html-opt-ancho")?.value || opc.ancho_max || "900px";
-  const fuente = $("#html-opt-fuente")?.value || opc.fuente || 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif';
+  const temaHtml = $("#html-opt-tema")?.value || opc.tema || MFORegistro.defaults("html").tema;
+  const paletaTri = $("#html-opt-paleta")?.value || opc.paleta_tricolor || MFORegistro.defaults("html").paleta_tricolor;
+  const anchoMaximo = $("#html-opt-ancho")?.value || opc.ancho_max || MFORegistro.defaults("html").ancho_max;
+  const fuente = $("#html-opt-fuente")?.value || opc.fuente || MFORegistro.defaults("html").fuente;
   const justificado = $("#html-opt-justificado") ? $("#html-opt-justificado").checked : (opc.justificado !== false);
   const numerarEcuaciones = $("#html-opt-num-eq") ? $("#html-opt-num-eq").checked : !!opc.numerar_ecuaciones;
-  const footerIzq = $("#html-opt-footer-izq") ? $("#html-opt-footer-izq").value : (opc.footer_izq || "MarkFlow AI 2026");
-  const footerDer = $("#html-opt-footer-der") ? $("#html-opt-footer-der").value : (opc.footer_der || "");
+  const footerIzq = $("#html-opt-footer-izq") ? $("#html-opt-footer-izq").value : (opc.footer_izq || MFORegistro.defaults("html").footer_izq);
+  const footerDer = $("#html-opt-footer-der") ? $("#html-opt-footer-der").value : (opc.footer_der || MFORegistro.defaults("html").footer_der);
 
   return {
     nombre: nombreDoc,
@@ -3456,7 +3405,7 @@ async function cargarVisorHtmlDedicado() {
   const iframe = $("#visor-html-dedicado");
   const linkAbrir = $("#btn-abrir-html-dedicado");
   const md = await obtenerMarkdownActual();
-  const nombreDoc = $("#titulo-documento").value.trim() || "documento";
+  const nombreDoc = $("#titulo-documento").value.trim() || MFORegistro.ui("nombre_documento");
 
   if (!iframe) return;
 
@@ -3502,7 +3451,7 @@ async function ejecutarExportarHtml() {
     alert("No hay contenido Markdown en Docs para exportar.");
     return;
   }
-  const nombreDoc = ($("#titulo-documento").value.trim() || "documento").replace(/\.html$/i, "");
+  const nombreDoc = ($("#titulo-documento").value.trim() || MFORegistro.ui("nombre_documento")).replace(/\.html$/i, "");
 
   [btnHeader, btnSidebar].forEach((b) => {
     if (b) {
@@ -3542,7 +3491,7 @@ async function ejecutarExportarHtml() {
     [btnHeader, btnSidebar].forEach((b) => {
       if (b) {
         b.disabled = false;
-        b.textContent = b.dataset.textoOriginal || "🌐 Exportar .html";
+        b.textContent = b.dataset.textoOriginal || MFORegistro.ui("etiqueta_exportar_html");
       }
     });
   }
@@ -3564,7 +3513,7 @@ async function ejecutarExportarPdf() {
     return;
   }
 
-  const nombreDoc = ($("#titulo-documento").value.trim() || "documento").replace(/\.pdf$/i, "");
+  const nombreDoc = ($("#titulo-documento").value.trim() || MFORegistro.ui("nombre_documento")).replace(/\.pdf$/i, "");
   const opc = window.MFORegistro ? MFORegistro.obtenerOpciones("pdf") : {};
 
   [btnHeader, btnSidebar].forEach(b => {
@@ -3591,20 +3540,20 @@ async function ejecutarExportarPdf() {
       body: JSON.stringify({
         nombre: nombreDoc,
         markdown: md,
-        tema_pdf: $("#pdf-opt-paleta")?.value || opc.paleta || "pizarra_carbon",
+        tema_pdf: $("#pdf-opt-paleta")?.value || opc.paleta || MFORegistro.defaults("pdf").paleta,
         plantilla_word: plantillaPdfSel,
         zona_top: zonaPdfTop,
         zona_bottom: zonaPdfBottom,
         zona_left: zonaPdfLeft,
         zona_right: zonaPdfRight,
-        estilo_maquetacion: $("#pdf-opt-estilo")?.value || opc.estilo_maquetacion || "informe",
-        modo_columnas: $("#pdf-opt-modo-diseno")?.value || opc.modo_columnas || "estandar",
-        tamanio_pt: parseFloat($("#pdf-opt-tamanio")?.value || opc.tamanio_pt || "11"),
+        estilo_maquetacion: $("#pdf-opt-estilo")?.value || opc.estilo_maquetacion || MFORegistro.defaults("pdf").estilo_maquetacion,
+        modo_columnas: $("#pdf-opt-modo-diseno")?.value || opc.modo_columnas || MFORegistro.defaults("pdf").modo_columnas,
+        tamanio_pt: parseFloat($("#pdf-opt-tamanio")?.value || opc.tamanio_pt || MFORegistro.defaults("pdf").tamanio_pt),
         justificado: $("#pdf-opt-justificado") ? $("#pdf-opt-justificado").checked : (opc.justificado !== false),
         portada_premium: await (async () => { const _pp = recolectarPortadaPremium(); if (_pp) _pp.imagenes = await convertirFotosPortada(); return _pp; })(),
-        fuente: $("#pdf-opt-fuente")?.value || opc.fuente || "Calibri",
-        interlineado: parseFloat($("#pdf-opt-interlineado")?.value || opc.interlineado || "1.15"),
-        pie_pagina: $("#pdf-opt-pie") ? $("#pdf-opt-pie").value : (opc.pie_pagina || ""),
+        fuente: $("#pdf-opt-fuente")?.value || opc.fuente || MFORegistro.defaults("pdf").fuente,
+        interlineado: parseFloat($("#pdf-opt-interlineado")?.value || opc.interlineado || MFORegistro.defaults("pdf").interlineado),
+        pie_pagina: $("#pdf-opt-pie") ? $("#pdf-opt-pie").value : (opc.pie_pagina || MFORegistro.defaults("pdf").pie_pagina),
         salto_capitulo: $("#pdf-opt-salto-cap") ? $("#pdf-opt-salto-cap").checked : (opc.salto_capitulo !== false),
         running_header: $("#pdf-opt-running-header") ? $("#pdf-opt-running-header").checked : (opc.running_header !== false),
         numerar_paginas: $("#pdf-opt-num-pag") ? $("#pdf-opt-num-pag").checked : (opc.numerar_paginas !== false),
@@ -3897,7 +3846,7 @@ async function ejecutarExportarExcel() {
   const nombreDoc = ($("#titulo-documento").value.trim() || "tablas_documento").replace(/\.xlsx$/i, "");
   const opc = window.MFORegistro ? MFORegistro.obtenerOpciones("excel") : {};
 
-  let estiloExcel = $("#excel-opt-paleta")?.value || opc.paleta || "clasico";
+  let estiloExcel = $("#excel-opt-paleta")?.value || opc.paleta || MFORegistro.defaults("excel").paleta;
   if (estiloExcel.startsWith("pal_custom_") || estiloExcel.startsWith("custom_")) {
     const pals = window.MFORegistro?.obtenerPaletasPersonalizadas() || [];
     const pEncontrada = pals.find(p => p.id === estiloExcel);
@@ -3905,17 +3854,17 @@ async function ejecutarExportarExcel() {
       const c1 = pEncontrada.colores[0];
       const c2 = pEncontrada.colores[1];
       const c3 = pEncontrada.colores[2] || pEncontrada.colores[1];
-      const c4 = pEncontrada.colores[3] || "#FFFFFF";
-      const c5 = pEncontrada.colores[4] || "#CBD5E1";
+      const c4 = pEncontrada.colores[3] || MFORegistro.ui("color_relleno_4");
+      const c5 = pEncontrada.colores[4] || MFORegistro.ui("color_relleno_5");
       estiloExcel = `${c1}|${c2}|${c3}|${c4}|${c5}`;
     }
   }
 
-  const modoHojas = $("#excel-opt-modo-hojas")?.value || opc.modo_hojas || "multi_hoja";
-  const tamFuente = parseInt($("#excel-opt-fuente-tam")?.value || opc.fuente_tam || "10", 10);
+  const modoHojas = $("#excel-opt-modo-hojas")?.value || opc.modo_hojas || MFORegistro.defaults("excel").modo_hojas;
+  const tamFuente = parseInt($("#excel-opt-fuente-tam")?.value || opc.fuente_tam || MFORegistro.defaults("excel").fuente_tam, 10);
   const gridlines = $("#excel-opt-gridlines") ? $("#excel-opt-gridlines").checked : (opc.gridlines !== false);
   const autofit = $("#excel-opt-autofit") ? $("#excel-opt-autofit").checked : true;
-  const anchoCol = $("#excel-opt-ancho-col")?.value || opc.ancho_col || "auto";
+  const anchoCol = $("#excel-opt-ancho-col")?.value || opc.ancho_col || MFORegistro.defaults("excel").ancho_col;
 
   [btnSidebar, btnDescargar].forEach(b => {
     if (b) { b.disabled = true; b.dataset.textoOriginal = b.textContent; b.textContent = "⏳ Exportando Excel…"; }
@@ -3953,7 +3902,7 @@ async function ejecutarExportarExcel() {
     alert(`Error al descargar Excel: ${err.message}`);
   } finally {
     [btnSidebar, btnDescargar].forEach(b => {
-      if (b) { b.disabled = false; b.textContent = b.dataset.textoOriginal || "📥 Exportar Excel (.xlsx)"; }
+      if (b) { b.disabled = false; b.textContent = b.dataset.textoOriginal || MFORegistro.ui("etiqueta_exportar_xlsx"); }
     });
   }
 }
@@ -4079,7 +4028,7 @@ $("#btn-rt-descargar-md")?.addEventListener("click", () => {
   const blob = new Blob([texto], { type: "text/markdown;charset=utf-8" });
   const url = URL.createObjectURL(blob);
   const enlace = document.createElement("a");
-  const nombreMd = (rtNombreOriginal || "documento").replace(/\.docx$/i, "") + ".md";
+  const nombreMd = (rtNombreOriginal || MFORegistro.ui("nombre_documento")).replace(/\.docx$/i, "") + ".md";
   enlace.href = url;
   enlace.download = nombreMd;
   enlace.click();
@@ -4092,7 +4041,7 @@ $("#btn-rt-descargar-md")?.addEventListener("click", () => {
 $("#btn-rt-cargar-docs")?.addEventListener("click", async () => {
   const texto = $("#rt-texto").value;
   if (!texto.trim()) return;
-  const baseNombre = (rtNombreOriginal || "documento").replace(/\.docx$/i, "");
+  const baseNombre = (rtNombreOriginal || MFORegistro.ui("nombre_documento")).replace(/\.docx$/i, "");
   $("#titulo-documento").value = baseNombre;
   $("#editor-markdown").value = texto;
   if (window.MFOEditor && typeof window.MFOEditor.setTexto === "function") {
@@ -4208,7 +4157,7 @@ $("#btn-enviar-ia").addEventListener("click", async () => {
       }),
     });
     burbuja.className = "ia-mensaje";
-    burbuja.textContent = cuerpo.datos.respuesta || "(sin respuesta)";
+    burbuja.textContent = cuerpo.datos.respuesta || MFORegistro.ui("sin_respuesta");
     if (!cuerpo.ok) burbuja.classList.add("error");
   } catch (error) {
     burbuja.className = "ia-mensaje error";
@@ -4234,8 +4183,8 @@ async function cargarConfigIA() {
   try {
     const cuerpo = await jsonFetch(`${API.office}/ia/config`);
     const cfg = cuerpo.datos;
-    $("#ia-base-url").value = cfg.local?.base_url || "http://localhost:11434";
-    $("#ia-modelo").value = cfg.local?.default_model || "llama3";
+    $("#ia-base-url").value = cfg.local?.base_url || MFORegistro.ui("ruta_ia_local");
+    $("#ia-modelo").value = cfg.local?.default_model || MFORegistro.ui("modelo_ia_local");
     const activos = Object.entries(cfg.external?.providers || {})
       .filter(([, p]) => (p.api_key || "").trim());
     if (activos.length) {
@@ -4272,8 +4221,8 @@ $("#btn-guardar-ia").addEventListener("click", async () => {
   const config = {
     local: {
       enabled: true,
-      base_url: $("#ia-base-url").value.trim() || "http://localhost:11434",
-      default_model: $("#ia-modelo").value.trim() || "llama3",
+      base_url: $("#ia-base-url").value.trim() || MFORegistro.ui("ruta_ia_local"),
+      default_model: $("#ia-modelo").value.trim() || MFORegistro.ui("modelo_ia_local"),
     },
     external: {
       enabled: Boolean(proveedor),
