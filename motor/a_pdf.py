@@ -320,6 +320,7 @@ def _generar_html_impresion(
 
     # Reglas para Modos Adicionales de Diseño (Estándar, 2 Columnas, Paper Científico, Revista)
     modo_clean = (modo_diseno or "estandar").lower()
+    clase_modo = "modo-premium" if modo_clean in ("premium", "premium_ejecutivo", "ejecutivo") else ""
     diseno_columnas_css = ""
     if modo_clean in ("dos_columnas", "2_columnas", "2col"):
         diseno_columnas_css = f"""
@@ -506,16 +507,135 @@ def _generar_html_impresion(
     elif modo_clean in ("premium", "premium_ejecutivo", "ejecutivo"):
         diseno_columnas_css = f"""
     /* ===== MODO PREMIUM EJECUTIVO ===== */
+    body {{
+        background: #fafbfc;
+    }}
+    .cuerpo-editorial.modo-premium {{
+        padding: 0.5cm 0;
+    }}
+    .cuerpo-editorial.modo-premium h1 {{
+        font-size: 1.6em;
+        font-weight: 800;
+        color: {paleta["primario"]};
+        border-bottom: 2.5pt solid {paleta["primario"]};
+        padding-bottom: 8px;
+        margin-bottom: 1.2em;
+        letter-spacing: 0.5px;
+    }}
+    .cuerpo-editorial.modo-premium h2 {{
+        color: {paleta["primario"]};
+        font-weight: 700;
+        border-left: 3pt solid {paleta["secundario"]};
+        padding-left: 10px;
+        margin-top: 1.4em;
+    }}
     .kpi-grid {{
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-        gap: 10px;
-        margin: 1.4em 0 1.8em 0;
+        gap: 12px;
+        margin: 1.6em 0 2.2em 0;
         break-inside: avoid;
         page-break-inside: avoid;
     }}
     .kpi-card {{
-        background: var(--fondo-suave, {paleta["fondo_suave"]});
+        background: {paleta["fondo_suave"]};
+        border-left: 4pt solid {paleta["primario"]};
+        border-radius: 0 8px 8px 0;
+        padding: 14px 16px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    }}
+    .kpi-valor {{
+        font-size: 1.5em;
+        font-weight: 800;
+        color: {paleta["primario"]};
+        line-height: 1.15;
+    }}
+    .kpi-label {{
+        font-size: 0.78em;
+        color: {paleta["secundario"]};
+        margin-top: 4px;
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+        font-weight: 600;
+    }}
+    .columns-premium {{
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14mm;
+        margin: 1.5em 0;
+        break-inside: avoid;
+        page-break-inside: avoid;
+        background: {paleta["fondo_suave"]};
+        padding: 12px;
+        border-radius: 6px;
+    }}
+    .figura-premium {{
+        margin: 1.8em auto;
+        text-align: center;
+        break-inside: avoid;
+        page-break-inside: avoid;
+        background: #ffffff;
+        padding: 10px;
+        border-radius: 6px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }}
+    .figura-premium img {{
+        max-width: 100%;
+        border-radius: 4px;
+    }}
+    .caption-premium {{
+        font-size: 8.5pt;
+        color: #64748b;
+        font-style: italic;
+        margin-top: 8px;
+    }}
+    .callout-premium {{
+        border-left: 4pt solid {paleta["secundario"]};
+        background: {paleta["fondo_suave"]};
+        padding: 14px 18px;
+        margin: 1.5em 0;
+        break-inside: avoid;
+        border-radius: 0 6px 6px 0;
+    }}
+    .separador-premium {{
+        border: none;
+        border-top: 2pt solid {paleta["secundario"]};
+        margin: 2em 0;
+        opacity: 0.5;
+    }}
+    .cuerpo-editorial.modo-premium table {{
+        border-collapse: collapse;
+        width: 100%;
+        break-inside: avoid;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    }}
+    .cuerpo-editorial.modo-premium th {{
+        background: {paleta["primario"]};
+        color: #ffffff;
+        font-weight: 700;
+        padding: 10px 12px;
+        text-transform: uppercase;
+        font-size: 0.9em;
+        letter-spacing: 0.5px;
+    }}
+    .cuerpo-editorial.modo-premium td {{
+        padding: 8px 12px;
+        border-bottom: 0.5pt solid #e2e8f0;
+    }}
+    .cuerpo-editorial.modo-premium tr:nth-child(even) td {{
+        background: {paleta["fondo_suave"]};
+    }}
+    .cuerpo-editorial.modo-premium figure,
+    .cuerpo-editorial.modo-premium .mermaid-contenedor,
+    .cuerpo-editorial.modo-premium img,
+    .cuerpo-editorial.modo-premium .table-container,
+    .cuerpo-editorial.modo-premium .indice-final-documento,
+    .cuerpo-editorial.modo-premium .bloque-firma {{
+        break-inside: avoid !important;
+        page-break-inside: avoid !important;
+    }}
+    .kpi-card {{
+        background: {paleta["fondo_suave"]};
         border-left: 3.5pt solid {paleta["primario"]};
         border-radius: 0 6px 6px 0;
         padding: 12px 14px;
@@ -975,7 +1095,7 @@ def _generar_html_impresion(
 <body>
 {membrete_html}
 {portada_html}
-<div class="cuerpo-editorial">
+<div class="cuerpo-editorial {clase_modo}">
 {cuerpo_con_details_abiertos}
 </div>
 </body>
