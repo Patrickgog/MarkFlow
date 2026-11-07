@@ -1,11 +1,11 @@
 @echo off
-title MarkFlow Office - Lanzador v1.23.7
+title MarkFlow Office - Lanzador v1.23.8
 setlocal enabledelayedexpansion
 cd /d "%~dp0"
 
 set "APP_NAME=MarkFlow Office"
 set "ABREV=MFO"
-set "VERSION=v1.23.7"
+set "VERSION=v1.23.8"
 set "ROOT_DIR=%~dp0"
 set "VENV_DIR=%ROOT_DIR%.venv"
 set "PYTHON_EXE=%VENV_DIR%\Scripts\python.exe"

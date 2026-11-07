@@ -1434,6 +1434,7 @@ async function inicializarBarrasLaterales() {
   poblarSelect("#pdf-opt-estilo", MFORegistro.ESTILOS_MAQUETACION_PDF);
   poblarSelect("#pdf-opt-modo-diseno", MFORegistro.MODOS_COLUMNAS_PDF);
   poblarSelect("#pdf-opt-fuente", MFORegistro.FUENTES_PDF);
+  poblarSelect("#pdf-opt-tamanio", MFORegistro.TAMANIOS_PDF);
   poblarSelect("#pdf-opt-interlineado", MFORegistro.INTERLINEADOS_PDF);
 
   poblarSelect("#excel-opt-paleta", MFORegistro.PALETAS_EXCEL);
@@ -1506,7 +1507,9 @@ async function inicializarBarrasLaterales() {
   if ($("#pdf-opt-estilo")) $("#pdf-opt-estilo").value = opcPdf.estilo_maquetacion || "informe";
   if ($("#pdf-opt-modo-diseno")) $("#pdf-opt-modo-diseno").value = opcPdf.modo_columnas || "estandar";
   if ($("#pdf-opt-fuente")) $("#pdf-opt-fuente").value = opcPdf.fuente || "Calibri";
+  if ($("#pdf-opt-tamanio")) $("#pdf-opt-tamanio").value = String(opcPdf.tamanio ?? opcPdf.tamanio_pt ?? 11);
   if ($("#pdf-opt-interlineado")) $("#pdf-opt-interlineado").value = String(opcPdf.interlineado || 1.15);
+  if ($("#pdf-opt-justificado")) $("#pdf-opt-justificado").checked = opcPdf.justificado !== false;
   if ($("#pdf-opt-pie")) $("#pdf-opt-pie").value = opcPdf.pie_pagina || "";
   if ($("#pdf-opt-salto-cap")) $("#pdf-opt-salto-cap").checked = opcPdf.salto_capitulo !== false;
   if ($("#pdf-opt-running-header")) $("#pdf-opt-running-header").checked = opcPdf.running_header !== false;
@@ -2539,8 +2542,13 @@ function registrarListenersReactivos() {
   // Listeners PDF
   const inputsPdf = [
     "#pdf-opt-paleta", "#pdf-opt-estilo", "#pdf-opt-modo-diseno",
-    "#pdf-opt-fuente", "#pdf-opt-interlineado", "#pdf-opt-pie",
-    "#pdf-opt-salto-cap", "#pdf-opt-running-header", "#pdf-opt-num-pag", "#pdf-opt-toc"
+    "#pdf-opt-fuente", "#pdf-opt-tamanio", "#pdf-opt-interlineado", "#pdf-opt-pie",
+    "#pdf-opt-salto-cap", "#pdf-opt-running-header", "#pdf-opt-num-pag", "#pdf-opt-toc",
+    "#pdf-opt-justificado",
+    "#pdf-portada-incluir", "#pdf-portada-tema", "#pdf-portada-tipo-doc",
+    "#pdf-portada-titulo", "#pdf-portada-memoria", "#pdf-portada-componente",
+    "#pdf-portada-consultor", "#pdf-portada-fecha", "#pdf-portada-codigo",
+    "#pdf-portada-fotos"
   ];
   inputsPdf.forEach(sel => {
     const alCambiar = () => {
@@ -2550,6 +2558,8 @@ function registrarListenersReactivos() {
         estilo_maquetacion: $("#pdf-opt-estilo")?.value,
         modo_columnas: $("#pdf-opt-modo-diseno")?.value,
         fuente: $("#pdf-opt-fuente")?.value,
+        tamanio_pt: parseFloat($("#pdf-opt-tamanio")?.value || "11"),
+        justificado: $("#pdf-opt-justificado")?.checked ?? true,
         interlineado: parseFloat($("#pdf-opt-interlineado")?.value || "1.15"),
         pie_pagina: $("#pdf-opt-pie")?.value,
         salto_capitulo: $("#pdf-opt-salto-cap")?.checked,
@@ -3257,6 +3267,8 @@ async function refrescarVisorPdfEnVivo() {
           zona_right: zonaPdfRight,
           estilo_maquetacion: $("#pdf-opt-estilo")?.value || opc.estilo_maquetacion || "informe",
           modo_columnas: $("#pdf-opt-modo-diseno")?.value || opc.modo_columnas || "estandar",
+          tamanio_pt: parseFloat($("#pdf-opt-tamanio")?.value || opc.tamanio_pt || "11"),
+          justificado: $("#pdf-opt-justificado") ? $("#pdf-opt-justificado").checked : (opc.justificado !== false),
           portada_premium: await (async () => { const _pp = recolectarPortadaPremium(); if (_pp) _pp.imagenes = await convertirFotosPortada(); return _pp; })(),
           fuente: $("#pdf-opt-fuente")?.value || opc.fuente || "Calibri",
           interlineado: parseFloat($("#pdf-opt-interlineado")?.value || opc.interlineado || "1.15"),
@@ -3587,6 +3599,8 @@ async function ejecutarExportarPdf() {
         zona_right: zonaPdfRight,
         estilo_maquetacion: $("#pdf-opt-estilo")?.value || opc.estilo_maquetacion || "informe",
         modo_columnas: $("#pdf-opt-modo-diseno")?.value || opc.modo_columnas || "estandar",
+        tamanio_pt: parseFloat($("#pdf-opt-tamanio")?.value || opc.tamanio_pt || "11"),
+        justificado: $("#pdf-opt-justificado") ? $("#pdf-opt-justificado").checked : (opc.justificado !== false),
         portada_premium: await (async () => { const _pp = recolectarPortadaPremium(); if (_pp) _pp.imagenes = await convertirFotosPortada(); return _pp; })(),
         fuente: $("#pdf-opt-fuente")?.value || opc.fuente || "Calibri",
         interlineado: parseFloat($("#pdf-opt-interlineado")?.value || opc.interlineado || "1.15"),

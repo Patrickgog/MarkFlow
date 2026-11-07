@@ -1041,7 +1041,9 @@ class ModeloExportarPdf(BaseModel):
     estilo_maquetacion: str = "informe"
     modo_columnas: str = "estandar"
     fuente: str = "Calibri"
+    tamanio_pt: float = 11.0
     interlineado: float = 1.15
+    justificado: bool = True
     pie_pagina: str = ""
     salto_capitulo: bool = True
     running_header: bool = True
@@ -1109,6 +1111,8 @@ async def endpoint_exportar_pdf(modelo: ModeloExportarPdf) -> Response:
                 zona_cm=zona_req,
                 alineacion_num=pos_num,
                 portada_premium=modelo.portada_premium,
+                tamanio_pt=modelo.tamanio_pt,
+                justificado=modelo.justificado,
             )
             pdf_bytes = ruta_res.read_bytes()
         except Exception as exc:

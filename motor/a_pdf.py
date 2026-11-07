@@ -141,24 +141,34 @@ def _transformar_kpi_premium(texto: str) -> str:
     return patron.sub(_repl, texto)
 
 
-def _postprocesar_columnas_premium(html: str) -> str:
-    """Divide los div.columns-premium en dos columnas usando el <hr /> como separador."""
+def _transformar_columnas_premium(texto: str) -> str:
+    """:::columns ... ::: con separadores '---' -> bloques HTML marcados para dos columnas."""
     import re
-    patron = re.compile(r'<div class="columns-premium">(.*?)</div>', re.DOTALL)
+    patron = re.compile(r":::columns\s*\n(.*?)\n:::", re.DOTALL | re.IGNORECASE)
 
     def _repl(m):
-        inner = m.group(1)
-        # separar por <hr> o <hr />
-        partes = re.split(r"<hr\s*/?>", inner, flags=re.IGNORECASE)
-        cols = []
-        for p in partes:
-            p = p.strip()
-            if p:
-                cols.append(f"<div>{p}</div>")
-        if len(cols) < 2:
-            cols = [f"<div>{inner.strip()}</div>", "<div></div>"]
-        return '<div class="columns-premium">\n' + "\n".join(cols) + "\n</div>"
+        partes = re.split(r"\n\s*---\s*\n", "\n" + m.group(1).strip() + "\n")
+        bloques = [p.strip() for p in partes if p.strip()]
+        cuerpo = '\n\n<div class="col-sep"></div>\n\n'.join(bloques)
+        return ('\n\n<div class="columns-premium">\n\n' + cuerpo +
+                '\n\n<div class="columns-premium-fin"></div>\n\n')
 
+    return patron.sub(_repl, texto)
+
+
+def _postprocesar_columnas_premium(html: str) -> str:
+    import re
+    patron = re.compile(
+        r'<div class="columns-premium">(.*?)<div class="columns-premium-fin"></div>',
+        re.DOTALL,
+    )
+    def _repl(m):
+        cols = [c.strip() for c in re.split(r'<div class="col-sep"></div>', m.group(1)) if c.strip()]
+        if len(cols) < 2:
+            cols.append("")
+        return ('<div class="columns-premium">\n' +
+                "\n".join(f'<div class="col">{c}</div>' for c in cols) +
+                "\n</div>")
     return patron.sub(_repl, html)
 
 
@@ -191,7 +201,8 @@ def _layout_fotos(n: int) -> str:
 
 
 def _generar_html_portada_premium(tema: str, datos: dict, imagenes: list, paleta: dict) -> str:
-    """Genera el HTML de una portada premium (primera página)."""
+    import html as _html
+    e = lambda s: _html.escape(str(s or ""))
     tema = (tema or "clasica_blanca").lower()
     tipo_doc = datos.get("tipo_documento", "ESTUDIO DE CONSULTORÍA DEL PROYECTO:")
     titulo = datos.get("titulo_proyecto", "")
@@ -204,65 +215,44 @@ def _generar_html_portada_premium(tema: str, datos: dict, imagenes: list, paleta
     imgs = [_imagen_a_datauri(i) for i in (imagenes or [])]
     n = len(imgs)
 
-    # Estilos por tema
     if tema == "ejecutiva_navy":
-        bg = "#1E3A5F"
-        fg = "#FFFFFF"
-        acento = "#38bdf8"
-        card_bg = "rgba(255,255,255,0.08)"
+        bg, fg, acento, card_bg = "#1E3A5F", "#FFFFFF", "#38bdf8", "rgba(255,255,255,0.08)"
     elif tema == "consultoria_verde":
-        bg = "#1C2E24"
-        fg = "#FFFFFF"
-        acento = "#34d399"
-        card_bg = "rgba(255,255,255,0.08)"
+        bg, fg, acento, card_bg = "#1C2E24", "#FFFFFF", "#34d399", "rgba(255,255,255,0.08)"
     elif tema == "blueprint":
-        bg = "#0F172A"
-        fg = "#E2E8F0"
-        acento = "#60A5FA"
-        card_bg = "rgba(96,165,250,0.08)"
+        bg, fg, acento, card_bg = "#0F172A", "#E2E8F0", "#60A5FA", "rgba(96,165,250,0.08)"
     elif tema == "minimal_slate":
-        bg = "#F8FAFC"
-        fg = "#0F172A"
-        acento = paleta.get("primario", "#1E293B")
-        card_bg = "#FFFFFF"
+        bg, fg, acento, card_bg = "#F8FAFC", "#0F172A", paleta.get("primario", "#1E293B"), "#FFFFFF"
     elif tema == "foto_hero":
-        bg = "#0F172A"
-        fg = "#FFFFFF"
-        acento = "#F59E0B"
-        card_bg = "rgba(255,255,255,0.10)"
-    else:  # clasica_blanca
-        bg = "#FFFFFF"
-        fg = "#0F172A"
-        acento = paleta.get("primario", "#1E293B")
-        card_bg = "#F8FAFC"
+        bg, fg, acento, card_bg = "#0F172A", "#FFFFFF", "#F59E0B", "rgba(255,255,255,0.10)"
+    else:
+        bg, fg, acento, card_bg = "#FFFFFF", "#0F172A", paleta.get("primario", "#1E293B"), "#F8FAFC"
 
-    # Galería de fotos
-    fotos_html = ""
+    partes = []
+    partes.append(f'<div class="portada-premium tema-{tema}" style="background:{bg}; color:{fg};">')
+    partes.append(f'<div class="portada-banda" style="border-bottom: 3pt solid {acento};"></div>')
+    partes.append('<div class="portada-contenido">')
+    partes.append(f'<p class="portada-tipo" style="color:{acento};">{e(tipo_doc)}</p>')
+    partes.append(f'<h1 class="portada-titulo" style="color:{fg};">{e(titulo)}</h1>')
+    if memoria:
+        partes.append(f'<p class="portada-memoria" style="color:{acento};">{e(memoria)}</p>')
+    if componente:
+        partes.append(f'<p class="portada-componente">{e(componente)}</p>')
     if imgs:
         layout = _layout_fotos(n)
-        cells = []
-        for src in imgs:
-            cells.append(f'<div class="portada-foto"><img src="{src}" alt="Foto de campo" /></div>')
-        fotos_html = f'<div class="portada-galeria" style="{layout}">' + "".join(cells) + "</div>"
-
-    html = f'''
-<div class="portada-premium tema-{tema}" style="background:{bg}; color:{fg};">
-  <div class="portada-banda" style="border-bottom: 3pt solid {acento};"></div>
-  <div class="portada-contenido">
-    <p class="portada-tipo" style="color:{acento};">{tipo_doc}</p>
-    <h1 class="portada-titulo" style="color:{fg};">{titulo}</h1>
-    {f'<p class="portada-memoria" style="color:{acento};">{memoria}</p>' if memoria else ""}
-    {f'<p class="portada-componente">{componente}</p>' if componente else ""}
-    {fotos_html}
-    <div class="portada-datos" style="background:{card_bg};">
-      {f'<p><b>Consultor:</b> {consultor}</p>' if consultor else ""}
-      {f'<p><b>Fecha:</b> {fecha}</p>' if fecha else ""}
-      {f'<p><b>Código:</b> {codigo}</p>' if codigo else ""}
-    </div>
-  </div>
-</div>
-'''
-    return html
+        cells = "".join(f'<div class="portada-foto"><img src="{src}" alt="Foto de campo" /></div>' for src in imgs)
+        partes.append(f'<div class="portada-galeria" style="{layout}">{cells}</div>')
+    datos_html = ""
+    if consultor:
+        datos_html += f'<p><b>Consultor:</b> {e(consultor)}</p>'
+    if fecha:
+        datos_html += f'<p><b>Fecha:</b> {e(fecha)}</p>'
+    if codigo:
+        datos_html += f'<p><b>Codigo:</b> {e(codigo)}</p>'
+    if datos_html:
+        partes.append(f'<div class="portada-datos" style="background:{card_bg};">{datos_html}</div>')
+    partes.append('</div></div>')
+    return "".join(partes)
 
 
 def _generar_html_impresion(
@@ -280,6 +270,7 @@ def _generar_html_impresion(
     modo_diseno: str = "estandar",
     elementos_membrete: list[dict[str, Any]] | None = None,
     zona_cm: dict[str, float] | None = None,
+    portada_premium_html: str = "",
 ) -> str:
     """Genera el documento HTML5 completo con reglas CSS Paged Media optimizadas para Chromium."""
     if zona_cm:
@@ -741,6 +732,9 @@ def _generar_html_impresion(
         </div>
         """
 
+    if portada_premium_html:
+        portada_html = portada_premium_html
+
     # Fondo transparente si hay membrete para permitir que PyMuPDF estampe el fondo en toda la hoja A4
     fondo_body_css = "background: transparent !important;" if elementos_membrete else "background: #ffffff;"
 
@@ -1123,7 +1117,7 @@ def _generar_html_impresion(
 </head>
 <body>
 {membrete_html}
-{portada_html}
+{portada_html}{portada_premium_html}
 <div class="cuerpo-editorial {clase_modo}">
 {cuerpo_con_details_abiertos}
 </div>
@@ -1401,6 +1395,7 @@ def a_pdf(
     plantilla_word: str | Path | None = None,
     zona_cm: dict[str, float] | None = None,
     portada_premium: dict | None = None,
+    portada_premium_html: str = "",
 ) -> tuple[Path, int, list[str]]:
     """Transforma texto Markdown saneado en un PDF Editorial Profesional de Alta Gama.
 
@@ -1436,6 +1431,7 @@ def a_pdf(
 
     # Transformación de bloques premium (:::kpi) a HTML crudo (pasa a través de pandoc)
     texto_conversion = _transformar_kpi_premium(texto_conversion)
+    texto_conversion = _transformar_columnas_premium(texto_conversion)
 
     exe_chromium = ruta_chromium()
     if exe_chromium is None:
@@ -1471,13 +1467,13 @@ def a_pdf(
     # 2. Generar fragmento HTML semántico con MathML nativo
     # Portada premium (primera pagina) si se solicita
     tiene_portada_premium = bool(portada_premium and portada_premium.get("incluir"))
+    portada_premium_html = ""
     if tiene_portada_premium:
         pp = portada_premium or {}
         datos_pp = pp.get("datos", pp)
         imagenes_pp = pp.get("imagenes", [])
         tema_pp = pp.get("tema", datos_pp.get("tema", "clasica_blanca"))
-        portada_html = _generar_html_portada_premium(tema_pp, datos_pp, imagenes_pp, paleta)
-        texto_conversion = portada_html + "\n\n" + texto_conversion
+        portada_premium_html = _generar_html_portada_premium(tema_pp, datos_pp, imagenes_pp, paleta)
 
     html_temp = destino.parent / f"{destino.stem}_temp.html"
     pdf_temp = destino.parent / f"{destino.stem}_crudo.pdf"
@@ -1502,10 +1498,6 @@ def a_pdf(
 
     # Post-proceso de bloques premium: columnas selectivas (dividir en <hr>)
     cuerpo_html = _postprocesar_columnas_premium(cuerpo_html)
-
-    # Añadir clase modo-premium al cuerpo si aplica
-    if (modo_diseno or "estandar").lower() in ("premium", "premium_ejecutivo", "ejecutivo"):
-        cuerpo_html = cuerpo_html.replace('<div class="cuerpo-editorial"', '<div class="cuerpo-editorial modo-premium"', 1)
 
     # Supresión estricta de componentes de interfaz de usuario (botones, sidebars, selectores de tema)
     cuerpo_html = re.sub(r'<button\b[^>]*>[\s\S]*?</button>', '', cuerpo_html, flags=re.IGNORECASE)
@@ -1613,6 +1605,7 @@ def a_pdf(
         modo_diseno=modo_diseno,
         elementos_membrete=elementos_membrete,
         zona_cm=zona_res,
+        portada_premium_html=portada_premium_html,
     )
     html_temp.write_text(documento_html, encoding="utf-8")
 

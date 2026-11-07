@@ -9,6 +9,23 @@ hardcodea la versión).
 
 ## 📦 Registro de Versiones
 
+### 📌 [v1.23.8] — 2026-11-06 00:00:00
+* **Tipo de Incremento:** PATCH (Correccion controles PDF y portada premium)
+* **Archivo SSOT:** `app/version.py` → `APP_VERSION = "1.23.8"`
+* **Componentes Afectados:**
+  - `templates/office.html`: controles #pdf-opt-tamanio, #pdf-opt-justificado, #pdf-portada-tipo-doc, #pdf-portada-codigo.
+  - `static/js/office.js`: poblarSelect, persistencia y payloads de tamanio_pt/justificado; inputsPdf actualizado; vista previa reacciona a campos de portada.
+  - `app/rutas/office.py`: ModeloExportarPdf con tamanio_pt y justificado; endpoint los pasa a a_pdf.
+  - `motor/a_pdf.py`: portada inyectada en <body> (no en Markdown); _generar_html_portada_premium sin indentacion/lineas vacias con html.escape; _transformar_columnas_premium + _postprocesar_columnas_premium reemplazados; codigo muerto eliminado.
+  - `tests/test_pdf_premium_1_23_8.py`: nuevos tests de contrato.
+* **Descripción Técnica de Cambios:**
+  1. Restaurados controles de tamano de letra y texto justificado en la barra PDF.
+  2. Portada premium inyectada en el body en lugar del Markdown (corrige que se mostrara como codigo).
+  3. Nueva sintaxis :::columns para columnas premium.
+  4. Limpieza de codigo muerto (replace de modo-premium).
+  5. KaTeX en pipeline (v1.23.7) se mantiene.
+
+
 ### 📌 [v1.23.7] — 2026-11-06 00:00:00
 * **Tipo de Incremento:** PATCH (KaTeX en pipeline PDF + CSS premium visible + portada premium UI)
 * **Archivo SSOT:** `app/version.py` → `APP_VERSION = "1.23.7"`
