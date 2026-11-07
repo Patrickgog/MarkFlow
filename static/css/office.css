@@ -2250,6 +2250,7 @@ body.modo-oscuro .hoja-word-marco {
 
 /* Barra lateral derecha (340 px) */
 .barra-lateral-derecha {
+  overflow: hidden;
   width: 340px;
   max-width: 85vw;
   height: 100%;
@@ -2324,8 +2325,11 @@ body.modo-oscuro .hoja-word-marco {
 }
 
 .sidebar-cuerpo {
-  flex: 1;
+  flex: 1 1 auto;
+  min-height: 0;
   overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-gutter: stable;
   padding: 0.85rem;
   display: flex;
   flex-direction: column;

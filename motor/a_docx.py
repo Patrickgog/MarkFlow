@@ -34,9 +34,7 @@ import docx.enum.text
 from motor.a_mermaid import reemplazar_mermaid_por_imagenes
 from motor.qa import contar_formulas
 
-_PANDOC_LOCAL = Path(
-    r"D:\APPS\Apps_2026\25_Claude\Convertidor_MD_HTML\motor\assets\pandoc\pandoc.exe"
-)
+_PANDOC_LOCAL = Path(__file__).resolve().parent / "assets" / "pandoc" / ("pandoc.exe" if __import__("os").name == "nt" else "pandoc")
 
 _DIR_TEMAS_WORD = Path(__file__).resolve().parent.parent / "templates" / "temas_word"
 

@@ -748,7 +748,7 @@ def a_html(
     paleta_tricolor: str = "tema_default",
     numerar_ecuaciones: bool = False,
     footer_izq: str = "",
-    footer_der: str = "Ing. Patricio Sarmiento Reinoso, Mgst.",
+    footer_der: str = "",
     base_dir: Path | str | None = None,
 ) -> tuple[str, int, list[str]]:
     """Transforma texto saneado a HTML imprimible con soporte universal de KaTeX y temas."""
@@ -781,7 +781,7 @@ def a_html(
     # Año dinámico para el pie de página
     anio_actual = datetime.datetime.now().year
     f_izq = footer_izq.strip() if footer_izq.strip() else f"MarkFlow AI {anio_actual}"
-    f_der = footer_der.strip() if footer_der.strip() else "Ing. Patricio Sarmiento Reinoso, Mgst."
+    f_der = footer_der.strip() if footer_der.strip() else ""
 
     # Paleta Tri-Color (predefinida o personalizada #c1|#c2|#c3)
     pal_clave = (paleta_tricolor or "tema_default").strip()

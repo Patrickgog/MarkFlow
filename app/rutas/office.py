@@ -419,7 +419,7 @@ class ModeloExportarHtml(BaseModel):
     justificado: bool = True
     numerar_ecuaciones: bool = False
     footer_izq: str = ""
-    footer_der: str = "Ing. Patricio Sarmiento Reinoso, Mgst."
+    footer_der: str = ""
 
 
 @router.get("/temas-html")
@@ -456,7 +456,7 @@ async def exportar_html_directo(modelo: ModeloExportarHtml) -> Response:
             justificado=bool(modelo.justificado),
             numerar_ecuaciones=bool(modelo.numerar_ecuaciones),
             footer_izq=modelo.footer_izq or "",
-            footer_der=modelo.footer_der or "Ing. Patricio Sarmiento Reinoso, Mgst.",
+            footer_der=modelo.footer_der or "",
         )
     except FileNotFoundError as exc:
         raise HTTPException(

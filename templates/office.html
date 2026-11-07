@@ -76,11 +76,6 @@
         <span class="riel-tooltip">Plantillas · placeholders</span>
       </button>
 
-      <button class="riel-btn" data-app="markflow" title="MarkFlow (motor clásico completo)" aria-label="MarkFlow">
-        <span class="riel-icono-texto">M▾</span>
-        <span class="riel-tooltip">MarkFlow · conversión completa</span>
-      </button>
-
       <button class="riel-btn" data-app="manual" title="Manual de Usuario y Documentación" aria-label="Manual de Usuario">
         <span class="riel-icono-texto">📖</span>
         <span class="riel-tooltip">Manual de Usuario</span>
@@ -693,15 +688,15 @@
                    </div>
                    <div class="campo-sidebar">
                      <label for="pdf-portada-memoria">Memoria / Fase:</label>
-                     <input type="text" id="pdf-portada-memoria" class="select-lateral" placeholder="MEMORIA TECNICA FASE II">
+                     <input type="text" id="pdf-portada-memoria" class="select-lateral" placeholder="Nombre de la memoria">
                    </div>
                    <div class="campo-sidebar">
                      <label for="pdf-portada-componente">Componente:</label>
-                     <input type="text" id="pdf-portada-componente" class="select-lateral" placeholder="COMPONENTE AGUA POTABLE">
+                     <input type="text" id="pdf-portada-componente" class="select-lateral" placeholder="Componente del proyecto">
                    </div>
                    <div class="campo-sidebar">
                      <label for="pdf-portada-tipo-doc">Tipo de documento:</label>
-                     <input type="text" id="pdf-portada-tipo-doc" class="select-lateral" value="ESTUDIO DE CONSULTORIA DEL PROYECTO:">
+                     <input type="text" id="pdf-portada-tipo-doc" class="select-lateral" placeholder="Tipo de documento">
                    </div>
                    <div class="campo-sidebar">
                      <label for="pdf-portada-codigo">Codigo del proyecto:</label>
@@ -709,11 +704,11 @@
                    </div>
                    <div class="campo-sidebar">
                      <label for="pdf-portada-consultor">Consultor / Autor:</label>
-                     <input type="text" id="pdf-portada-consultor" class="select-lateral" placeholder="Ing. Patricio Sarmiento Reinoso">
+                     <input type="text" id="pdf-portada-consultor" class="select-lateral" placeholder="Nombre del consultor">
                    </div>
                    <div class="campo-sidebar">
                      <label for="pdf-portada-fecha">Fecha:</label>
-                     <input type="text" id="pdf-portada-fecha" class="select-lateral" placeholder="JULIO 2024">
+                     <input type="text" id="pdf-portada-fecha" class="select-lateral" placeholder="Fecha del documento">
                    </div>
                    <div class="campo-sidebar">
                      <label>Fotografias de campo (1 a 6):</label>
@@ -847,7 +842,7 @@
                   </div>
                   <div class="campo-sidebar">
                     <label for="html-opt-footer-der">Pie de página derecho:</label>
-                    <input type="text" id="html-opt-footer-der" class="select-lateral" value="Ing. Patricio Sarmiento Reinoso, Mgst.">
+                    <input type="text" id="html-opt-footer-der" class="select-lateral" placeholder="Texto del pie derecho">
                   </div>
                 </div>
               </details>
@@ -1391,14 +1386,6 @@
         </div>
       </section>
 
-      <!-- ── App: MarkFlow Conversión Completa (Motor Clásico) ── -->
-      <section id="panel-markflow" class="app-panel" style="overflow: hidden; height: 100%; padding: 0; box-sizing: border-box;">
-        <div style="height: 100%; display: flex; flex-direction: column;">
-          <iframe id="marco-clasico" src="/clasico" title="MarkFlow Conversión Completa"
-                  style="width: 100%; height: 100%; flex: 1; border: none; background: var(--bg-main);"></iframe>
-        </div>
-      </section>
-
       <!-- ── App: Manual de Usuario y Documentación Técnica ── -->
       <section id="panel-manual" class="app-panel" style="overflow-y: auto; height: 100%; padding: 1.5rem 2rem; box-sizing: border-box;">
         <div class="vidrio tarjeta" style="max-width: 1000px; margin: 0 auto 2rem auto;">
@@ -1467,6 +1454,8 @@
       <span aria-hidden="true">·</span>
       <span>Motor MarkFlow + núcleo GenOffice</span>
       <span aria-hidden="true">·</span>
+      <span>{{ autor_cargo }}: <strong>{{ autor }}</strong></span>
+      <span aria-hidden="true">·</span>
       <span>100&nbsp;% offline</span>
     </footer>
   </div>
@@ -1488,7 +1477,7 @@
           <div style="display: flex; flex-direction: column; gap: 0.75rem;">
             <div>
               <label for="input-nombre-paleta-custom" style="font-size: 0.78rem; font-weight: 600; color: var(--text-muted); display: block; margin-bottom: 0.3rem;">Nombre de la paleta:</label>
-              <input type="text" id="input-nombre-paleta-custom" class="select-lateral" placeholder="Ej: Mi Paleta Hidrosanitaria" maxlength="40">
+              <input type="text" id="input-nombre-paleta-custom" class="select-lateral" placeholder="Ej: Mi paleta" maxlength="40">
             </div>
 
             <div>

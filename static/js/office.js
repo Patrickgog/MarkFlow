@@ -1378,7 +1378,7 @@ function recolectarPortadaPremium() {
     incluir: true,
     tema: document.querySelector("#pdf-portada-tema")?.value || "clasica_blanca",
     datos: {
-      tipo_documento: document.querySelector("#pdf-portada-tipo-doc")?.value || "ESTUDIO DE CONSULTORÍA DEL PROYECTO:",
+      tipo_documento: document.querySelector("#pdf-portada-tipo-doc")?.value || "",
       titulo_proyecto: document.querySelector("#pdf-portada-titulo")?.value || "",
       memoria_fase: document.querySelector("#pdf-portada-memoria")?.value || "",
       componente: document.querySelector("#pdf-portada-componente")?.value || "",
@@ -1434,7 +1434,7 @@ async function inicializarBarrasLaterales() {
   poblarSelect("#pdf-opt-estilo", MFORegistro.ESTILOS_MAQUETACION_PDF);
   poblarSelect("#pdf-opt-modo-diseno", MFORegistro.MODOS_COLUMNAS_PDF);
   poblarSelect("#pdf-opt-fuente", MFORegistro.FUENTES_PDF);
-  poblarSelect("#pdf-opt-tamanio", MFORegistro.TAMANIOS_PDF);
+  poblarSelect("#pdf-opt-tamanio", MFORegistro.opciones("pdf", "tamanios"));
   poblarSelect("#pdf-opt-interlineado", MFORegistro.INTERLINEADOS_PDF);
 
   poblarSelect("#excel-opt-paleta", MFORegistro.PALETAS_EXCEL);
@@ -1499,7 +1499,7 @@ async function inicializarBarrasLaterales() {
   if ($("#html-opt-justificado")) $("#html-opt-justificado").checked = opcHtml.justificado !== false;
   if ($("#html-opt-num-eq")) $("#html-opt-num-eq").checked = !!opcHtml.numerar_ecuaciones;
   if ($("#html-opt-footer-izq")) $("#html-opt-footer-izq").value = opcHtml.footer_izq || "MarkFlow AI 2026";
-  if ($("#html-opt-footer-der")) $("#html-opt-footer-der").value = opcHtml.footer_der || "Ing. Patricio Sarmiento Reinoso, Mgst.";
+  if ($("#html-opt-footer-der")) $("#html-opt-footer-der").value = opcHtml.footer_der || "";
 
   // 4. Cargar valores en PDF
   const opcPdf = MFORegistro.obtenerOpciones("pdf");
@@ -3434,7 +3434,7 @@ function construirPayloadHtml(md, nombreDoc) {
   const justificado = $("#html-opt-justificado") ? $("#html-opt-justificado").checked : (opc.justificado !== false);
   const numerarEcuaciones = $("#html-opt-num-eq") ? $("#html-opt-num-eq").checked : !!opc.numerar_ecuaciones;
   const footerIzq = $("#html-opt-footer-izq") ? $("#html-opt-footer-izq").value : (opc.footer_izq || "MarkFlow AI 2026");
-  const footerDer = $("#html-opt-footer-der") ? $("#html-opt-footer-der").value : (opc.footer_der || "Ing. Patricio Sarmiento Reinoso, Mgst.");
+  const footerDer = $("#html-opt-footer-der") ? $("#html-opt-footer-der").value : (opc.footer_der || "");
 
   return {
     nombre: nombreDoc,
@@ -4313,7 +4313,7 @@ $("#btn-probar-ia").addEventListener("click", async () => {
 function arranque() {
   /* Deep-links: /?app=docs · /?app=word&doc=Nombre&tema=tema3&alin=justificado */
   const params = new URLSearchParams(location.search);
-  const APPS = ["documentos", "docs", "markflow", "word", "pdf", "html", "tablas", "plantillas", "config"];
+  const APPS = ["documentos", "docs", "word", "pdf", "html", "tablas", "plantillas", "config"];
   const app = params.get("app");
   const doc = params.get("doc");
   const temaParam = params.get("tema");

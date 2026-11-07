@@ -4,7 +4,7 @@ Ensambla: router de API clásica de MarkFlow (motor de conversión), routers de
 la suite (documentos + office), estáticos, plantillas Jinja2 y el ciclo de vida
 (purga de sesiones al arrancar y al apagar). Puntos de entrada:
 
-    uvicorn app.principal:app --port 8320   → shell Office (/) + clásico (/clasico)
+    uvicorn app.principal:app --port 8320   → shell Office (/)
 """
 
 from __future__ import annotations
@@ -22,7 +22,7 @@ from app.rutas.documentos import router as router_documentos
 from app.rutas.office import router as router_office
 from app.rutas.plantillas import router as router_plantillas
 from app.servicios import sesiones
-from app.version import APP_NOMBRE, APP_VERSION
+from app.version import APP_AUTOR, APP_AUTOR_CARGO, APP_NOMBRE, APP_VERSION
 
 RAIZ = Path(__file__).resolve().parents[1]
 DIR_STATIC = RAIZ / "static"
@@ -59,17 +59,9 @@ def crear_app() -> FastAPI:
         return plantillas.TemplateResponse(
             request=request,
             name="office.html",
-            context={"nombre": APP_NOMBRE, "version": APP_VERSION},
+            context={"nombre": APP_NOMBRE, "version": APP_VERSION, "autor": APP_AUTOR, "autor_cargo": APP_AUTOR_CARGO},
         )
 
-    @app.get("/clasico", response_class=HTMLResponse, include_in_schema=False)
-    async def clasico(request: Request) -> HTMLResponse:
-        """UI clásica de MarkFlow (conversor completo), embebida en la app MarkFlow."""
-        return plantillas.TemplateResponse(
-            request=request,
-            name="index.html",
-            context={"nombre": APP_NOMBRE, "version": APP_VERSION},
-        )
 
     @app.get("/favicon.ico", include_in_schema=False)
     async def favicon():

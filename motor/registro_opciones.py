@@ -205,7 +205,7 @@ REGISTRO_OPCIONES = {
             "tamanio": 11,
             "interlineado": 1.6,
             "footer_izq": "MarkFlow AI 2026",
-            "footer_der": "Ing. Patricio Sarmiento Reinoso, Mgst.",
+            "footer_der": "",
             "justificado": True,
             "numerar_ecuaciones": False,
         },
@@ -267,7 +267,7 @@ REGISTRO_OPCIONES = {
             "defaults": {
                 "incluir": False,
                 "tema": "clasica_blanca",
-                "tipo_documento": "ESTUDIO DE CONSULTORÍA DEL PROYECTO:",
+                "tipo_documento": "",
                 "titulo_proyecto": "",
                 "memoria_fase": "",
                 "componente": "",

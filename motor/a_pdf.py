@@ -83,6 +83,12 @@ class ErrorMotorPDF(RuntimeError):
     """Excepción tipada para fallos del motor editorial PDF."""
 
 
+_KATEX_DIR = Path(__file__).resolve().parent / "assets" / "katex"
+_KATEX_CSS_URI = (_KATEX_DIR / "katex.min.css").as_uri()
+_KATEX_JS_URI = (_KATEX_DIR / "katex.min.js").as_uri()
+_KATEX_AUTO_URI = (_KATEX_DIR / "contrib" / "auto-render.min.js").as_uri()
+
+
 def ruta_chromium() -> str | None:
     """Localiza el ejecutable de Microsoft Edge o Google Chrome en el sistema."""
     candidatos = [
@@ -97,7 +103,7 @@ def ruta_chromium() -> str | None:
         if Path(ruta).is_file():
             return ruta
 
-    en_path = shutil.which("msedge") or shutil.which("chrome") or shutil.which("chromium")
+    en_path = shutil.which("msedge") or shutil.which("chrome") or shutil.which("chromium") or shutil.which("google-chrome") or shutil.which("google-chrome-stable")
     if en_path:
         return en_path
 
@@ -141,35 +147,30 @@ def _transformar_kpi_premium(texto: str) -> str:
     return patron.sub(_repl, texto)
 
 
-def _transformar_columnas_premium(texto: str) -> str:
-    """:::columns ... ::: con separadores '---' -> bloques HTML marcados para dos columnas."""
-    import re
+def _transformar_columnas_premium(texto: str, token: str) -> str:
+    """:::columns ... ::: con '---' -> parrafos token que pandoc conserva."""
     patron = re.compile(r":::columns\s*\n(.*?)\n:::", re.DOTALL | re.IGNORECASE)
 
     def _repl(m):
-        partes = re.split(r"\n\s*---\s*\n", "\n" + m.group(1).strip() + "\n")
-        bloques = [p.strip() for p in partes if p.strip()]
-        cuerpo = '\n\n<div class="col-sep"></div>\n\n'.join(bloques)
-        return ('\n\n<div class="columns-premium">\n\n' + cuerpo +
-                '\n\n<div class="columns-premium-fin"></div>\n\n')
+        partes = [p.strip() for p in re.split(r"\n\s*---\s*\n", "\n" + m.group(1).strip() + "\n") if p.strip()]
+        if not partes:
+            return ""
+        if len(partes) > 2:
+            partes = [partes[0], "\n\n".join(partes[1:])]
+        if len(partes) == 1:
+            partes.append("")
+        return (f"\n\nCMFOCOLSTART{token}\n\n{partes[0]}\n\n"
+                f"CMFOCOLSEP{token}\n\n{partes[1]}\n\n"
+                f"CMFOCOLEND{token}\n\n")
 
     return patron.sub(_repl, texto)
 
 
-def _postprocesar_columnas_premium(html: str) -> str:
-    import re
-    patron = re.compile(
-        r'<div class="columns-premium">(.*?)<div class="columns-premium-fin"></div>',
-        re.DOTALL,
-    )
-    def _repl(m):
-        cols = [c.strip() for c in re.split(r'<div class="col-sep"></div>', m.group(1)) if c.strip()]
-        if len(cols) < 2:
-            cols.append("")
-        return ('<div class="columns-premium">\n' +
-                "\n".join(f'<div class="col">{c}</div>' for c in cols) +
-                "\n</div>")
-    return patron.sub(_repl, html)
+def _postprocesar_columnas_premium(html: str, token: str) -> str:
+    html = re.sub(rf'<p>\s*CMFOCOLSTART{token}\s*</p>', '<div class="columns-premium"><div class="col">', html)
+    html = re.sub(rf'<p>\s*CMFOCOLSEP{token}\s*</p>', '</div><div class="col">', html)
+    html = re.sub(rf'<p>\s*CMFOCOLEND{token}\s*</p>', '</div></div>', html)
+    return html
 
 
 def _imagen_a_datauri(img) -> str:
@@ -204,7 +205,7 @@ def _generar_html_portada_premium(tema: str, datos: dict, imagenes: list, paleta
     import html as _html
     e = lambda s: _html.escape(str(s or ""))
     tema = (tema or "clasica_blanca").lower()
-    tipo_doc = datos.get("tipo_documento", "ESTUDIO DE CONSULTORÍA DEL PROYECTO:")
+    tipo_doc = datos.get("tipo_documento", "")
     titulo = datos.get("titulo_proyecto", "")
     memoria = datos.get("memoria_fase", "")
     componente = datos.get("componente", "")
@@ -722,12 +723,8 @@ def _generar_html_impresion(
         <div class="portada-editorial">
             <div class="portada-decoracion"></div>
             <div class="portada-contenido">
-                <p class="portada-categoria">MEMORIA TÉCNICA DE CONSULTORÍA</p>
                 <h1 class="portada-titulo">{titulo}</h1>
                 <div class="portada-filete"></div>
-                <p class="portada-metadato"><b>Fecha:</b> Documento Oficial</p>
-                <p class="portada-metadato"><b>Especialidad:</b> Ingeniería Hidrosanitaria & Civil</p>
-                <p class="portada-autor">Preparado con MarkFlow AI Suite</p>
             </div>
         </div>
         """
@@ -739,10 +736,22 @@ def _generar_html_impresion(
     fondo_body_css = "background: transparent !important;" if elementos_membrete else "background: #ffffff;"
 
     portada_css = """
+    @page portada {
+        size: A4;
+        margin: 0;
+    }
     .portada-premium {
+        page: portada;
         page-break-after: always;
-        min-height: 100%;
-        padding: 2cm 1.5cm;
+        break-after: page;
+        height: 297mm;
+        min-height: 297mm;
+        padding: 18mm 20mm;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        overflow: hidden;
         box-sizing: border-box;
         position: relative;
         font-family: "Calibri", "Inter", sans-serif;
@@ -1084,9 +1093,9 @@ def _generar_html_impresion(
 <head>
     <meta charset="utf-8">
     <title>{titulo}</title>
-    <link rel="stylesheet" href="file:///D:/APPS/Apps_2026/3_App_convertir_MARKFLOW_office/motor/assets/katex/katex.min.css">
-    <script src="file:///D:/APPS/Apps_2026/3_App_convertir_MARKFLOW_office/motor/assets/katex/katex.min.js"></script>
-    <script src="file:///D:/APPS/Apps_2026/3_App_convertir_MARKFLOW_office/motor/assets/katex/contrib/auto-render.min.js"></script>
+    <link rel="stylesheet" href="{_KATEX_CSS_URI}">
+    <script src="{_KATEX_JS_URI}"></script>
+    <script src="{_KATEX_AUTO_URI}"></script>
     <script>
     (function() {{
         function render() {{
@@ -1117,7 +1126,7 @@ def _generar_html_impresion(
 </head>
 <body>
 {membrete_html}
-{portada_html}{portada_premium_html}
+{portada_html}
 <div class="cuerpo-editorial {clase_modo}">
 {cuerpo_con_details_abiertos}
 </div>
@@ -1431,7 +1440,9 @@ def a_pdf(
 
     # Transformación de bloques premium (:::kpi) a HTML crudo (pasa a través de pandoc)
     texto_conversion = _transformar_kpi_premium(texto_conversion)
-    texto_conversion = _transformar_columnas_premium(texto_conversion)
+    import secrets as _secrets
+    _col_token = _secrets.token_hex(4)
+    texto_conversion = _transformar_columnas_premium(texto_conversion, _col_token)
 
     exe_chromium = ruta_chromium()
     if exe_chromium is None:
@@ -1497,7 +1508,7 @@ def a_pdf(
     cuerpo_html = proc_p.stdout.decode("utf-8", errors="replace")
 
     # Post-proceso de bloques premium: columnas selectivas (dividir en <hr>)
-    cuerpo_html = _postprocesar_columnas_premium(cuerpo_html)
+    cuerpo_html = _postprocesar_columnas_premium(cuerpo_html, _col_token)
 
     # Supresión estricta de componentes de interfaz de usuario (botones, sidebars, selectores de tema)
     cuerpo_html = re.sub(r'<button\b[^>]*>[\s\S]*?</button>', '', cuerpo_html, flags=re.IGNORECASE)
@@ -1535,9 +1546,9 @@ def a_pdf(
 
     # Inserción de Bloque de Firma Institucional al final del documento
     # Valores exactos institucionales requeridos (docs/mejoras/mejoras_app_02_paleta de colores.md)
-    f_nom = firma_nombre.strip() if firma_nombre.strip() else "Ing. Patricio Sarmiento Reinoso, Mgst."
-    f_car = firma_cargo.strip() if firma_cargo.strip() else "CONSULTOR"
-    bloque_firma_html = f"""
+    f_nom = firma_nombre.strip() if firma_nombre.strip() else ""
+    f_car = firma_cargo.strip() if firma_cargo.strip() else ""
+    bloque_firma_html = "" if not (f_nom or f_car) else f"""
     <div class="bloque-firma" style="margin-top: 60px; margin-bottom: 40px; text-align: center; break-inside: avoid; page-break-inside: avoid;">
         <div style="height: 65px;"></div>
         <div style="display: inline-block; min-width: 280px; max-width: 380px; border-top: 1.5pt solid {paleta['secundario']}; padding-top: 8px;">

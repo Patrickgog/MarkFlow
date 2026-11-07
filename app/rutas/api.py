@@ -452,7 +452,7 @@ async def transformar(request: Request) -> dict:
     paleta_tabla = str(cuerpo.get("paleta_tabla", "defecto"))
     paleta_tricolor = str(cuerpo.get("paleta_tricolor", "defecto"))
     footer_izq = str(cuerpo.get("footer_izq", "MarkFlow AI 2026"))
-    footer_der = str(cuerpo.get("footer_der", "Ing. Patricio Sarmiento Reinoso, Mgst."))
+    footer_der = str(cuerpo.get("footer_der", ""))
     ancho_maximo = str(cuerpo.get("ancho_maximo", "900px"))
     ruta_salida_custom = str(cuerpo.get("ruta_salida", "")).strip()
 
@@ -478,8 +478,8 @@ async def transformar(request: Request) -> dict:
     running_header_texto = str(cuerpo.get("running_header_texto", "")).strip()
     salto_capitulo_pdf = bool(cuerpo.get("salto_capitulo_pdf", True))
     modo_diseno_pdf = str(cuerpo.get("modo_diseno_pdf", "estandar"))
-    firma_nombre = str(cuerpo.get("firma_nombre", "Ing. Patricio Sarmiento Reinoso, Mgst.")).strip() or "Ing. Patricio Sarmiento Reinoso, Mgst."
-    firma_cargo = str(cuerpo.get("firma_cargo", "CONSULTOR")).strip() or "CONSULTOR"
+    firma_nombre = str(cuerpo.get("firma_nombre", "")).strip() or ""
+    firma_cargo = str(cuerpo.get("firma_cargo", "")).strip() or ""
     indice_al_final = bool(cuerpo.get("indice_al_final", True))
 
     tamanio_tabla_raw = cuerpo.get("tamanio_tabla_pt")
@@ -802,7 +802,7 @@ async def render_preview(request: Request) -> dict:
     justificado = bool(justificado_val) if isinstance(justificado_val, bool) else str(justificado_val).lower() not in ("false", "0", "no")
     numerar_ecuaciones = bool(cuerpo.get("numerar_ecuaciones", False))
     footer_izq = str(cuerpo.get("footer_izq", "")).strip()
-    footer_der = str(cuerpo.get("footer_der", "Ing. Patricio Sarmiento Reinoso, Mgst.")).strip()
+    footer_der = str(cuerpo.get("footer_der", "")).strip()
 
     texto_saneado, formulas, avisos_sanear = saneanar(texto)
     try:
