@@ -9,6 +9,19 @@ hardcodea la versión).
 
 ## 📦 Registro de Versiones
 
+### 📌 [v1.23.7] — 2026-11-06 00:00:00
+* **Tipo de Incremento:** PATCH (KaTeX en pipeline PDF + CSS premium visible + portada premium UI)
+* **Archivo SSOT:** `app/version.py` → `APP_VERSION = "1.23.7"`
+* **Componentes Afectados:**
+  - `motor/a_pdf.py`: pandoc `--mathml` → `--mathjax`; KaTeX CSS/JS en `<head>`; `--virtual-time-budget=8000`; CSS premium visualmente distinto (fondo, headings, tablas, tarjetas).
+  - `templates/office.html`: panel "Portada Premium" (slider) con inputs y upload de fotos.
+  - `static/js/office.js`: `recolectarPortadaPremium` + `convertirFotosPortada` integrados en el payload de exportación.
+* **Descripción Técnica de Cambios:**
+  1. Fórmulas renderizadas con KaTeX (HTML/CSS) en lugar de MathML → más fiable en Chromium.
+  2. Modo Premium con CSS visualmente distinto (fondo #fafbfc, headings con borde, tablas con cabecera de color primario, tarjetas KPI).
+  3. Panel "Portada Premium" en la barra lateral PDF con 6 temas, inputs y upload de 1-6 fotos.
+
+
 ### 📌 [v1.23.2] — 2026-11-06 00:00:00
 * **Tipo de Incremento:** PATCH (Corrección total del registro de opciones)
 * **Archivo SSOT:** `app/version.py` → `APP_VERSION = "1.23.2"`

@@ -320,7 +320,9 @@ def _generar_html_impresion(
 
     # Reglas para Modos Adicionales de Diseño (Estándar, 2 Columnas, Paper Científico, Revista)
     modo_clean = (modo_diseno or "estandar").lower()
-    clase_modo = "modo-premium" if modo_clean in ("premium", "premium_ejecutivo", "ejecutivo") else ""
+    estilo_clean = (estilo_maquetacion or "informe").lower()
+    es_premium = modo_clean in ("premium", "premium_ejecutivo", "ejecutivo") or estilo_clean == "premium"
+    clase_modo = "modo-premium" if es_premium else ""
     diseno_columnas_css = ""
     if modo_clean in ("dos_columnas", "2_columnas", "2col"):
         diseno_columnas_css = f"""
@@ -504,7 +506,7 @@ def _generar_html_impresion(
     }}
     """
 
-    elif modo_clean in ("premium", "premium_ejecutivo", "ejecutivo"):
+    elif es_premium:
         diseno_columnas_css = f"""
     /* ===== MODO PREMIUM EJECUTIVO ===== */
     body {{
@@ -1089,22 +1091,31 @@ def _generar_html_impresion(
     <meta charset="utf-8">
     <title>{titulo}</title>
     <link rel="stylesheet" href="file:///D:/APPS/Apps_2026/3_App_convertir_MARKFLOW_office/motor/assets/katex/katex.min.css">
-    <script defer src="file:///D:/APPS/Apps_2026/3_App_convertir_MARKFLOW_office/motor/assets/katex/katex.min.js"></script>
-    <script defer src="file:///D:/APPS/Apps_2026/3_App_convertir_MARKFLOW_office/motor/assets/katex/contrib/auto-render.min.js"></script>
+    <script src="file:///D:/APPS/Apps_2026/3_App_convertir_MARKFLOW_office/motor/assets/katex/katex.min.js"></script>
+    <script src="file:///D:/APPS/Apps_2026/3_App_convertir_MARKFLOW_office/motor/assets/katex/contrib/auto-render.min.js"></script>
     <script>
-    document.addEventListener("DOMContentLoaded", function() {{
-        if (window.renderMathInElement) {{
-            renderMathInElement(document.body, {{
-                delimiters: [
-                    {{left: "$$", right: "$$", display: true}},
-                    {{left: "$", right: "$", display: false}},
-                    {{left: "\\\\(", right: "\\\\)", display: false}},
-                    {{left: "\\\\[", right: "\\\\]", display: true}}
-                ],
-                throwOnError: false
-            }});
+    (function() {{
+        function render() {{
+            if (window.renderMathInElement) {{
+                renderMathInElement(document.body, {{
+                    delimiters: [
+                        {{left: "$$", right: "$$", display: true}},
+                        {{left: "$", right: "$", display: false}},
+                        {{left: "\\\\(", right: "\\\\)", display: false}},
+                        {{left: "\\\\[", right: "\\\\]", display: true}}
+                    ],
+                    throwOnError: false
+                }});
+            }} else {{
+                setTimeout(render, 50);
+            }}
         }}
-    }});
+        if (document.readyState === "loading") {{
+            document.addEventListener("DOMContentLoaded", render);
+        }} else {{
+            render();
+        }}
+    }})();
     </script>
     <style>
 {css}
